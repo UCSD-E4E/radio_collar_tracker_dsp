@@ -1,0 +1,3 @@
+sudo cpufreq-set -g performance
+cpufreq-info
+./collarTracker
