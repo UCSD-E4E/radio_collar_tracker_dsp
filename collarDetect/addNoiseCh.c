@@ -12,6 +12,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+/////////////////
+// Global Vars //
+/////////////////
+char* progName;
+
 /////////////////////////
 // Function Prototypes //
 /////////////////////////
@@ -21,18 +26,21 @@ void printHelp();
 // Function Definitions //
 //////////////////////////
 void printHelp(){
-	printf("Usage: addNoiseCh NUM_COLLARS COLLAR_FILE\n");
+	printf("Usage: %s NUM_COLLARS COLLAR_FILE\n", progName);
+	printf("\n");
+	printf("%s is a program that generates a noise baseline channel for the radio\n", progName);
+	printf("collar tracker spectrumAnalysis tool to use in positively identifying\n");
+	printf("radio collars based on a signal to noise ratio.\n");
 }
 
 int main(int argc, char** argv){
+	progName = "addNoiseCh";
 	if(argc != 3){
-		printf("addNoiseCh: missing operand\n");
 		printHelp();
 		return 1;
 	}
 	FILE *collarFreqFile = fopen(argv[2], "r");
 	if(collarFreqFile == NULL){
-		printf("addNoiseCh: Could not open file!\n");
 		printHelp();
 		return 1;
 	}
