@@ -77,9 +77,9 @@ int main(int argc, char** argv){
 	// Import and process run_file CSV as int arrays
 	string line;
 	int64_t max_noise = INT64_MIN;
-	int64_t *avg_SNR = new int64_t[num_collars];
+	int64_t *max_SNR = new int64_t[num_collars];
 	for(int i = 0; i < num_collars; i++){
-		avg_SNR[i] = INT64_MIN;
+		max_SNR[i] = INT64_MIN;
 	}
 	int sampleCount = 0;
 	while(getline(run_file, line) && run_file.good()){
@@ -94,8 +94,8 @@ int main(int argc, char** argv){
 			max_noise = array[3 + num_collars];
 		}
 		for(int i = 0; i < num_collars; i++){
-			if(array[3 + i] > avg_SNR[i]){
-				avg_SNR[i] = array[3 + i];
+			if(array[3 + i] > max_SNR[i]){
+				max_SNR[i] = array[3 + i];
 			}
 		}
 	}
@@ -145,11 +145,15 @@ int main(int argc, char** argv){
 	cout << endl;
 	cout << "Positively ID'd collars:" << endl;
 	for(int i = 0; i < num_collars; i++){
-		if(avg_SNR[i] > max_noise){
+		if(max_SNR[i] / 1000.0 - max_noise / 1000.0 > 10){
 			cout << "Collar " << i + 1 << " at " << collars[i][0] << ", "
 					<< collars [i][1] << " within " << collars[i][2]
 					<< " meters" << endl;
 		}
+	}
+	cout << "Max Noise: " << max_noise / 1000.0 << "dB" << endl;
+	for(int i = 0; i < num_collars; i++){
+		cout << "Collar " << i << ": " << max_SNR[i] / 1000.0 << "dB" << endl;
 	}
 
 	return 0;
