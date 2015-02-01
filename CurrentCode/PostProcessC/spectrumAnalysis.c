@@ -321,7 +321,7 @@ void load_files() {
 	min_jump            = (int)ceil(((double)(MIN_SLICING_FACTOR * pul_num_sam)) /
 	                                1000);
 	for(int i = 0; i < max_gain_index; i++) {
-		valid_gain_values[i] = pow(10, ((double)gain_values[i]) / 100);
+		valid_gain_values[i] = pow(10, ((double)gain_values[i]) / 10.0);
 	}
 
 }
