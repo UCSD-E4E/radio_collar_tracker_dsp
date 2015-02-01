@@ -39,8 +39,11 @@ for row in array:
 csvFile = open(sys.argv[2], 'w')
 string = ""
 for row in filteredAlt:
-	for element in row:
-		string += str(element) + ","
+	string += str(int(row[0] * 10000000)) + ","
+	string += str(int(row[1] * 10000000)) + ","
+	string += str(int(row[2] * 1000)) + ","
+	for collar in range(3, len(array[0])):
+		string += str(int(row[collar] * 1000)) + ","
 	string = string.rstrip(",")
 	string += "\n"
 csvFile.write(string)
