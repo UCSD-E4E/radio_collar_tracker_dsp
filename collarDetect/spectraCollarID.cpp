@@ -84,18 +84,18 @@ int main(int argc, char** argv){
 	int sampleCount = 0;
 	while(getline(run_file, line) && run_file.good()){
 		stringstream line_stream (line, ios_base::in);
-		int64_t* array = new int64_t[3 + num_collars + 1];
+		int64_t* array = new int64_t[5 + num_collars + 1];
 		string buf;
-		for(int i = 0; i < 4 + num_collars; i++){
+		for(int i = 0; i < 6 + num_collars; i++){
 			getline(line_stream, buf, ',');
 			array[i] = stoi(buf);
 		}
-		if(array[3 + num_collars] > max_noise){
-			max_noise = array[3 + num_collars];
+		if(array[5 + num_collars] > max_noise){
+			max_noise = array[5 + num_collars];
 		}
 		for(int i = 0; i < num_collars; i++){
-			if(array[3 + i] > max_SNR[i]){
-				max_SNR[i] = array[3 + i];
+			if(array[5 + i] > max_SNR[i]){
+				max_SNR[i] = array[5 + i];
 			}
 		}
 	}
@@ -145,7 +145,7 @@ int main(int argc, char** argv){
 	cout << endl;
 	cout << "Positively ID'd collars:" << endl;
 	for(int i = 0; i < num_collars; i++){
-		if(max_SNR[i] / 1000.0 - max_noise / 1000.0 > 10){
+		if(max_SNR[i] / 1000.0 - max_noise / 1000.0 > 6){
 			cout << "Collar " << i + 1 << " at " << collars[i][0] << ", "
 					<< collars [i][1] << " within " << collars[i][2]
 					<< " meters" << endl;
