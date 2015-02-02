@@ -321,7 +321,7 @@ void load_files() {
 	min_jump            = (int)ceil(((double)(MIN_SLICING_FACTOR * pul_num_sam)) /
 	                                1000);
 	for(int i = 0; i < max_gain_index; i++) {
-		valid_gain_values[i] = pow(10, ((double)gain_values[i]) / 10.0);
+		valid_gain_values[i] = pow(10, ((double)gain_values[i]) / 100.0);
 	}
 
 }
@@ -533,7 +533,7 @@ void analysis() {
 		for(int j = 0; j < 3; j++) {
 			fprintf(fileStream, "%d,", gps_pos[i][j]);
 		}
-		fprintf(fileStream, "%d,", gain[i]);
+		fprintf(fileStream, "%d,", gain_values[(int)gain[i]]);
 		fprintf(fileStream, "%f,", valid_gain_values[(int)gain[i]]);
 		for(int j = 0; j < num_col - 1; j++) {
 			fprintf(fileStream, "%d,", (int)(1000 * pulse_snr[j][i]));
