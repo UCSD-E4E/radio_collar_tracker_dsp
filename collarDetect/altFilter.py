@@ -16,7 +16,7 @@ csvFile = open(sys.argv[2] + ".bak")
 csv = csvFile.readlines()
 csvFile.close()
 strArray = [line.rstrip().split(",") for line in csv]
-array = [[int(x) for x in line] for line in strArray]
+array = [[float(x) for x in line] for line in strArray]
 
 maxAlt = 0
 
@@ -24,9 +24,11 @@ for row in array:
 	row[0] = row[0] / 10000000.0
 	row[1] = row[1] / 10000000.0
 	row[2] = row[2] / 1000.0
+	row[3] = row[3]
+	row[4] = row[4]
 	if row[2] > maxAlt:
 		maxAlt = row[2]
-	for collar in range(3, len(array[0])):
+	for collar in range(5, len(array[0])):
 		row[collar] = row[collar] / 1000.0
 
 filteredAlt = []
@@ -42,7 +44,9 @@ for row in filteredAlt:
 	string += str(int(row[0] * 10000000)) + ","
 	string += str(int(row[1] * 10000000)) + ","
 	string += str(int(row[2] * 1000)) + ","
-	for collar in range(3, len(array[0])):
+	string += str(int(row[3])) + ","
+	string += str(int(row[4])) + ","
+	for collar in range(5, len(array[0])):
 		string += str(int(row[collar] * 1000)) + ","
 	string = string.rstrip(",")
 	string += "\n"
