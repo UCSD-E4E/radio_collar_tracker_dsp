@@ -17,8 +17,8 @@ echo "alpha_c_thres: 500" >> JOB
 echo "num_col: "$num_col >> JOB
 echo "f_drift: -3000" >> JOB
 ./spectrumAnalysis > /dev/null
-runFile=$(ls | grep -E RUN_[[:digit:]]\+$run.csv)
+runFile=$(ls | grep -E RUN_[[:digit:]]\+$run.csv$)
 ./altFilter.py $alt $runFile
 ./finalAnalysis > /dev/null
 metaFile=$(ls | grep -E META_[[:digit:]]\+$run.csv)
-./spectraCollarID $num_col RUN_+([0-9]).csv $metaFile
+./spectraCollarID $num_col $runFile $metaFile
