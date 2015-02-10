@@ -2,7 +2,7 @@
 if [[ -w JOB ]]; then
 	rm JOB
 fi
-num_col=$(cat COL | wc -l)
+num_col=$(cat COL | wc -l) - 1
 curwd=$(pwd)
 echo $curwd"/">> JOB
 echo "curr_run: "$1 >> JOB
