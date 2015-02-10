@@ -2,6 +2,7 @@
 read -p "Enter run number: " run
 read -p "Enter flight altitude: " alt
 read -e -p "Enter Raw Data directory: " dir
+dir=$(echo $dir | sed "s%~%$HOME%")
 if [[ -w JOB ]]; then
 	rm JOB
 fi
@@ -16,6 +17,8 @@ echo "alpha_c_thres: 500" >> JOB
 echo "num_col: "$num_col >> JOB
 echo "f_drift: -3000" >> JOB
 ./spectrumAnalysis > /dev/null
-./altFilter.py $alt RUN_+([0-9]).csv
+runFile=$(ls | grep -E RUN_[[:digit:]]\+$run.csv)
+./altFilter.py $alt $runFile
 ./finalAnalysis > /dev/null
-./spectraCollarID $num_col RUN_+([0-9]).csv META_+([0-9]).csv
+metaFile=$(ls | grep -E META_[[:digit:]]\+$run.csv)
+./spectraCollarID $num_col RUN_+([0-9]).csv $metaFile
