@@ -5,6 +5,7 @@
 #include <rtl-sdr.h>
 #include <string.h>
 #include <stdio.h>
+#include <signal.h>
 #include "serialGPS.h"
 
 #define FILE_BUFFER_SIZE			256
@@ -95,7 +96,11 @@ void adjust_gain();
 
 void setup_rtlsdr();
 
+void siginthandler(int sig);
+
 int main(int argc, char *argv[]){
+
+	signal(SIGINT, siginthandler);
 
 	load_files(); 
 
@@ -132,13 +137,13 @@ void destroy(GtkWidget *widget, gpointer data){
 
 int timeout_cb(gpointer darea){
 
-	fileStream = fopen(PIN_PATH,"r");
+/*	fileStream = fopen(PIN_PATH,"r");
 	fgets(fileBuffer, FILE_BUFFER_SIZE,fileStream);
 	fclose(fileStream);
 	trigger = atoi(fileBuffer);
 	if(trigger)
 		exit(0);
-
+*/
 	// GPS Handling
 	serial_read(fd);
 
@@ -343,4 +348,10 @@ void populate_gps(){
 	alt	= return_alti();
 	lon	= return_long();
 	lat	= return_lati();
+}
+
+void siginthandler(int sig)
+{
+	printf("Got SIGINT!!!\n");
+	exit(-1);
 }
