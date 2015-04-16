@@ -1,5 +1,10 @@
 #!/bin/sh
 # setup here
+timestamp(){
+	date
+}
+
+log="/home/debian/rct.log"
 # check for autostart file!
 if [ ! -e /home/debian/autostart ]
 	then
@@ -7,9 +12,8 @@ if [ ! -e /home/debian/autostart ]
 fi
 
 echo 30 > /sys/class/gpio/export
-
 stateVal="startWait"
-echo "Starting..."
+echo "$(timestamp): Starting..." >> $log
 while true
 do
 	case $stateVal in
@@ -20,15 +24,17 @@ do
 				sleep 3
 				switchVal=$(cat /sys/class/gpio/gpio30/value)
 			done
-			echo "Received start signal!"
+			echo "$(timestamp): Received start signal!" >> $log
 			stateVal="startgo"
 			;;
 		"startgo" )
 		# State 2 - go for start, initialize
-			#/home/debian/gpio/main > /dev/null &
-			/home/debian/xcode/run | /home/debian/parser.sh >> /home/debian/rct.log 2>&1 &
-			pid=$!
-			echo "Started program!"
+			cpufreq-set -g performance >> $log 2>&1
+			cpufreq-info >> $log 2>&1
+			/home/debian/xcode/collarTracker > /home/debian/out.tmp &
+			# /home/debian/ct > /home/debian/out.tmp &
+			/home/debian/parser.sh < /home/debian/out.tmp >> $log 2>&1 &
+			echo "$(timestamp): Started program!" >> $log
 			stateVal="endWait"
 			;;
 		"endWait" )
@@ -37,12 +43,14 @@ do
 				sleep 3
 				switchVal=$(cat /sys/class/gpio/gpio30/value)
 			done
-			echo "Received stop signal!"
+			echo "$(timestamp): Received stop signal!" >> $log
 			stateVal="endgo"
 			;;
 		"endgo" )
-			kill %1
-			echo "Ended program!"
+			killall collarTracker -s INT
+			# killall ct -s INT
+			echo "$(timestamp): Ended program!" >> $log
 			stateVal="startWait"
+			;;
 	esac
 done
