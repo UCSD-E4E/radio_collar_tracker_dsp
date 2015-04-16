@@ -24,35 +24,35 @@ unsigned char *rawFileBuffer 		= NULL;	// Data Storage Time domain buffer
 
 // File Handling Variables
 FILE *fileStream;
-fpos_t filePos; 
-char fileBuffer[FILE_BUFFER_SIZE]; 
-char meta_file_path[FILE_BUFFER_SIZE]; 
+fpos_t filePos;
+char fileBuffer[FILE_BUFFER_SIZE];
+char meta_file_path[FILE_BUFFER_SIZE];
 int currentRun						= 0;
 int currentRunFile					= 1;
 int trigger 						= 0;
 
-// Config Variables 
+// Config Variables
 const int valid_gain_values[] 		= { 0, 9, 14, 27, 37, 77, 87, 125, 144, 157, 166, 197, 207, 229, 254, 280, 297, 328, 338, 364, 372, 386, 402, 421, 434, 439, 445, 480, 496 };
 const int max_gain_index 			= 28;
 int  current_gain_index 			= 0;
 unsigned int center_freq 			= 0;
 unsigned int samp_rate 				= 0;
-int timeout_interrupt				= 0; 
-int goal_signal_amplitude 			= 0; 
-int controller_coef 				= 0; 
-int number_frames_per_file 			= 0; 
-int gps_serial_mult 				= 0; 
-int gps_serial_count 				= 0; 
+int timeout_interrupt				= 0;
+int goal_signal_amplitude 			= 0;
+int controller_coef 				= 0;
+int number_frames_per_file 			= 0;
+int gps_serial_mult 				= 0;
+int gps_serial_count 				= 0;
 
 unsigned int time_buffer_len 		= 0;
 unsigned int raw_file_buffer_len 	= 0;
 unsigned int dev_index 				= 0;
 
 // Aux Variables
-int frame_counter					= 0; 
-int maxFindAuxInt					= 0; 
+int frame_counter					= 0;
+int maxFindAuxInt					= 0;
 int intAux							= 0;
-char auxString[AUX_STRING_SIZE]; 
+char auxString[AUX_STRING_SIZE];
 int device_count;
 int r;
 
@@ -72,7 +72,7 @@ void destroy(GtkWidget *widget, gpointer data);
 
 void init_memmory();
 
-void update_meta(); 
+void update_meta();
 
 void clean_up_memmory();
 
@@ -80,15 +80,15 @@ void checkRunNumber();
 
 void load_files();
 
-int loadParameter(); 
+int loadParameter();
 
 int timeout_cb(gpointer darea);
 
 void populate_gps();
 
-void compile_data(); 
+void compile_data();
 
-void store_data(); 
+void store_data();
 
 gboolean read_rtlsdr();
 
@@ -98,140 +98,155 @@ void setup_rtlsdr();
 
 void siginthandler(int sig);
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
 
 	signal(SIGINT, siginthandler);
 
-	load_files(); 
+	load_files();
 
-    setup_rtlsdr();
+	setup_rtlsdr();
 
-    init_memmory();
+	init_memmory();
 
-    fd=init_serial();
-	
+	fd = init_serial();
+
 	// GPS communication testing
 	serial_read(fd);
-	
+
 	printf("GPS and SDR operating!\n");
-	
+	fflush(stdout);
+
 	checkRunNumber();
 
-    tid = g_timeout_add(GPS_SERIAL_PERIOD, timeout_cb, window);
-    
+	tid = g_timeout_add(GPS_SERIAL_PERIOD, timeout_cb, window);
+
 	gtk_main();
-    
-    g_source_remove(tid);    
+
+	g_source_remove(tid);
 
 	clean_up_memmory();
 
 	close_port(fd);
-    
-    return 0;
+
+	return 0;
 }
 
-void destroy(GtkWidget *widget, gpointer data){
+void destroy(GtkWidget *widget, gpointer data) {
 	cairo_destroy(cr);
 	gtk_main_quit();
 }
 
-int timeout_cb(gpointer darea){
+int timeout_cb(gpointer darea) {
 
-/*	fileStream = fopen(PIN_PATH,"r");
-	fgets(fileBuffer, FILE_BUFFER_SIZE,fileStream);
-	fclose(fileStream);
-	trigger = atoi(fileBuffer);
-	if(trigger)
-		exit(0);
-*/
+	/*	fileStream = fopen(PIN_PATH,"r");
+		fgets(fileBuffer, FILE_BUFFER_SIZE,fileStream);
+		fclose(fileStream);
+		trigger = atoi(fileBuffer);
+		if(trigger)
+			exit(0);
+	*/
 	// GPS Handling
 	serial_read(fd);
 
 	gps_serial_count++;
 	// Gets samples from rtlsdr
-	if(gps_serial_count >= gps_serial_mult){
+	if (gps_serial_count >= gps_serial_mult) {
 		gps_serial_count = 0;
-		if (read_rtlsdr())
-			return FALSE;  // error handling
+		if (read_rtlsdr()) {
+			return FALSE;    // error handling
+		}
 
 		populate_gps();
 
 		compile_data();
 
-		printf("Current Frame: %03d Gain: %03d\n", frame_counter, valid_gain_values[(int)current_gain_index]);
+		printf("Current Frame: %03d Gain: %03d\n", frame_counter,
+		       valid_gain_values[(int)current_gain_index]);
+		fflush(stdout);
 
 		frame_counter++;
-		if(frame_counter >= number_frames_per_file){
+		if (frame_counter >= number_frames_per_file) {
 			printf("FILE: %06d\n", currentRunFile);
+			fflush(stdout);
 			store_data();
-			frame_counter = 0; 
-			update_meta(); 
-			currentRunFile++; 
+			frame_counter = 0;
+			update_meta();
+			currentRunFile++;
 		}
 
 		adjust_gain();
 	}
-	
+
 	return TRUE;
 }
 
-void compile_data(){
+void compile_data() {
 
 	// SDR data
-	for (int i = 0; i < time_buffer_len/2; i++){
-		rawFileBuffer[frame_counter*(time_buffer_len+EXTRA_DATA_SIZE)+2*i] 		= time_buffer[2*i];
-		rawFileBuffer[frame_counter*(time_buffer_len+EXTRA_DATA_SIZE)+2*i+1]	= time_buffer[2*i+1];
+	for (int i = 0; i < time_buffer_len / 2; i++) {
+		rawFileBuffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) + 2 * i] 		=
+		    time_buffer[2 * i];
+		rawFileBuffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) + 2 * i + 1]	=
+		    time_buffer[2 * i + 1];
 	}
-	
+
 	// GPS data
-	for (int i = 0; i < 4; i++){
-		rawFileBuffer[frame_counter*(time_buffer_len+EXTRA_DATA_SIZE)+time_buffer_len+i] 	= (lat>>8*i)&0xFF;
-		rawFileBuffer[frame_counter*(time_buffer_len+EXTRA_DATA_SIZE)+time_buffer_len+4+i] 	= (lon>>8*i)&0xFF;
-		rawFileBuffer[frame_counter*(time_buffer_len+EXTRA_DATA_SIZE)+time_buffer_len+8+i] 	= (alt>>8*i)&0xFF;
+	for (int i = 0; i < 4; i++) {
+		rawFileBuffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) +
+		              time_buffer_len + i] 	= (lat >> 8 * i) & 0xFF;
+		rawFileBuffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) +
+		              time_buffer_len + 4 + i] 	= (lon >> 8 * i) & 0xFF;
+		rawFileBuffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) +
+		              time_buffer_len + 8 + i] 	= (alt >> 8 * i) & 0xFF;
 	}
-	
+
 	// Gain
-	rawFileBuffer[frame_counter*(time_buffer_len+EXTRA_DATA_SIZE)+time_buffer_len+EXTRA_DATA_SIZE-1] = current_gain_index;
+	rawFileBuffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) +
+	              time_buffer_len + EXTRA_DATA_SIZE - 1] = current_gain_index;
 }
 
-void store_data(){
-	sprintf(auxString, "%s%06d_%06d", RAW_DATA_FILENAME, currentRun, currentRunFile);
-	fileStream = fopen (auxString, "wb");
-	fwrite(rawFileBuffer, sizeof(unsigned char), raw_file_buffer_len*sizeof(unsigned char), fileStream);
+void store_data() {
+	sprintf(auxString, "%s%06d_%06d", RAW_DATA_FILENAME, currentRun,
+	        currentRunFile);
+	fileStream = fopen(auxString, "wb");
+	fwrite(rawFileBuffer, sizeof(unsigned char),
+	       raw_file_buffer_len * sizeof(unsigned char), fileStream);
 	fclose(fileStream);
 }
 
-void init_memmory(){
+void init_memmory() {
 	time_buffer		= malloc(time_buffer_len * sizeof(unsigned char));
 	rawFileBuffer	= malloc(raw_file_buffer_len * sizeof(unsigned char));
 }
 
-void update_meta(){
+void update_meta() {
 
 	sprintf(meta_file_path, "%s%06d", META_FILE_PREFIX, currentRun);
-	fileStream = fopen (meta_file_path, "wb");
-	fprintf(fileStream, "center_freq: %d \nsamp_rate: %d \ntimeout_interrupt: %d \ngoal_signal_amplitude: %d \ncontroller_coef: %d \nnumber_frames_per_file: %d \ncurrentRunFile: %d \n ",
-	 center_freq, samp_rate, timeout_interrupt, goal_signal_amplitude, controller_coef, number_frames_per_file, currentRunFile);
+	fileStream = fopen(meta_file_path, "wb");
+	fprintf(fileStream,
+	        "center_freq: %d \nsamp_rate: %d \ntimeout_interrupt: %d \ngoal_signal_amplitude: %d \ncontroller_coef: %d \nnumber_frames_per_file: %d \ncurrentRunFile: %d \n ",
+	        center_freq, samp_rate, timeout_interrupt, goal_signal_amplitude,
+	        controller_coef, number_frames_per_file, currentRunFile);
 	fclose(fileStream);
 
 }
 
-void clean_up_memmory(){
+void clean_up_memmory() {
 	rtlsdr_close(dev);
 	free(time_buffer);
 	free(rawFileBuffer);
 }
 
-void checkRunNumber(){ 
+void checkRunNumber() {
 	fileStream	= fopen(FILE_COUNTER_PATH, "r+");
 	currentRun	= loadParameter();
-	currentRun++; 
-	rewind(fileStream); 
+	currentRun++;
+	rewind(fileStream);
 	fprintf(fileStream, "currentRun: %d \n", currentRun);
- 	fclose(fileStream);
+	fclose(fileStream);
 }
 
-void load_files(){ 
+void load_files() {
 
 	fileStream 						= fopen(CONFIG_FILE_PATH, "r");
 	center_freq 					= loadParameter();
@@ -240,118 +255,133 @@ void load_files(){
 	goal_signal_amplitude 			= loadParameter();
 	controller_coef 				= loadParameter();
 	number_frames_per_file 			= loadParameter();
- 	fclose(fileStream);
+	fclose(fileStream);
 
-	time_buffer_len 				= (int)(((float)timeout_interrupt*samp_rate)/500); 
-	raw_file_buffer_len 			= number_frames_per_file*(time_buffer_len+EXTRA_DATA_SIZE);
-	gps_serial_mult 				= timeout_interrupt/GPS_SERIAL_PERIOD; 
+	time_buffer_len 				= (int)(((float)timeout_interrupt * samp_rate) / 500);
+	raw_file_buffer_len 			= number_frames_per_file * (time_buffer_len +
+	                                  EXTRA_DATA_SIZE);
+	gps_serial_mult 				= timeout_interrupt / GPS_SERIAL_PERIOD;
 
 }
 
-int loadParameter(){
-    if (fgets(fileBuffer, FILE_BUFFER_SIZE, fileStream) == NULL) {
-        fprintf(stderr, "ERROR Reading Data Config File!\n");
+int loadParameter() {
+	if (fgets(fileBuffer, FILE_BUFFER_SIZE, fileStream) == NULL) {
+		fprintf(stderr, "ERROR Reading Data Config File!\n");
 		exit(1);
-    }
-    intAux = 0; 
-    while(fileBuffer[intAux] != ':')
-    	intAux++;
-    if(intAux >= FILE_BUFFER_SIZE){
-        fprintf(stderr, "ERROR Reading Data Config File!\n");
+	}
+	intAux = 0;
+	while (fileBuffer[intAux] != ':') {
+		intAux++;
+	}
+	if (intAux >= FILE_BUFFER_SIZE) {
+		fprintf(stderr, "ERROR Reading Data Config File!\n");
 		exit(1);
-    }
-    return atoi(fileBuffer+intAux+1); 
+	}
+	return atoi(fileBuffer + intAux + 1);
 }
 
-gboolean read_rtlsdr(){
+gboolean read_rtlsdr() {
 
-    int n_read;
-	
-	for (int i = 0; i < time_buffer_len; i++)
-		*(time_buffer+i) = 0; 
+	int n_read;
 
-    if (rtlsdr_read_sync(dev, time_buffer, time_buffer_len, &n_read) < 0) {
-        fprintf(stderr, "WARNING: sync read failed. time_buffer_len: %d.\n", time_buffer_len);
-    	return TRUE;
-    }
+	for (int i = 0; i < time_buffer_len; i++) {
+		*(time_buffer + i) = 0;
+	}
 
-    if ((unsigned int)n_read < time_buffer_len) {
-        fprintf(stderr, "Short read (%d / %d), samples lost, exiting!\n", n_read, time_buffer_len);
-    	return TRUE;
-    }
+	if (rtlsdr_read_sync(dev, time_buffer, time_buffer_len, &n_read) < 0) {
+		fprintf(stderr, "WARNING: sync read failed. time_buffer_len: %d.\n",
+		        time_buffer_len);
+		return TRUE;
+	}
 
-    return FALSE;
+	if ((unsigned int)n_read < time_buffer_len) {
+		fprintf(stderr, "Short read (%d / %d), samples lost, exiting!\n", n_read,
+		        time_buffer_len);
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
-void adjust_gain(){
-    
-    //  Finding max signal value
-    maxFindAuxInt = 0; 
-    for (int i = 0; i < time_buffer_len; i+= 2)
-    	if(time_buffer[i] > maxFindAuxInt)
-    		maxFindAuxInt = time_buffer[i]; 
-    maxFindAuxInt -= 128; 
+void adjust_gain() {
+
+	//  Finding max signal value
+	maxFindAuxInt = 0;
+	for (int i = 0; i < time_buffer_len; i += 2)
+		if (time_buffer[i] > maxFindAuxInt) {
+			maxFindAuxInt = time_buffer[i];
+		}
+	maxFindAuxInt -= 128;
 
 	// Gain controller
-	current_gain_index += (goal_signal_amplitude - abs(maxFindAuxInt))/controller_coef; 
-		
+	current_gain_index += (goal_signal_amplitude - abs(maxFindAuxInt)) /
+	                      controller_coef;
+
 	// Ensuring array bounds
-	if(current_gain_index > max_gain_index)
-		current_gain_index = max_gain_index; 
-	else if(current_gain_index < 0)
-		current_gain_index = 0; 
+	if (current_gain_index > max_gain_index) {
+		current_gain_index = max_gain_index;
+	} else if (current_gain_index < 0) {
+		current_gain_index = 0;
+	}
 	// Setting gain value
-	if (rtlsdr_set_tuner_gain(dev, valid_gain_values[(int)current_gain_index]) < 0)
+	if (rtlsdr_set_tuner_gain(dev,
+	                          valid_gain_values[(int)current_gain_index]) < 0) {
 		fprintf(stderr, "WARNING: Failed to set up fixed gain.\n");
+	}
 
 }
 
-void setup_rtlsdr(){
+void setup_rtlsdr() {
 
 	device_count = rtlsdr_get_device_count();
-	if (!device_count){
+	if (!device_count) {
 		fprintf(stderr, "No supported devices found.\n");
 		exit(1);
 	}
 
 	r = rtlsdr_open(&dev, dev_index);
-	if (r < 0){
+	if (r < 0) {
 		fprintf(stderr, "Failed to open rtlsdr device #%d.\n", dev_index);
 		exit(1);
 	}
 
 	r = rtlsdr_set_sample_rate(dev, samp_rate);
-	if (r < 0)
+	if (r < 0) {
 		fprintf(stderr, "WARNING: Failed to set sample rate.\n");
+	}
 
 	r = rtlsdr_set_center_freq(dev, center_freq);
-	if (r < 0)
+	if (r < 0) {
 		fprintf(stderr, "WARNING: Failed to set center freq.\n");
+	}
 
 	// Setting gain mode (auto(0) or manual(1))
 	r = rtlsdr_set_tuner_gain_mode(dev, 1);
-	if (r < 0)
-		fprintf( stderr, "WARNING: Failed to enable manual gain.\n");
+	if (r < 0) {
+		fprintf(stderr, "WARNING: Failed to enable manual gain.\n");
+	}
 
 	// Setting gain value
 	r = rtlsdr_set_tuner_gain(dev, valid_gain_values[(int)current_gain_index]);
-	if (r < 0)
+	if (r < 0) {
 		fprintf(stderr, "WARNING: Failed to set up fixed gain.\n");
+	}
 
 	r = rtlsdr_reset_buffer(dev);
-	if (r < 0)
+	if (r < 0) {
 		fprintf(stderr, "WARNING: Failed to reset buffers.\n");
+	}
 
 }
 
-void populate_gps(){
+void populate_gps() {
 	alt	= return_alti();
 	lon	= return_long();
 	lat	= return_lati();
 }
 
-void siginthandler(int sig)
-{
+void siginthandler(int sig) {
 	printf("Got SIGINT!!!\n");
+	fflush(stdout);
 	exit(-1);
 }
