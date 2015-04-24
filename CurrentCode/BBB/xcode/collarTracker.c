@@ -250,7 +250,6 @@ void load_files() {
 
 	fileStream 						= fopen(CONFIG_FILE_PATH, "r");
 	center_freq 					= loadParameter();
-	printf("%d\n", center_freq);
 	samp_rate 						= loadParameter();
 	timeout_interrupt 				= loadParameter();
 	goal_signal_amplitude 			= loadParameter();
