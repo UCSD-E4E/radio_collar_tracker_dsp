@@ -1,3 +1,4 @@
+mkdir bin
 cd CurrentCode/PostProcessC/
 chmod +x build*
 ./build-finalAnalysis
