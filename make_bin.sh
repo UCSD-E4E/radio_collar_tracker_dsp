@@ -1,4 +1,9 @@
-mkdir bin
+if [ -e "bin" ]
+	then
+	echo ""
+	else
+		mkdir bin
+	fi
 cd CurrentCode/PostProcessC/
 chmod +x build*
 ./build-finalAnalysis
