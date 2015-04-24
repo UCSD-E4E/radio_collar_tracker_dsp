@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-read -p "Raw data path: "
+read -e -p "Raw data path: "
 echo $REPLY > JOB
 read -p "Run number: "
 echo "curr_run: $REPLY" >> JOB
