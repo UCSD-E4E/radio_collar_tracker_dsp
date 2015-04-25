@@ -41,3 +41,10 @@ Rtlizer was written by Alexandru Csete.
 Uses code from rtl_test by Steve Markgraf.
 Includes kiss_fft by Mark Borgerding.
 
+Notes
+-----
+It may be necessary (on x86 machines) to unload the kernel module.  Use
+
+    sudo rmmod dvb_usb_rtl28xxu
+
+to unload the kernel module so that rtlizer will run.
