@@ -2,10 +2,11 @@
 
 To configure the autostart code, place the file `rctstart.sh` in the `/etc/init.d/` directory.  In the directory `/home/debian`, make the file `autostart`.
 
-Pinout:	PWR -> 3.3V
+# Pinout:
+PWR -> 3.3V
 
-		LED ->
+LED ->
 
-		SW1	->
+SW1	->
 
-		GND	->
+GND	->
