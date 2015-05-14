@@ -513,7 +513,7 @@ void analysis() {
 				noise_pwr /= intAux;
 
 				// SNR caculation
-				pulse_snr[l][cur_fr] = 10 * log10(signal_pwr / noise_pwr / pul_num_sam);
+				pulse_snr[l][cur_fr] = 10 * log10( signal_pwr / noise_pwr );
 
 			}
 		}
