@@ -1,63 +1,51 @@
-function [] = makeRunHeatMap()
-[file, path] = uigetfile('*.csv');
-data = csvread(strcat(path, file));
+function [] = makeRunHeatMap(varargin)
+numRowPlots = 1;
+numColPlots = 1;
+numCols = 1;
+firstCollarColumn = 6;
+file = 0;
+path = 0;
+data = 0;
+% Getting file
+if nargin == 0
+    [file, path] = uigetfile({'*.csv';'*.csv.bak'});
+    % get data from file
+    if path == 0
+        return
+    end
+    data = csvread(strcat(path, file));
+elseif nargin == 1
+    path = char(varargin(1));
+    data = csvread(path);
+end
+
+
+% Extract data
 lat = data(:,1) / 10000000;
 lon = data(:,2) / 10000000;
-col1 = data(:,9)/1000;
-col2 = data(:,10)/1000;
-col3 = data(:,11)/1000;
-col4 = data(:,12)/1000;
-col5 = data(:,13)/1000;
-col6 = data(:,14)/1000;
-noise = data(:,15)/1000;
+col = zeros(length(lat), numCols);
+for i = 1:1:numCols
+    tmp = firstCollarColumn - 1 + i;
+    col(1:length(lat), i) = transpose(data(:,tmp)/1000);
+end
+noise = data(:,firstCollarColumn + i)/1000;
+
+% create plot
 figure;
 hold on;
-subplot(2, 3, 1);
-hold on;
-makeHeatMap(lat, lon, col1);
-scatter(32.716683, -115.93375, 25, 'k', 'x')
-caxis([min(min(data(:,9:15)))/1000, max(max(data(:,9:15)))/1000]);
-title('Collar 1');
-colorbar;
-subplot(2, 3, 2);
-hold on;
-makeHeatMap(lat, lon, col2);
-scatter(32.716809, -115.93378, 25, 'k', 'x')
-caxis([min(min(data(:,9:15)))/1000, max(max(data(:,9:15)))/1000]);
-title('Collar 2');
-colorbar;
-subplot(2, 3, 3);
-hold on;
-makeHeatMap(lat, lon, col3);
-scatter(32.716317, -115.93342, 25, 'k', 'x')
-caxis([min(min(data(:,9:15)))/1000, max(max(data(:,9:15)))/1000]);
-title('Collar 3');
-colorbar;
-subplot(2, 3, 4);
-hold on;
-makeHeatMap(lat, lon, col4);
-scatter(32.716969, -115.93327, 25, 'k', 'x')
-caxis([min(min(data(:,9:15)))/1000, max(max(data(:,9:15)))/1000]);
-title('Collar 4');
-colorbar;
-subplot(2, 3, 5);
-hold on;
-makeHeatMap(lat, lon, col5);
-scatter(32.717086, -115.93286, 25, 'k', 'x')
-caxis([min(min(data(:,9:15)))/1000, max(max(data(:,9:15)))/1000]);
-title('Collar 5');
-colorbar;
-subplot(2, 3, 6);
-hold on;
-makeHeatMap(lat, lon, col6);
-scatter(32.717202, -115.93291, 25, 'k', 'x')
-caxis([min(min(data(:,9:15)))/1000, max(max(data(:,9:15)))/1000]);
-title('Collar 6');
-colorbar;
+for i = 1:1:numCols
+    % create a 2 row x 3 col subplot, select plot 1
+    subplot(numRowPlots, numColPlots, i);
+    hold on;
+    makeHeatMap(lat, lon, col(:,i));
+    caxis([min(min(data(:,firstCollarColumn:firstCollarColumn+numCols)))/1000, max(max(data(:,firstCollarColumn:firstCollarColumn+numCols)))/1000]);
+    title(strcat('Collar ',num2str(i)));
+    colorbar;
+end
+
 figure;
 makeHeatMap(lat, lon, noise);
-caxis([min(min(data(:,9:15)))/1000, max(max(data(:,9:15)))/1000]);
+caxis([min(min(data(:,firstCollarColumn:firstCollarColumn+numCols)))/1000, max(max(data(:,firstCollarColumn:firstCollarColumn+numCols)))/1000]);
 title('Noise');
 colorbar;
-clear lat lon col1 col2 col3 col4 col5 col6 noise
 end
