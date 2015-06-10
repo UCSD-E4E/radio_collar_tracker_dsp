@@ -1,7 +1,44 @@
 #! /usr/bin/env bash
-read -p "Enter run number: " run
-read -p "Enter flight altitude: " alt
-read -e -p "Enter Raw Data directory: " dir
+if [ $# -ne 3 ]; then
+	echo "Invalid arguments! Usage: cas.sh run flight_alt data_dir"
+	echo ""
+	echo "run             Run number"
+	echo "flight_alt      Flight altitude in meters above launch"
+	echo "data_dir        Location of data on local filesystem"
+	exit 1
+fi
+# read -p "Enter run number: " run
+run=$1
+re='^[0-9]+$'
+if ! [[ $run =~ $re ]] ; then
+	echo "Invalid arguments! Usage: cas.sh run flight_alt data_dir"
+	echo ""
+	echo "run             Run number"
+	echo "flight_alt      Flight altitude in meters above launch"
+	echo "data_dir        Directory of data on local filesystem"
+	exit 1
+fi
+# read -p "Enter flight altitude: " alt
+alt=$2
+re='^[0-9]+([.][0-9]+)?$'
+if ! [[ $alt =~ $re ]] ; then
+	echo "Invalid arguments! Usage: cas.sh run flight_alt data_dir"
+	echo ""
+	echo "run             Run number"
+	echo "flight_alt      Flight altitude in meters above launch"
+	echo "data_dir        Directory of data on local filesystem"
+	exit 1
+fi
+# read -e -p "Enter Raw Data directory: " dir
+dir=$3
+if ! [[ -d $dir ]]; then
+	echo "Invalid arguments! Usage: cas.sh run flight_alt data_dir"
+	echo ""
+	echo "run             Run number"
+	echo "flight_alt      Flight altitude in meters above launch"
+	echo "data_dir        Directory of data on local filesystem"
+	exit 1
+fi
 dir=$(echo $dir | sed "s%~%$HOME%")
 if [[ -w JOB ]]; then
 	rm JOB
