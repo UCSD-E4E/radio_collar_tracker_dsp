@@ -1,4 +1,12 @@
 #! /usr/bin/env bash
+if [[ $1 -eq "-h" || $1 -eq "--help" ]] ; then
+	echo "Usage: cas.sh run flight_alt data_dir"
+	echo ""
+	echo "run             Run number"
+	echo "flight_alt      Flight altitude in meters above launch"
+	echo "data_dir        Location of data on local filesystem"
+	exit 0
+fi
 if [ $# -ne 3 ]; then
 	echo "Invalid arguments! Usage: cas.sh run flight_alt data_dir"
 	echo ""
