@@ -16,11 +16,15 @@ parser.add_argument('-d', '--directory', default=os.getcwd(),
 parser.add_argument('--ignore-run-number', action='store_true',
 	dest='run_num_mismatch',
 	help='Ignore run number mistmatch between filename and configuration file')
+parser.add_argument('-k', '--output_kml', action='store_true', dest='kml',
+	help='Creates a kml containing points representing the locations and '
+	'signal strengths of the radio collars are specific copter locations.')
 args = parser.parse_args()
 
 filename = args.filename
 ignore_number_mismatch = args.run_num_mismatch
 output_path = args.directory
+kml_output = args.kml
 ## FIXME use length of file to get number of collars!
 # Load config file
 try:
@@ -81,6 +85,11 @@ alt = [x / 1000 for x in data['alt']]
 for i in xrange(1, num_col + 1):
 	colname = 'col' + str(i)
 	coldata[i-1] = [x / 1000 for x in data[colname]]
+north = np.amax(lat)
+south = np.amin(lat)
+east = np.amax(lon)
+west = np.amin(lon)
+
 # convert deg to utm
 zone = "X"
 zonenum = 60;
@@ -107,7 +116,77 @@ for i in xrange(1, num_col + 1):
 	ax.get_yaxis().get_major_formatter().set_useOffset(False)
 	ax.set_xlabel('Easting')
 	ax.set_ylabel('Northing')
-	ax.set_title('Run %d, Collar at %0.3f MHz\nUTM Zone: %d %s' % (run_num, collars[i-1]/1000000, zonenum, zone))
-	plot.savefig('%s/RUN_%06d_COL_%0.3f.png'%(output_path, run_num, collars[i - 1]/1000000), bbox_inches='tight')
-	print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3f.png'%(collars[i - 1]/1000000, output_path, run_num, collars[i - 1]/1000000))
+	ax.set_title('Run %d, Collar at %0.3f MHz\nUTM Zone: %d %s' % (run_num,
+		collars[i - 1] / 1000000, zonenum, zone))
+	ax.set_aspect('equal')
+	plot.xticks(rotation='vertical')
+
+	plot.savefig('%s/RUN_%06d_COL_%0.3f.png' % (output_path, run_num,
+		collars[i - 1] / 1000000), bbox_inches = 'tight')
+	print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3f.png' %
+		(collars[i - 1] / 1000000, output_path, run_num,
+		collars[i - 1] / 1000000))
 	# plot.show(block=False)
+	plot.close()
+
+if(kml_output):
+	import Image
+	for i in xrange(1, num_col + 1):
+		fig = plot.figure(i)
+		fig.patch.set_facecolor('none')
+		fig.patch.set_alpha(0)
+		fig.set_size_inches(8, 6)
+		fig.set_dpi(72)
+		curColMap = plot.cm.get_cmap('jet')
+		sc = plot.scatter(lon, lat, c=coldata[i - 1], cmap=curColMap, vmin = minCol, vmax = maxCol)
+		ax = plot.gca()
+		ax.patch.set_facecolor('none')
+		ax.set_aspect('equal')
+		plot.axis('off')
+		plot.savefig('tmp.png', bbox_inches = 'tight')
+		print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3ftx.png' %
+			(collars[i - 1] / 1000000, output_path, run_num,
+			collars[i - 1] / 1000000))
+		# plot.show(block=False)
+		plot.close()
+
+		image=Image.open('tmp.png')
+		image.load()
+
+		image_data = np.asarray(image)
+		image_data_bw = image_data.max(axis=2)
+		non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
+		non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
+		cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
+
+		image_data_new = image_data[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
+
+		new_image = Image.fromarray(image_data_new)
+		new_image.save('%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num,
+			collars[i - 1] / 1000000))
+		os.remove('tmp.png')
+
+		f = open('%s/RUN_%06d_COL%0.3f.kml' % (output_path, run_num,
+			collars[i - 1] / 1000000), 'w')
+		f.write("""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Folder>
+    <name>Radio Collar Tracker</name>
+    <description>Radio Collar Tracker, UCSD</description>
+    <GroundOverlay>
+      <name>RUN %d</name>
+      <description>RUN %d, Collar at %0.3f MHz</description>
+      <Icon>
+        <href>%s</href>
+      </Icon>
+      <LatLonBox>
+        <north>%f</north>
+        <south>%f</south>
+        <east>%f</east>
+        <west>%f</west>
+        <rotation>0</rotation>
+      </LatLonBox>
+    </GroundOverlay>
+  </Folder>
+</kml>""" % (run_num, run_num, collars[i - 1] / 1000000, '%s/RUN_%06d_COL%0.3ftx.png' % (output_path, run_num, collars[i - 1] / 1000000),north, south, east, west))
+		f.close()
