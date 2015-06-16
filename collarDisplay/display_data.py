@@ -19,9 +19,9 @@ parser.add_argument('--ignore-run-number', action='store_true',
 args = parser.parse_args()
 
 filename = args.filename
-# ignore_number_mismatch = args.run_num_mismatch
+ignore_number_mismatch = args.run_num_mismatch
 output_path = args.directory
-
+## FIXME use length of file to get number of collars!
 # Load config file
 try:
 	job_cfg = open('JOB', 'r')
@@ -38,6 +38,7 @@ alpha_c_thres = int(job_cfg.readline().rpartition(" ")[2])
 num_col = int(job_cfg.readline().rpartition(" ")[2])
 freq_drift = int(job_cfg.readline().rpartition(" ")[2])
 
+## FIXME use length of file to get number of collars!
 # Load collar file
 try:
 	col_cfg = open('COL', 'r')
@@ -57,7 +58,7 @@ try:
 	filenum = int(filename.partition("_")[2].rpartition(".")[0])
 except Exception,e:
 	run_num = -1
-if run_num != filenum:
+if not ignore_number_mismatch and run_num != filenum:
 	print("Error: Filename does not match expected run number from config! Exiting...")
 	sys.exit(1)
 
