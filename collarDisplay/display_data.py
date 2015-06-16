@@ -5,13 +5,22 @@ import matplotlib.pyplot as plot
 # USING utm 0.4.0 from https://pypi.python.org/pypi/utm
 import utm
 import os
+import argparse
 
-# if len(sys.argv) != 2:
-# 	print("Invalid arguments! Usage: display_data.py data_file")
-# 	print("data_file   CSV file from the spectrumAnalysis code")
-# 	sys.exit(1)
+parser = argparse.ArgumentParser(description='Processes RUN_XXXXXX.csv files '
+	'from the Radio Collar Tracker software to generate maps of radio collar '
+	'signal strength')
+parser.add_argument('filename', help='CSV file from the spectrumAnalysis code')
+parser.add_argument('-d', '--directory', default=os.getcwd(),
+	help='output directory for map files', metavar='<directory>')
+parser.add_argument('--ignore-run-number', action='store_true',
+	dest='run_num_mismatch',
+	help='Ignore run number mistmatch between filename and configuration file')
+args = parser.parse_args()
 
-output_path = os.getcwd()
+filename = args.filename
+# ignore_number_mismatch = args.run_num_mismatch
+output_path = args.directory
 
 # Load config file
 try:
@@ -44,31 +53,13 @@ for i in range(num_col):
 		sys.exit(1)
 
 # Load data file
-# filename = sys.argv[1]
-filename = "RUN_000477.csv"
 try:
 	filenum = int(filename.partition("_")[2].rpartition(".")[0])
-except ValueError, e:
-	print("WARNING: Filename does not match expected run number from config!")
-	try:
-		retval = input("Continue? y/(n) > ")
-	except SyntaxError, e:
-		sys.exit(1)
-	if retval == y:
-		pass
-	else:
-		sys.exit(1)
-
+except Exception,e:
+	run_num = -1
 if run_num != filenum:
-	print("WARNING: Filename does not match expected run number from config!")
-	try:
-		retval = input("Continue? y/(n) > ")
-	except SyntaxError, e:
-		sys.exit(1)
-	if retval == y:
-		pass
-	else:
-		sys.exit(1)
+	print("Error: Filename does not match expected run number from config! Exiting...")
+	sys.exit(1)
 
 
 if filename.rpartition(".")[2] != "csv":
@@ -117,5 +108,5 @@ for i in xrange(1, num_col + 1):
 	ax.set_ylabel('Northing')
 	ax.set_title('Run %d, Collar at %0.3f MHz\nUTM Zone: %d %s' % (run_num, collars[i-1]/1000000, zonenum, zone))
 	plot.savefig('%s/RUN_%06d_COL_%0.3f.png'%(output_path, run_num, collars[i - 1]/1000000), bbox_inches='tight')
-	print('Collar %0.3f: %s/RUN_%06d_COL_%0.3f.png'%(collars[i - 1], output_path, run_num, collars[i - 1]/1000000))
+	print('Collar at %0.3f MHz: %s/RUN_%06d_COL_%0.3f.png'%(collars[i - 1]/1000000, output_path, run_num, collars[i - 1]/1000000))
 	# plot.show(block=False)
