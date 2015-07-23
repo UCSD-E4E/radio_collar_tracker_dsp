@@ -1,32 +1,32 @@
 #!/bin/bash
 # Remove extraneous packages
-apt-get remove apache2 openbox xscreensaver mesa-common-dev aspell gksu gnome-keyring gsettings-desktop-schemas hicolor-icon-theme hunspell-en-us javascript-common leafpad lxde-common lxmenu-data lxpanel lxsession lxterminal whiptail --purge -y
+sudo apt-get remove apache2 openbox xscreensaver mesa-common-dev aspell gksu gnome-keyring gsettings-desktop-schemas hicolor-icon-theme hunspell-en-us javascript-common leafpad lxde-common lxmenu-data lxpanel lxsession lxterminal whiptail --purge -y
 
 # Update and upgrad existing software
-apt-get update -y
-apt-get upgrade -y
-apt-get dist-upgrade -y
-apt-get clean -y
-apt-get autoremove -y
+sudo apt-get update -y
+sudo apt-get upgrade -y
+sudo apt-get dist-upgrade -y
+sudo apt-get clean -y
+sudo apt-get autoremove -y
 
 # Install dependencies
-apt-get install build-essential -y
-apt-get install cpufrequtils -y
-apt-get install sysfsutils -y
-apt-get install gtk+-2.0 -y
-apt-get install libgtk2.0-dev -y
-apt-get install libcairo2-dev -y
-apt-get install git -y
-apt-get install cmake -y
-apt-get install libusb-1.0-0-dev -y
-apt-get install lightdm -y
+sudo apt-get install build-essential -y
+sudo apt-get install cpufrequtils -y
+sudo apt-get install sysfsutils -y
+sudo apt-get install gtk+-2.0 -y
+sudo apt-get install libgtk2.0-dev -y
+sudo apt-get install libcairo2-dev -y
+sudo apt-get install git -y
+sudo apt-get install cmake -y
+sudo apt-get install libusb-1.0-0-dev -y
+sudo apt-get install lightdm -y
 
 # Set CPU governor
-mv /etc/init.d/cpufrequtils /etc/init.d/cpufrequtils.old
-chmod -x /etc/init.d/cpufrequtils.old
-cat /etc/init.d/cpufrequtils.old | sed 's_^GOVERNOR=\"[a-zA-Z]*\"$_GOVERNOR=\"performance\"_' > /etc/init.d/cpufrequtils
+sudo mv /etc/init.d/cpufrequtils /etc/init.d/cpufrequtils.old
+sudo chmod -x /etc/init.d/cpufrequtils.old
+sudo cat /etc/init.d/cpufrequtils.old | sed 's_^GOVERNOR=\"[a-zA-Z]*\"$_GOVERNOR=\"performance\"_' > /etc/init.d/cpufrequtils
 
-echo blacklist dvb_usb_rtl28xxu > /etc/modprobe.d/rtlsdr.conf
+sudo echo blacklist dvb_usb_rtl28xxu > /etc/modprobe.d/rtlsdr.conf
 
 cd ~
 git clone https://github.com/steve-m/librtlsdr
