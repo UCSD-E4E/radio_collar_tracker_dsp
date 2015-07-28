@@ -1,5 +1,4 @@
 /**
- *
  * rtl-sdr, turns your Realtek RTL2832 based DVB dongle into a SDR receiver
  * Copyright (C) 2012 by Steve Markgraf <steve@steve-m.de>
  *
@@ -18,9 +17,11 @@
  */
 
 #include <signal.h>
-#include <rtl_sdr.h>
+#include <rtl-sdr.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <getopt.h>
+#include <stdlib.h>
 
 #define SAMP_RATE 2048000
 #define CENTR_FREQ 172464000
@@ -35,8 +36,14 @@ static void sighandler(int signum){
 }
 
 int main(int argc, char **argv){
+
+	// Setting up variables
+	struct sigaction sigact;
 	int gain = 0;
-	uint8_t* buffer;
+	int opt;
+	FILE* file;
+
+	// Getting command line options
 	while ((opt = getopt(argc, argv, "g")) != -1){
 		switch(opt){
 			case 'g':
@@ -45,13 +52,13 @@ int main(int argc, char **argv){
 		}
 	}
 
-	buffer = malloc(out_block_size * sizeof(uint8_t));
-
+	// Opening SDR
 	if(rtlsdr_open(&dev, 0)){
 		fprintf(stderr, "Failed to open rtlsdr device!");
 		exit(1);
 	}
 
+	// Setting signal handlers
 	sigact.sa_handler = sighandler;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
@@ -60,10 +67,55 @@ int main(int argc, char **argv){
 	sigaction(SIGQUIT, &sigact, NULL);
 	sigaction(SIGPIPE, &sigact, NULL);
 
+	// Setting sample rate
 	if(rtlsdr_set_sample_rate(dev, SAMP_RATE)){
 		fprintf(stderr, "WARNING: Failed to set sample rate.\n");
+		exit(1);
 	}
+	// Setting center frequency
 	if(rtlsdr_set_center_freq(dev, CENTR_FREQ)){
 		fprintf(stderr, "WARNING: Failed to set center freq.\n");
+		exit(1);
 	}
+
+	// Setting gain
+	if(gain == 0){
+		if(rtlsdr_set_tuner_gain_mode(dev, 0)){
+			fprintf(stderr, "WARNING: Failed to set tuner gain.\n");
+			exit(1);
+		}
+	}else{
+		if(rtlsdr_set_tuner_gain_mode(dev, 1)){
+			fprintf(stderr, "WARNING: Failed to enable manual gain.\n");
+			exit(1);
+		}
+		if(rtlsdr_set_tuner_gain(dev, gain)){
+			fprintf(stderr, "WARNING: Failed to set tuner gain.\n");
+			exit(1);
+		}
+	}
+
+	// Setting output filename
+	// FIXME: Need smarter filename
+	file = fopen("tmp", "wb");
+	if(!file){
+		fprintf(stderr, "Failed to open file!\n");
+	}
+
+	// Reset endpoint before we start reading from it (mandatory)
+	if(rtlsdr_reset_buffer(dev)){
+		fprintf(stderr, "WARNING: Failed to reset buffers\n");
+		exit(1);
+	}
+
+	// FIXME: Add timestamp here!
+	// Read samples in async mode
+	int r = rtlsdr_read_async(dev, rtlsdr_callback, (void*) file, 0, out_block_size);
+	/*
+	 * TODO: Set up callback to copy frame to worker thread's memory space, 
+	 * have worker send data to file.
+	 */
+
+	fclose(file);
+	rtlsdr_close(dev);
 }
