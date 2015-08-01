@@ -50,8 +50,6 @@ int main(int argc, char** argv){
 	int samp_freq = 2048000;
 	// Center Frequency for SDR in Hz
 	int center_freq = 172464000;
-	// Nominal pulse length in ms
-	int pulse_length = 0;
 	// Nominal pulse period in m
 	int pulse_per = 1500;
 	// Run number
@@ -71,7 +69,7 @@ int main(int argc, char** argv){
 
 	// Get command line options
 	printf("Getting command line options\n");
-	while ((opt = getopt(argc, argv, "g:s:f:p:r:P:")) != -1){
+	while ((opt = getopt(argc, argv, "g:s:f:r:P:")) != -1){
 		switch(opt){
 			case 'g':
 				gain = (int)(atof(optarg) * 10);
@@ -82,14 +80,11 @@ int main(int argc, char** argv){
 			case 'f':
 				center_freq = (int)(atof(optarg));
 				break;
-			case 'p':
-				pulse_length = (int)(atof(optarg));
-				break;
 			case 'r':
 				run_num = (int)(atof(optarg));
 				break;
 			case 'P':
-				pulse_per = (int)(atof(pulse_per));
+				pulse_per = (int)(atof(optarg));
 				break;
 		}
 	}
@@ -158,10 +153,6 @@ int main(int argc, char** argv){
 		fprintf(stderr, "ERROR: Failed to create default thread attributes.\n");
 		exit(1);
 	}
-	if(pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED)){
-		fprintf(stderr, "ERROR: Failed to create detached thread.\n");
-		exit(1);
-	}
 	pargs.run_num = run_num;
 	pargs.frame_len = block_size;
 	if(pthread_create(&thread_id, &attr, proc_queue, (void*) &pargs)){
@@ -178,6 +169,7 @@ int main(int argc, char** argv){
 	// clean up
 	clock_gettime(CLOCK_REALTIME, &end_time);
 	printf("Stopping record\n");
+	pthread_join(thread_id, NULL);
 	rtlsdr_close(dev);
 }
 
@@ -210,17 +202,14 @@ void* proc_queue(void* args){
 	empty = queue_isEmpty(&data_queue);
 	pthread_mutex_unlock(&lock);
 
-	printf("Running thread\n");
 
-	while(run || !empty){
-		printf("Checking queue\n");
+	while(run){
 		pthread_mutex_lock(&lock);
 		empty = queue_isEmpty(&data_queue);
 		pthread_mutex_unlock(&lock);
 
 		if(!empty){
 			// Process queue
-			printf("Got frame\n");
 			snprintf(buff, sizeof(buff),
 					"RAW_DATA_%06d_%06d", run_num,
 					frame_num %4 + 1);
@@ -230,15 +219,12 @@ void* proc_queue(void* args){
 			data_ptr = (char*) queue_pop(&data_queue);
 			pthread_mutex_unlock(&lock);
 
-			printf("Writing frame\n");
 			fwrite(data_ptr, sizeof(char), frame_len, data_stream);
 			fclose(data_stream);
 
 			free(data_ptr);
 			frame_num++;
-			printf("done\n");
 		}else{
-			printf("No frame\n");
 			usleep(FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
 		}
 	}
