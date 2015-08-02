@@ -1,6 +1,6 @@
 CFLAGS=-c -std=gnu99 -Wall -g
 CPPFLAGS=-c -std=c++11 -Wall -g
-LFLAGS=`pkg-config --cflags --libs librtlsdr` -pthread
+LFLAGS=`pkg-config --cflags --libs librtlsdr` -pthread -lrt
 .PHONY: clean test
 
 sdr_record: sdr_record.o queue.o
