@@ -201,7 +201,12 @@ void* proc_queue(void* args){
 	int frame_num;
 	uint64_t num_samples = 0;
 	int file_num = 0;
-	
+
+	struct timespec start_time;
+	struct timespec end_time;
+	uint64_t start_ms = 0;
+	uint64_t end_ms = 0;
+	uint64_t wait_time = 0;
 
 	frame_num = 0;
 	// Lock mutex
@@ -213,9 +218,19 @@ void* proc_queue(void* args){
 
 	while(run || !empty){
 		printf("RUN: %d\tLENGTH: %d\n", run, data_queue.length);
+		clock_gettime(CLOCK_REALTIME, &start_time);
 		pthread_mutex_lock(&lock);
+		clock_gettime(CLOCK_REALTIME, &end_time);
+		start_ms = (long)start_time.tv_sec * 1e9 + start_time.tv_nsec;
+		end_ms = (long)end_time.tv_sec * 1e9 + end_time.tv_nsec;
+		wait_time += end_ms - start_ms;
 		empty = queue_isEmpty(&data_queue);
+		clock_gettime(CLOCK_REALTIME, &start_time);
 		pthread_mutex_unlock(&lock);
+		clock_gettime(CLOCK_REALTIME, &end_time);
+		start_ms = (long)start_time.tv_sec * 1e9 + start_time.tv_nsec;
+		end_ms = (long)end_time.tv_sec * 1e9 + end_time.tv_nsec;
+		wait_time += end_ms - start_ms;
 
 		if(!empty){
 			// Process queue
@@ -229,10 +244,20 @@ void* proc_queue(void* args){
 				file_num++;
 				data_stream = fopen(buff, "ab");
 			}
+			clock_gettime(CLOCK_REALTIME, &start_time);
 			pthread_mutex_lock(&lock);
+			clock_gettime(CLOCK_REALTIME, &end_time);
+			start_ms = (long)start_time.tv_sec * 1e9 + start_time.tv_nsec;
+			end_ms = (long)end_time.tv_sec * 1e9 + end_time.tv_nsec;
+			wait_time += end_ms - start_ms;
 			char* data_ptr = NULL;
 			data_ptr = (char*) queue_pop(&data_queue);
+			clock_gettime(CLOCK_REALTIME, &start_time);
 			pthread_mutex_unlock(&lock);
+			clock_gettime(CLOCK_REALTIME, &end_time);
+			start_ms = (long)start_time.tv_sec * 1e9 + start_time.tv_nsec;
+			end_ms = (long)end_time.tv_sec * 1e9 + end_time.tv_nsec;
+			wait_time += end_ms - start_ms;
 
 			for(int i = 0; i < frame_len; i++){
 				fbuf[i] = (float)data_ptr[i] / 128.0 - 1.0;
@@ -250,6 +275,7 @@ void* proc_queue(void* args){
 	fclose(data_stream);
 	printf("Recorded %f seconds of data to disk\n", num_samples / 2048000.0);
 	printf("Queue length at end: %d.\n", data_queue.length);
+	printf("Wait time: %ld\n", wait_time);
 	return NULL;
 }
 
