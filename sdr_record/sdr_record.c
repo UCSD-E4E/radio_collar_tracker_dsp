@@ -18,6 +18,7 @@
 
 // Global constants
 #define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	50
+#define FRAMES_PER_FILE	4
 
 // Typedefs
 struct proc_queue_args{
@@ -199,6 +200,7 @@ void* proc_queue(void* args){
 	float fbuf[frame_len];
 	int frame_num;
 	uint64_t num_samples = 0;
+	int file_num = 0;
 	
 
 	frame_num = 0;
@@ -217,10 +219,16 @@ void* proc_queue(void* args){
 
 		if(!empty){
 			// Process queue
-			snprintf(buff, sizeof(buff),
-					"/media/RAW_DATA/rct/RAW_DATA_%06d_%06d", run_num,
-					frame_num %4 + 1);
-			data_stream = fopen(buff, "ab");
+			if(frame_num % FRAMES_PER_FILE + 1!= file_num){
+				if(data_stream){
+					fclose(data_stream);
+				}
+				snprintf(buff, sizeof(buff),
+						"/media/RAW_DATA/rct/RAW_DATA_%06d_%06d", run_num,
+						frame_num % FRAMES_PER_FILE + 1);
+				file_num++;
+				data_stream = fopen(buff, "ab");
+			}
 			pthread_mutex_lock(&lock);
 			char* data_ptr = NULL;
 			data_ptr = (char*) queue_pop(&data_queue);
@@ -231,7 +239,6 @@ void* proc_queue(void* args){
 			}
 
 			fwrite(fbuf, sizeof(float), frame_len, data_stream);
-			fclose(data_stream);
 
 			free(data_ptr);
 			frame_num++;
@@ -240,6 +247,7 @@ void* proc_queue(void* args){
 			usleep(FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
 		}
 	}
+	fclose(data_stream);
 	printf("Recorded %f seconds of data to disk\n", num_samples / 2048000.0);
 	printf("Queue length at end: %d.\n", data_queue.length);
 	return NULL;
