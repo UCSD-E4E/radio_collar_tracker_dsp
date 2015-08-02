@@ -31,6 +31,7 @@ int run = 1;
 pthread_mutex_t lock;
 queue data_queue;
 int counter = 0;
+static uint64_t num_samples = 0;
 
 // Function Prototypes
 void sighandler(int signal);
@@ -170,6 +171,7 @@ int main(int argc, char** argv){
 	// clean up
 	clock_gettime(CLOCK_REALTIME, &end_time);
 	printf("Stopping record\n");
+	printf("Queued %f seconds of data\n", num_samples / 2048000.0);
 	pthread_join(thread_id, NULL);
 	rtlsdr_close(dev);
 }
@@ -237,12 +239,13 @@ void* proc_queue(void* args){
 			usleep(FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
 		}
 	}
-	printf("Recorded %f seconds of data\n", num_samples / 2048000.0);
+	printf("Recorded %f seconds of data to disk\n", num_samples / 2048000.0);
 	return NULL;
 }
 
 static void rtlsdr_callback(unsigned char* buf, uint32_t len, void *ctx){
 	counter++;
+	num_samples += len / 2;
 	if(counter > 100){
 		sighandler(0);
 	}
