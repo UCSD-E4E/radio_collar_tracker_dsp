@@ -27,7 +27,7 @@ struct proc_queue_args{
 
 // Global variables
 rtlsdr_dev_t *dev = NULL;
-int run = 1;
+volatile int run = 1;
 pthread_mutex_t lock;
 queue data_queue;
 int counter = 0;
@@ -209,7 +209,8 @@ void* proc_queue(void* args){
 	pthread_mutex_unlock(&lock);
 
 
-	while(run){
+	while(run || empty){
+		printf("RUN: %d\tLENGTH: %d\n", run, data_queue.length);
 		pthread_mutex_lock(&lock);
 		empty = queue_isEmpty(&data_queue);
 		pthread_mutex_unlock(&lock);
@@ -240,18 +241,19 @@ void* proc_queue(void* args){
 		}
 	}
 	printf("Recorded %f seconds of data to disk\n", num_samples / 2048000.0);
+	printf("Queue length at end: %d.\n", data_queue.length);
 	return NULL;
 }
 
 static void rtlsdr_callback(unsigned char* buf, uint32_t len, void *ctx){
 	counter++;
-	num_samples += len / 2;
 	if(counter > 100){
 		sighandler(0);
 	}
 	if(!run){
 		return;
 	}
+	num_samples += len / 2;
 	char* newframe = malloc(len * sizeof(char));
 	memcpy(newframe, buf, len);
 	pthread_mutex_lock(&lock);
