@@ -18,7 +18,7 @@
 
 // Global constants
 #define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	50
-#define FRAMES_PER_FILE	4
+#define FRAMES_PER_FILE	80
 
 // Typedefs
 struct proc_queue_args {
@@ -219,13 +219,14 @@ void* proc_queue(void* args) {
 
 		if (!empty) {
 			// Process queue
-			if (frame_num % FRAMES_PER_FILE + 1 != file_num) {
+			if (frame_num / FRAMES_PER_FILE + 1 != file_num) {
 				if (data_stream) {
 					fclose(data_stream);
 				}
 				snprintf(buff, sizeof(buff),
 				         "/media/RAW_DATA/rct/RAW_DATA_%06d_%06d", run_num,
-				         frame_num % FRAMES_PER_FILE + 1);
+				         frame_num / FRAMES_PER_FILE + 1);
+				printf("File: %s\n", buff);
 				file_num++;
 				data_stream = fopen(buff, "ab");
 			}
