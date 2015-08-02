@@ -14,6 +14,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include "queue.h"
+#include <stdint.h>
 
 // Global constants
 #define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	500
@@ -195,6 +196,8 @@ void* proc_queue(void* args){
 	char buff[256];
 	float fbuf[frame_len];
 	int frame_num;
+	uint64_t num_samples = 0;
+	
 
 	frame_num = 0;
 	// Lock mutex
@@ -229,10 +232,12 @@ void* proc_queue(void* args){
 
 			free(data_ptr);
 			frame_num++;
+			num_samples += frame_len / 2;
 		}else{
 			usleep(FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
 		}
 	}
+	printf("Recorded %f seconds of data\n", num_samples / 2048000.0);
 	return NULL;
 }
 
