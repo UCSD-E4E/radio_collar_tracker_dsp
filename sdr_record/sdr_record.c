@@ -17,7 +17,7 @@
 #include <stdint.h>
 
 // Global constants
-#define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	500
+#define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	50
 
 // Typedefs
 struct proc_queue_args{
@@ -209,7 +209,7 @@ void* proc_queue(void* args){
 	pthread_mutex_unlock(&lock);
 
 
-	while(run || empty){
+	while(run || !empty){
 		printf("RUN: %d\tLENGTH: %d\n", run, data_queue.length);
 		pthread_mutex_lock(&lock);
 		empty = queue_isEmpty(&data_queue);
@@ -218,7 +218,7 @@ void* proc_queue(void* args){
 		if(!empty){
 			// Process queue
 			snprintf(buff, sizeof(buff),
-					"RAW_DATA_%06d_%06d", run_num,
+					"/media/RAW_DATA/rct/RAW_DATA_%06d_%06d", run_num,
 					frame_num %4 + 1);
 			data_stream = fopen(buff, "ab");
 			pthread_mutex_lock(&lock);
