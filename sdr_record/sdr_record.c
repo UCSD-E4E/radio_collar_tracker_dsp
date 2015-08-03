@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
 
 	// Add timing data
 	char buf[256];
-	snprintf(buf, sizeof(buf), "%s/%s%6d", DATA_DIR, META_PREFIX, run_num);
+	snprintf(buf, sizeof(buf), "%s/%s%06d", DATA_DIR, META_PREFIX, run_num);
 	FILE* timing_stream = fopen(buf, "w");
 	fprintf(timing_stream, "start_time: %f\n", start_time.tv_sec + (float)start_time.tv_nsec / 1.e9);
 	fprintf(timing_stream, "end_time: %f\n", end_time.tv_sec + (float)end_time.tv_nsec / 1.e9);
