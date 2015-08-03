@@ -117,20 +117,13 @@ int main(int argc, char** argv) {
 
 	// Configure SDR
 	printf("Configuring SDR\n");
-	if (gain == 0) {
-		if (rtlsdr_set_tuner_gain_mode(dev, 0)) {
-			fprintf(stderr, "ERROR: Failed to set tuner gain.\n");
-			exit(1);
-		}
-	} else {
-		if (rtlsdr_set_tuner_gain_mode(dev, 1)) {
-			fprintf(stderr, "ERROR: Failed to enable manual gain.\n");
-			exit(1);
-		}
-		if (rtlsdr_set_tuner_gain(dev, gain)) {
-			fprintf(stderr, "ERROR: Failed to set tuner gain.\n");
-			exit(1);
-		}
+	if (rtlsdr_set_tuner_gain_mode(dev, 1)) {
+		fprintf(stderr, "ERROR: Failed to enable manual gain.\n");
+		exit(1);
+	}
+	if (rtlsdr_set_tuner_gain(dev, gain)) {
+		fprintf(stderr, "ERROR: Failed to set tuner gain.\n");
+		exit(1);
 	}
 	if (rtlsdr_set_center_freq(dev, center_freq)) {
 		fprintf(stderr, "ERROR: Failed to set center frequency.\n");
@@ -232,8 +225,8 @@ void* proc_queue(void* args) {
 					fclose(data_stream);
 				}
 				snprintf(buff, sizeof(buff),
-				         "%s/RAW_DATA_%06d_%06d",DATA_DIR, run_num,
-				         frame_num / FRAMES_PER_FILE + 1);
+						"%s/RAW_DATA_%06d_%06d",DATA_DIR, run_num,
+						frame_num / FRAMES_PER_FILE + 1);
 				printf("File: %s\n", buff);
 				file_num++;
 				data_stream = fopen(buff, "wb");
