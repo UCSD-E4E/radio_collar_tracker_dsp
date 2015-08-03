@@ -12,7 +12,7 @@ int main(int argc, char** argv){
 
 	uint8_t next[2];
 	while(fread(&next, sizeof(uint8_t) * 2, 1, stream)){
-		float magnitude = sqrt(next[0] * next[0] + next[1] * next[1]);
+		float magnitude = sqrt((next[0]-128) * (next[0]-128) + (next[1]-128) * (next[1]-128));
 		if(magnitude > max){
 			max = magnitude;
 		}
