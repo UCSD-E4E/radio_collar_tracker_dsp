@@ -11,6 +11,10 @@ clean:
 	-rm -rf sdr_record
 	-rm -rf rtl_sdr
 	-rm -rf test
+	-rm -rf raw_data_to_complex
+	-rm -rf switch_iq
+	-rm -rf fopentest
+	-rm -rf rtl_sdr
 
 sdr_record.o: sdr_record.c queue.h
 	gcc sdr_record.c $(CFLAGS) 
@@ -32,3 +36,10 @@ switch_iq: switch_iq.c
 fopentest: fopentest.c
 	gcc fopentest.c $(CFLAGS)
 	gcc fopentest.o $(LFLAGS) -o fopentest
+
+rtl_sdr: rtl_sdr.c convenience.h convenience.c
+	gcc rtl_sdr.c convenience.c $(CFLAGS)
+	gcc rtl_sdr.o convenience.o $(LFLAGS) -o rtl_sdr
+
+sample_mag: sample_mag.c
+	gcc -std=gnu99 sample_mag.c -o sample_mag -lm
