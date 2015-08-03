@@ -101,6 +101,7 @@ int main(int argc, char** argv) {
 
 	// Initialize environment
 	printf("Configuring environment\n");
+	// TODO Fix this
 	block_size = (int)(pulse_per / 1000.0 * 2 * samp_freq);
 	block_size = 262144;
 	queue_init(&data_queue);
@@ -269,7 +270,9 @@ static void rtlsdr_callback(unsigned char* buf, uint32_t len, void *ctx) {
 	}
 	num_samples += len / 2;
 	char* newframe = malloc(len * sizeof(char));
-	memcpy(newframe, buf, len);
+	for(int i = 0; i < len; i++){
+		newframe[i] = buf[i];
+	}
 	pthread_mutex_lock(&lock);
 	queue_push((queue*)ctx, (void*) newframe);
 	pthread_mutex_unlock(&lock);
