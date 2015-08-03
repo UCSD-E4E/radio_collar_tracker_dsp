@@ -228,7 +228,7 @@ void* proc_queue(void* args) {
 				         frame_num / FRAMES_PER_FILE + 1);
 				printf("File: %s\n", buff);
 				file_num++;
-				data_stream = fopen(buff, "ab");
+				data_stream = fopen(buff, "wb");
 			}
 			lock_mutex();
 			char* data_ptr = NULL;
