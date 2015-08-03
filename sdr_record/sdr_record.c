@@ -64,8 +64,6 @@ int main(int argc, char** argv) {
 	int block_size = 0;
 	// Start Time
 	struct timespec start_time;
-	// End Time
-	struct timespec end_time;
 	// Thread attributes
 	pthread_attr_t attr;
 	// Thread ID
@@ -173,14 +171,11 @@ int main(int argc, char** argv) {
 	// begin recording
 	rtlsdr_read_async(dev, rtlsdr_callback, (void*) &data_queue, 0, block_size);
 	// clean up
-	clock_gettime(CLOCK_REALTIME, &end_time);
-
 	// Add timing data
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s/%s%06d", DATA_DIR, META_PREFIX, run_num);
 	FILE* timing_stream = fopen(buf, "w");
 	fprintf(timing_stream, "start_time: %f\n", start_time.tv_sec + (float)start_time.tv_nsec / 1.e9);
-	fprintf(timing_stream, "end_time: %f\n", end_time.tv_sec + (float)end_time.tv_nsec / 1.e9);
 	fclose(timing_stream);
 
 	printf("Stopping record\n");
