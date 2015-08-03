@@ -198,7 +198,6 @@ void* proc_queue(void* args) {
 	int frame_len = pargs->frame_len;
 	FILE* data_stream;
 	char buff[256];
-	float fbuf[frame_len];
 	int frame_num;
 	uint64_t num_samples = 0;
 	int file_num = 0;
@@ -235,11 +234,7 @@ void* proc_queue(void* args) {
 			data_ptr = (char*) queue_pop(&data_queue);
 			pthread_mutex_unlock(&lock);
 
-			for (int i = 0; i < frame_len; i++) {
-				fbuf[i] = (float)data_ptr[i] / 128.0 - 1.0;
-			}
-
-			fwrite(fbuf, sizeof(float), frame_len, data_stream);
+			fwrite(data_ptr, sizeof(char), frame_len, data_stream);
 
 			free(data_ptr);
 			frame_num++;
