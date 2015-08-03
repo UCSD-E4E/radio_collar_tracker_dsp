@@ -232,7 +232,7 @@ void* proc_queue(void* args) {
 					fclose(data_stream);
 				}
 				snprintf(buff, sizeof(buff),
-				         "/media/RAW_DATA/rct/RAW_DATA_%06d_%06d", run_num,
+				         "%s/RAW_DATA_%06d_%06d",DATA_DIR, run_num,
 				         frame_num / FRAMES_PER_FILE + 1);
 				printf("File: %s\n", buff);
 				file_num++;
