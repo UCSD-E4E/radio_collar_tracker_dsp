@@ -19,7 +19,7 @@
 // Global constants
 #define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	50
 #define FRAMES_PER_FILE	80
-#define DATA_DIR "/media/RAW_DATA/rct/"
+#define DATA_DIR "/media/RAW_DATA/test/"
 #define META_PREFIX "META_"
 
 // Typedefs
@@ -239,8 +239,8 @@ void* proc_queue(void* args) {
 				data_stream = fopen(buff, "wb");
 			}
 			lock_mutex();
-			char* data_ptr = NULL;
-			data_ptr = (char*) queue_pop(&data_queue);
+			unsigned char* data_ptr = NULL;
+			data_ptr = (unsigned char*) queue_pop(&data_queue);
 			pthread_mutex_unlock(&lock);
 
 			for(int i = 0; i < frame_len; i++){
@@ -269,7 +269,7 @@ static void rtlsdr_callback(unsigned char* buf, uint32_t len, void *ctx) {
 		return;
 	}
 	num_samples += len / 2;
-	char* newframe = malloc(len * sizeof(char));
+	unsigned char* newframe = malloc(len * sizeof(char));
 	for(int i = 0; i < len; i++){
 		newframe[i] = buf[i];
 	}
