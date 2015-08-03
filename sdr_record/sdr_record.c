@@ -252,7 +252,6 @@ void* proc_queue(void* args) {
 static void rtlsdr_callback(unsigned char* buf, uint32_t len, void *ctx) {
 	counter++;
 	if (counter > 1000) {
-		sighandler(0);
 	}
 	if (!run) {
 		return;
