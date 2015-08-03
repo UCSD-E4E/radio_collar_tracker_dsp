@@ -19,6 +19,8 @@
 // Global constants
 #define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	50
 #define FRAMES_PER_FILE	80
+#define DATA_DIR "/media/RAW_DATA/rct/"
+#define META_PREFIX "META_"
 
 // Typedefs
 struct proc_queue_args {
@@ -172,6 +174,15 @@ int main(int argc, char** argv) {
 	rtlsdr_read_async(dev, rtlsdr_callback, (void*) &data_queue, 0, block_size);
 	// clean up
 	clock_gettime(CLOCK_REALTIME, &end_time);
+
+	// Add timing data
+	char buf[256];
+	snprintf(buf, sizeof(buf), "%s/%s%6d", DATA_DIR, META_PREFIX, run_num);
+	FILE* timing_stream = fopen(buf, "w");
+	fprintf(timing_stream, "start_time: %f\n", start_time.tv_sec + (float)start_time.tv_nsec / 1.e9);
+	fprintf(timing_stream, "end_time: %f\n", end_time.tv_sec + (float)end_time.tv_nsec / 1.e9);
+	fclose(timing_stream);
+
 	printf("Stopping record\n");
 	printf("Queued %f seconds of data\n", num_samples / 2048000.0);
 	pthread_join(thread_id, NULL);
