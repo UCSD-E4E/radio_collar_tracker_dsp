@@ -208,6 +208,8 @@ void* proc_queue(void* args) {
 	uint64_t num_samples = 0;
 	int file_num = 0;
 
+	uint8_t data_buf[frame_len];
+
 	frame_num = 0;
 	// Lock mutex
 	bool empty = true;
@@ -240,7 +242,10 @@ void* proc_queue(void* args) {
 			data_ptr = (char*) queue_pop(&data_queue);
 			pthread_mutex_unlock(&lock);
 
-			fwrite(data_ptr, sizeof(char), frame_len, data_stream);
+			for(int i = 0; i < frame_len; i++){
+				data_buf[i] = (uint8_t)data_ptr[i];
+			}
+			fwrite(data_buf, sizeof(uint8_t), frame_len, data_stream);
 
 			free(data_ptr);
 			frame_num++;
