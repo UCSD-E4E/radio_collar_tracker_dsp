@@ -16,6 +16,7 @@ clean:
 	-rm -rf fopentest
 	-rm -rf rtl_sdr
 	-rm -rf maxmin
+	-rm -rf sample_mag
 
 sdr_record.o: sdr_record.c queue.h
 	gcc sdr_record.c $(CFLAGS) 
