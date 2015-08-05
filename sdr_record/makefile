@@ -35,10 +35,6 @@ switch_iq: switch_iq.c
 	gcc switch_iq.c $(CFLAGS)
 	gcc switch_iq.o $(LFLAGS) -o switch_iq
 
-fopentest: fopentest.c
-	gcc fopentest.c $(CFLAGS)
-	gcc fopentest.o $(LFLAGS) -o fopentest
-
 rtl_sdr: rtl_sdr.c convenience.h convenience.c
 	gcc rtl_sdr.c convenience.c $(CFLAGS)
 	gcc rtl_sdr.o convenience.o $(LFLAGS) -o rtl_sdr
