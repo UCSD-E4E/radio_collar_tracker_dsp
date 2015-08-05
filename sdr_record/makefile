@@ -15,6 +15,7 @@ clean:
 	-rm -rf switch_iq
 	-rm -rf fopentest
 	-rm -rf rtl_sdr
+	-rm -rf maxmin
 
 sdr_record.o: sdr_record.c queue.h
 	gcc sdr_record.c $(CFLAGS) 
@@ -43,3 +44,6 @@ rtl_sdr: rtl_sdr.c convenience.h convenience.c
 
 sample_mag: sample_mag.c
 	gcc -std=gnu99 sample_mag.c -o sample_mag -lm
+
+maxmin: maxmin.c
+	gcc -std=gnu99 maxmin.c -o maxmin
