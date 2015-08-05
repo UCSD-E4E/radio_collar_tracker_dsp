@@ -37,7 +37,7 @@ int main(int argc, char** argv){
 	while((nread = fread((void*)buf, sizeof(uint8_t), 4096, infile)) > 0){
 		totread += nread;
 		for(int i = 0; i < nread; i++){
-			fbuf[i] = (float)((float)buf[i] / 128.0 - 1.0);
+			fbuf[i] = (float)((float)buf[i] -128.0)/128.0;
 		}
 		int retval = fwrite(fbuf, sizeof(float), nread, outfile);
 		if(retval != nread){
