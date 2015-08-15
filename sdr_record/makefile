@@ -1,6 +1,6 @@
-CFLAGS=-c -std=gnu99 -Wall -g -pg
+CFLAGS=-c -std=gnu99 -Wall -g
 CPPFLAGS=-c -std=c++11 -Wall -g
-LFLAGS=`pkg-config --cflags --libs librtlsdr` -pthread -lrt -pg
+LFLAGS=`pkg-config --cflags --libs librtlsdr` -pthread -lrt
 .PHONY: clean test
 
 sdr_record: sdr_record.o queue.o
@@ -17,9 +17,10 @@ clean:
 	-rm -rf rtl_sdr
 	-rm -rf maxmin
 	-rm -rf sample_mag
+	-rm -rf gmon.out
 
 sdr_record.o: sdr_record.c queue.h
-	gcc sdr_record.c $(CFLAGS) 
+	gcc sdr_record.c $(CFLAGS)
 
 queue.o: queue.c
 	gcc queue.c $(CFLAGS)
