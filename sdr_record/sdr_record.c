@@ -19,7 +19,6 @@
 // Global constants
 #define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	50
 #define FRAMES_PER_FILE	80
-#define DATA_DIR "/media/RAW_DATA/test/"
 #define META_PREFIX "META_"
 
 // Typedefs
@@ -35,6 +34,7 @@ pthread_mutex_t lock;
 queue data_queue;
 int counter = 0;
 static uint64_t num_samples = 0;
+char* DATA_DIR = "/media/RAW_DATA/test/";
 
 // Function Prototypes
 void sighandler(int signal);
@@ -42,6 +42,15 @@ int main(int argc, char** argv);
 void* proc_queue(void* args);
 static void rtlsdr_callback(unsigned char* buf, uint32_t len, void *ctx);
 void lock_mutex();
+void printUsage();
+
+/**
+ * Prints the usage statement for this program.
+ */
+void printUsage(){
+	printf("usage: sdr_record [-h] [-g <gain>] [-s <sampling_frequency>]\n\t"
+		"[-f <center_frequency>] [-r <run_number>] [-o <output_dir>]\n");
+}
 
 /**
  * Main function of this program.
@@ -56,8 +65,6 @@ int main(int argc, char** argv) {
 	int samp_freq = 2048000;
 	// Center Frequency for SDR in Hz
 	int center_freq = 172464000;
-	// Nominal pulse period in m
-	int pulse_per = 1500;
 	// Run number
 	int run_num = -1;
 	// Block size
@@ -73,8 +80,11 @@ int main(int argc, char** argv) {
 
 	// Get command line options
 	printf("Getting command line options\n");
-	while ((opt = getopt(argc, argv, "g:s:f:r:P:")) != -1) {
+	while ((opt = getopt(argc, argv, "hg:s:f:r:o:")) != -1) {
 		switch (opt) {
+			case 'h':
+				printUsage();
+				exit(0);
 			case 'g':
 				gain = (int)(atof(optarg) * 10);
 				break;
@@ -87,22 +97,21 @@ int main(int argc, char** argv) {
 			case 'r':
 				run_num = (int)(atof(optarg));
 				break;
-			case 'P':
-				pulse_per = (int)(atof(optarg));
+			case 'o':
+				DATA_DIR = optarg;
 				break;
 		}
 	}
 	if (run_num == -1) {
 		// TODO: add usage notification here!
 		fprintf(stderr, "Bad RUN number!\n");
+		printUsage();
 		exit(-1);
 	}
 	printf("done\n");
 
 	// Initialize environment
 	printf("Configuring environment\n");
-	// TODO Fix this
-	block_size = (int)(pulse_per / 1000.0 * 2 * samp_freq);
 	block_size = 262144;
 	queue_init(&data_queue);
 	printf("Done configuring environment\n");
