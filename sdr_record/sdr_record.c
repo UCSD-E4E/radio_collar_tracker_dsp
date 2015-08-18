@@ -47,9 +47,9 @@ void printUsage();
 /**
  * Prints the usage statement for this program.
  */
-void printUsage(){
+void printUsage() {
 	printf("usage: sdr_record [-h] [-g <gain>] [-s <sampling_frequency>]\n\t"
-		"[-f <center_frequency>] [-r <run_number>] [-o <output_dir>]\n");
+	       "[-f <center_frequency>] [-r <run_number>] [-o <output_dir>]\n");
 }
 
 /**
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 	struct proc_queue_args pargs;
 
 	// Get command line options
-	printf("Getting command line options\n");
+	// printf("Getting command line options\n");
 	while ((opt = getopt(argc, argv, "hg:s:f:r:o:")) != -1) {
 		switch (opt) {
 			case 'h':
@@ -104,28 +104,28 @@ int main(int argc, char** argv) {
 	}
 	if (run_num == -1) {
 		// TODO: add usage notification here!
-		fprintf(stderr, "Bad RUN number!\n");
+		fprintf(stderr, "ERROR: Bad RUN number!\n");
 		printUsage();
 		exit(-1);
 	}
-	printf("done\n");
+	// printf("done\n");
 
 	// Initialize environment
-	printf("Configuring environment\n");
+	// printf("Configuring environment\n");
 	block_size = 262144;
 	queue_init(&data_queue);
-	printf("Done configuring environment\n");
+	// printf("Done configuring environment\n");
 
 	// Open SDR
-	printf("Opening SDR\n");
+	// printf("Opening SDR\n");
 	if (rtlsdr_open(&dev, 0)) {
-		fprintf(stderr, "Failed to open rtlsdr device\n");
+		fprintf(stderr, "ERROR: Failed to open rtlsdr device\n");
 		exit(1);
 	}
-	printf("SDR Opened\n");
+	// printf("SDR Opened\n");
 
 	// Configure SDR
-	printf("Configuring SDR\n");
+	// printf("Configuring SDR\n");
 	if (rtlsdr_set_tuner_gain_mode(dev, 1)) {
 		fprintf(stderr, "ERROR: Failed to enable manual gain.\n");
 		exit(1);
@@ -146,16 +146,16 @@ int main(int argc, char** argv) {
 		fprintf(stderr, "ERROR: Failed to reset buffers.\n");
 		exit(1);
 	}
-	printf("SDR Configured.\n");
+	// printf("SDR Configured.\n");
 
 	// Configure signal handlers
-	printf("Configuring signal handlers.\n");
+	// printf("Configuring signal handlers.\n");
 	signal(SIGINT, sighandler);
 	signal(SIGTERM, sighandler);
-	printf("Signal handlers configured\n");
+	// printf("Signal handlers configured\n");
 
 	// Configure worker thread
-	printf("Configuring worker thread\n");
+	// printf("Configuring worker thread\n");
 	if (pthread_attr_init(&attr)) {
 		fprintf(stderr, "ERROR: Failed to create default thread attributes.\n");
 		exit(1);
@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
 		fprintf(stderr, "ERROR: Failed to create detached thread.\n");
 		exit(1);
 	}
-	printf("Worker thread configured\n");
+	// printf("Worker thread configured\n");
 
 	// Get timestamp
 	printf("Starting record\n");
@@ -178,7 +178,8 @@ int main(int argc, char** argv) {
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s/%s%06d", DATA_DIR, META_PREFIX, run_num);
 	FILE* timing_stream = fopen(buf, "w");
-	fprintf(timing_stream, "start_time: %f\n", start_time.tv_sec + (float)start_time.tv_nsec / 1.e9);
+	fprintf(timing_stream, "start_time: %f\n",
+	        start_time.tv_sec + (float)start_time.tv_nsec / 1.e9);
 	fclose(timing_stream);
 
 	printf("Stopping record\n");
@@ -192,7 +193,7 @@ int main(int argc, char** argv) {
  * and notifies all threads to finish execution.
  */
 void sighandler(int signal) {
-	printf("Signal caught, exiting\n");
+	// printf("Signal caught, exiting\n");
 	run = 0;
 	rtlsdr_cancel_async(dev);
 }
@@ -222,7 +223,7 @@ void* proc_queue(void* args) {
 
 
 	while (run || !empty) {
-		printf("RUN: %d\tLENGTH: %d\n", run, data_queue.length);
+		// printf("RUN: %d\tLENGTH: %d\n", run, data_queue.length);
 		lock_mutex();
 		empty = queue_isEmpty(&data_queue);
 		pthread_mutex_unlock(&lock);
@@ -234,9 +235,9 @@ void* proc_queue(void* args) {
 					fclose(data_stream);
 				}
 				snprintf(buff, sizeof(buff),
-						"%s/RAW_DATA_%06d_%06d",DATA_DIR, run_num,
-						frame_num / FRAMES_PER_FILE + 1);
-				printf("File: %s\n", buff);
+				         "%s/RAW_DATA_%06d_%06d", DATA_DIR, run_num,
+				         frame_num / FRAMES_PER_FILE + 1);
+				// printf("File: %s\n", buff);
 				file_num++;
 				data_stream = fopen(buff, "wb");
 			}
@@ -245,7 +246,7 @@ void* proc_queue(void* args) {
 			data_ptr = (unsigned char*) queue_pop(&data_queue);
 			pthread_mutex_unlock(&lock);
 
-			for(int i = 0; i < frame_len; i++){
+			for (int i = 0; i < frame_len; i++) {
 				data_buf[i] = (uint8_t)data_ptr[i];
 			}
 			fwrite(data_buf, sizeof(uint8_t), frame_len, data_stream);
@@ -272,7 +273,7 @@ static void rtlsdr_callback(unsigned char* buf, uint32_t len, void *ctx) {
 	}
 	num_samples += len / 2;
 	unsigned char* newframe = malloc(len * sizeof(char));
-	for(int i = 0; i < len; i++){
+	for (int i = 0; i < len; i++) {
 		newframe[i] = buf[i];
 	}
 	pthread_mutex_lock(&lock);

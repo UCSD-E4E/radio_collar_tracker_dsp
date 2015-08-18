@@ -26,7 +26,11 @@ queue.o: queue.c
 	gcc queue.c $(CFLAGS)
 
 test: sdr_record
-	./sdr_record -r 1
+	-mkdir test
+	./sdr_record -r 1 -o test &
+	sleep 5
+	sudo killall sdr_record
+	sleep .5
 
 raw_data_to_complex: raw_data_to_complex.c
 	gcc raw_data_to_complex.c $(CFLAGS)
