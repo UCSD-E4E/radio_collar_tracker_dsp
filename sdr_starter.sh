@@ -54,7 +54,7 @@ mavproxypid=$!
 
 sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &
 sdr_record_pid=$!
-trap "kill -9 $mavproxypid; kill -9 $sdr_record_pid; rm gps_logger_args; exit 0" SIGINT SIGTERM
+trap "kill -s SIGINT $mavproxypid; kill -s SIGINT $sdr_record_pid; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
 while :
 do
 	sleep 1
