@@ -21,7 +21,7 @@ gpsPrefix = argfile.readline().strip()
 gpsSuffix = argfile.readline().strip()
 runNum = int(argfile.readline().strip())
 
-logfile = open("%s/%s%d" % (dataDir, gpsPrefix, runNum), "w")
+logfile = open("%s/%s%06d" % (dataDir, gpsPrefix, runNum), "w")
 
 # connect to MAV
 mavmaster = mavutil.mavlink_connection("/dev/ttyACM0", 57600)
