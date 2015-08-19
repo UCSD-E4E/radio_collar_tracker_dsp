@@ -49,12 +49,12 @@ echo $output > gps_logger_args
 echo "GPS_" >> gps_logger_args
 echo "" >> gps_logger_args
 echo $run >> gps_logger_args
-mavproxy.py &
+gps_logger/gps_logger.py &
 mavproxypid=$!
 
-#sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &
-#sdr_record_pid=$!
-trap "kill -9 $mavproxypid; kill -9 $sdr_record_pid; exit 0" SIGINT SIGTERM
+sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &
+sdr_record_pid=$!
+trap "kill -9 $mavproxypid; kill -9 $sdr_record_pid; rm gps_logger_args; exit 0" SIGINT SIGTERM
 while :
 do
 	sleep 1

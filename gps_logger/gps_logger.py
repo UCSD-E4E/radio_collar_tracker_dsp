@@ -6,10 +6,13 @@
 #               prefix:         GPS_
 #               suffix:         
 #               runNum:         1
-from droneapi.lib import VehicleMode
 from pymavlink import mavutil
 import time
 import argparse
+import signal
+
+global runstate
+runstate = True
 
 argfile = open("gps_logger_args", "r")
 dataDir = argfile.readline().strip()
@@ -17,16 +20,33 @@ gpsPrefix = argfile.readline().strip()
 gpsSuffix = argfile.readline().strip()
 runNum = int(argfile.readline().strip())
 
-
-api = local_connect()
-v = api.get_vehicles()[0]
-
 logfile = open("%s/%s%d" % (dataDir, gpsPrefix, runNum), "w")
+
+# connect to MAV
+mavmaster = mavutil.mavlink_connection("/dev/ttyACM0", 57600)
+mavmaster.wait_heartbeat()
+mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
+        mavmaster.target_component, mavutil.mavlink.MAV_DATA_STREAM_POSITION,
+        10, 1)
+
+def handler(signum, frame):
+    global runstate
+    runstate = False
+
+
+signal.signal(signal.SIGINT, handler)
 
 print "Running"
 
-while True:
-    if v.location.lat is not None and v.location.lon is not None:
-    	logfile.write("%.3f, %f, %f\n" % (round(time.time()) / 1000.0, float(v.location.lat), float(v.location.lon)))
+
+
+while runstate:
+    msg = mavmaster.recv_match(blocking=False)
+    if msg is not None:
+        if msg.get_type() == 'GLOBAL_POSITION_INT':
+    	    logfile.write("%.3f, %d, %d\n" % (time.time(), 
+                msg.lat, msg.lon))
     time.sleep(0.5)
+print("Ending thread")
+logfile.close()
 
