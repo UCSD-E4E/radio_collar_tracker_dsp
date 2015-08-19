@@ -32,7 +32,7 @@ if [[ "$run" -ne $run ]]; then
 fi
 
 if [[ $run -eq -1 ]]; then
-	run=`fileCount $output`
+	run=`./getRunNum.py $output`
 fi
 
 if [[ "$freq" -ne $freq ]]; then
