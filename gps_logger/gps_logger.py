@@ -12,6 +12,7 @@ import argparse
 import signal
 
 global runstate
+print("GPS_LOGGER: Started")
 runstate = True
 
 argfile = open("gps_logger_args", "r")
@@ -25,6 +26,7 @@ logfile = open("%s/%s%d" % (dataDir, gpsPrefix, runNum), "w")
 # connect to MAV
 mavmaster = mavutil.mavlink_connection("/dev/ttyACM0", 57600)
 mavmaster.wait_heartbeat()
+print("GPS_LOGGER: Connected")
 mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
         mavmaster.target_component, mavutil.mavlink.MAV_DATA_STREAM_POSITION,
         10, 1)
@@ -36,7 +38,7 @@ def handler(signum, frame):
 
 signal.signal(signal.SIGINT, handler)
 
-print "Running"
+print("GPS_LOGGER: Running")
 
 
 
@@ -47,6 +49,6 @@ while runstate:
     	    logfile.write("%.3f, %d, %d\n" % (time.time(), 
                 msg.lat, msg.lon))
     time.sleep(0.5)
-print("Ending thread")
+print("GPS_LOGGER: Ending thread")
 logfile.close()
 
