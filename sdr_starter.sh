@@ -5,8 +5,9 @@ freq=172464000
 gain="19.7"
 output="/media/RAW_DATA/rct/"
 sampling_freq=2048000
+port="/dev/ttyACM0"
 
-while getopts "r:f:g:o:s:" opt; do
+while getopts "r:f:g:o:s:p:" opt; do
 	case $opt in
 		r)
 			run=$OPTARG
@@ -22,6 +23,9 @@ while getopts "r:f:g:o:s:" opt; do
 			;;
 		s)
 			sampling_freq=$OPTARG
+			;;
+		p)
+			port=$OPTARG
 			;;
 	esac
 done
@@ -49,6 +53,7 @@ echo $output > gps_logger_args
 echo "GPS_" >> gps_logger_args
 echo "" >> gps_logger_args
 echo $run >> gps_logger_args
+echo $port >> gps_logger_args
 gps_logger/gps_logger.py &
 mavproxypid=$!
 

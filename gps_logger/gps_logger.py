@@ -20,11 +20,12 @@ dataDir = argfile.readline().strip()
 gpsPrefix = argfile.readline().strip()
 gpsSuffix = argfile.readline().strip()
 runNum = int(argfile.readline().strip())
+port = argfile.readline().strip()
 
 logfile = open("%s/%s%06d" % (dataDir, gpsPrefix, runNum), "w")
 
 # connect to MAV
-mavmaster = mavutil.mavlink_connection("/dev/ttyACM0", 57600)
+mavmaster = mavutil.mavlink_connection(port, 57600)
 mavmaster.wait_heartbeat()
 print("GPS_LOGGER: Connected")
 mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
