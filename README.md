@@ -40,5 +40,5 @@ Installing sdr_record
 
 Running sdr_record
 ==================
-usage: sdr_starter.sh [-r <runNum>] [-f <center_frequency>] [-g <sdr_gain>]
-[-o <output_directory>] [-s <sampling_frequency>] [-p <autopilot_serial_port>]
+usage: `sdr_starter.sh [-r <runNum>] [-f <center_frequency>] [-g <sdr_gain>]
+[-o <output_directory>] [-s <sampling_frequency>] [-p <autopilot_serial_port>]`
