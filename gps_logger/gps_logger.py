@@ -28,7 +28,8 @@ logfile = open("%s/%s%06d" % (dataDir, gpsPrefix, runNum), "w")
 mavmaster = mavutil.mavlink_connection(port, 57600)
 mavmaster.wait_heartbeat()
 print("GPS_LOGGER: Connected")
-mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
+# TODO fix in later version
+#mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
         mavmaster.target_component, mavutil.mavlink.MAV_DATA_STREAM_POSITION,
         10, 1)
 
