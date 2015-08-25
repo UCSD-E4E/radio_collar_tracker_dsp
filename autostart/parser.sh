@@ -23,3 +23,5 @@ while $run; do
 	fi
 done
 echo low > $led_dir/direction
+kill -s SIGINT $mavproxypid
+kill -s SIGINT $sdr_starterpid

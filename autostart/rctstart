@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides: rctstart
+# Provides: rctstart RAW_DATA
 # Required-Start: $portmap $time $remote_fs
 # Required-Stop:
 # Default-Start: 2 3 4 5
