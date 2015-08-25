@@ -12,11 +12,11 @@ PI_uninstall:
 	-rm /etc/init.d/rctstart
 
 BBB_install: sdr_record/sdr_record autostart/rctstart gps_logger/gps_logger.py autostart/parser.sh getRunNum.py
+	cp autostart/mount_RAW_DATA /etc/init.d/
+	update-rc.d mount_RAW_DATA defaults
 	cp autostart/rctstart /etc/init.d/
 	update-rc.d rctstart defaults
 	-mkdir /media/RAW_DATA/
-	cp autostart/mount_RAW_DATA /etc/init.d/
-	update-rc.d mount_RAW_DATA defaults
 	
 BBB_uninstall:
 	-update-rc.d rctstart remove
