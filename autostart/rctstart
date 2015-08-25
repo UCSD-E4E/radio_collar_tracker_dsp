@@ -25,7 +25,7 @@ fi
 
 echo $switch_num > /sys/class/gpio/export
 stateVal="startWait"
-echo "$timestamp: Starting..." >> $log
+echo "$(timestamp): Starting..." >> $log
 while true
 do
 	case $stateVal in
@@ -36,14 +36,14 @@ do
 				sleep 3
 				switchVal=`cat $switch_dir/value`
 			done
-			echo "$timestamp: Received start signal!" >> $log
+			echo "$(timestamp): Received start signal!" >> $log
 			stateVal="startgo"
 			;;
 		"startgo" )
 		# State 2 - go for start, initialize
 			/home/pi/radio_collar_tracker/sdr_starter.sh &
 			sdr_starter_pid=$!
-			echo "$timestamp: Started program!" >> $log
+			echo "$(timestamp): Started program!" >> $log
 			stateVal="endWait"
 			;;
 		"endWait" )
@@ -52,13 +52,13 @@ do
 				sleep 3
 				switchVal=`cat $switch_dir/value`
 			done
-			echo "$timestamp: Received stop signal!" >> $log
+			echo "$(timestamp): Received stop signal!" >> $log
 			stateVal="endgo"
 			;;
 		"endgo" )
 			/bin/kill -s TERM $sdr_starter_pid
 			# killall ct -s INT
-			echo "$timestamp: Ended program!" >> $log
+			echo "$(timestamp): Ended program!" >> $log
 			stateVal="startWait"
 			;;
 	esac
