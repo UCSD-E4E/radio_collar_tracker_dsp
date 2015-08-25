@@ -60,8 +60,9 @@ mavproxypid=$!
 /home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &
 sdr_record_pid=$!
 
-trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record_pid; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
 /home/pi/radio_collar_tracker/autostart/parser.sh $mavproxypid $sdr_record_pid
+parser_pid=$!
+trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record_pid; /bin/kill -s SIGINT $parser_pid; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
 while :
 do
 	sleep 1
