@@ -41,7 +41,7 @@ while True:
         break
     fail_counter += 1
     if fail_counter > 1000:
-        print("GPS_LOGGER: ERROR: Timeout connectin!")
+        print("GPS_LOGGER: ERROR: Timeout connecting!")
         sys.exit(1)
     sleep(0.005)
 
