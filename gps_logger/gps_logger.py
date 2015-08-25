@@ -13,6 +13,13 @@ import signal
 import sys
 from time import sleep
 
+def handler(signum, frame):
+    global runstate
+    runstate = False
+
+
+signal.signal(signal.SIGINT, handler)
+
 global runstate
 print("GPS_LOGGER: Started")
 runstate = True
@@ -43,13 +50,6 @@ print("GPS_LOGGER: Connected")
 #mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
 #        mavmaster.target_component, mavutil.mavlink.MAV_DATA_STREAM_POSITION,
 #        10, 1)
-
-def handler(signum, frame):
-    global runstate
-    runstate = False
-
-
-signal.signal(signal.SIGINT, handler)
 
 print("GPS_LOGGER: Running")
 
