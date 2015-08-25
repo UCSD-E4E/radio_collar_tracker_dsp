@@ -1,4 +1,10 @@
 #!/bin/sh
+### BEGIN INIT INFO
+# Required-Start: $portmap $time $remote_fs
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start radio collar tracker payload on switch
+### END INIT INFO
 # setup here
 switch_num="4"
 
