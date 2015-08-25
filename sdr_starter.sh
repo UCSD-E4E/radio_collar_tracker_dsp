@@ -3,7 +3,7 @@ OPTIND=1
 run=-1
 freq=172464000
 gain="19.7"
-output="/usr/pi/rct/"
+output="/home/pi/rct/"
 sampling_freq=2048000
 port="/dev/ttyAMA0"
 
@@ -36,7 +36,7 @@ if [[ "$run" -ne $run ]]; then
 fi
 
 if [[ $run -eq -1 ]]; then
-	run=`./getRunNum.py $output`
+	run=`/home/pi/radio_collar_tracker/getRunNum.py $output`
 fi
 
 if [[ "$freq" -ne $freq ]]; then
@@ -54,12 +54,21 @@ echo "GPS_" >> gps_logger_args
 echo "" >> gps_logger_args
 echo $run >> gps_logger_args
 echo $port >> gps_logger_args
-gps_logger/gps_logger.py &
+/home/pi/radio_collar_tracker/gps_logger/gps_logger.py &
 mavproxypid=$!
 
-sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &
+/home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &
 sdr_record_pid=$!
-trap "kill -s SIGINT $mavproxypid; kill -s SIGINT $sdr_record_pid; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
+echo "sdr_record options"
+echo $gain
+echo $sampling_freq
+echo $freq
+echo $run
+echo $output
+echo "end opt"
+
+trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record_pid; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
+/home/pi/radio_collar_tracker/autostart/parser.sh $mavproxypid $sdr_record_pid
 while :
 do
 	sleep 1

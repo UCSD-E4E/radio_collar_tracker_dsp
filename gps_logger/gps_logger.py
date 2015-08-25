@@ -10,6 +10,15 @@ from pymavlink import mavutil
 import time
 import argparse
 import signal
+import sys
+from time import sleep
+
+def handler(signum, frame):
+    global runstate
+    runstate = False
+
+
+signal.signal(signal.SIGINT, handler)
 
 global runstate
 print("GPS_LOGGER: Started")
@@ -26,19 +35,21 @@ logfile = open("%s/%s%06d" % (dataDir, gpsPrefix, runNum), "w")
 
 # connect to MAV
 mavmaster = mavutil.mavlink_connection(port, 57600)
-mavmaster.wait_heartbeat()
+fail_counter = 0
+while True:
+    if mavmaster.wait_heartbeat(blocking=False) is not None:
+        break
+    fail_counter += 1
+    if fail_counter > 1000:
+        print("GPS_LOGGER: ERROR: Timeout connectin!")
+        sys.exit(1)
+    sleep(0.005)
+
 print("GPS_LOGGER: Connected")
 # TODO fix in later version
 #mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
 #        mavmaster.target_component, mavutil.mavlink.MAV_DATA_STREAM_POSITION,
 #        10, 1)
-
-def handler(signum, frame):
-    global runstate
-    runstate = False
-
-
-signal.signal(signal.SIGINT, handler)
 
 print("GPS_LOGGER: Running")
 

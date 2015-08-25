@@ -1,47 +1,25 @@
 #!/bin/bash
-if [ ! -e /sys/class/gpio/gpio60 ]
+mavproxypid=$1
+sdr_starterpid=$2
+
+led_num="17"
+
+led_dir="/sys/class/gpio/gpio$led_num"
+if [ ! -e $led_dir ]
     then
-    echo 60 > /sys/class/gpio/export
+    echo $led_num > /sys/class/gpio/export
 fi
 run=true
 while $run; do
+	echo high > $led_dir/direction
 	sleep 0.5
-	read line
-	retval=$?
-	if [ "$retval" = "1" ]
-        then	# EOF reached.  Normal end
-        # echo "Found EOF, waiting..."
-        sleep 2
-        read line
-        retval=$?
-        if [ "$retval" = "1" ]
-        	then	# EOF reached, no change for 2 seconds!
-	        echo "Error! TIMEOUT! REBOOT!"
-			echo low > /sys/class/gpio/gpio60/direction
-			run=false;
-			killall collarTracker -s INT
-			# reboot
-		fi
+	if ! ps -p $mavproxypid > /dev/null
+	then
+		run=false
 	fi
-	if [ "$retval" = "0" ]
-		echo $line
-        then
-		if [ "$(echo $line | grep Frame | wc -l)" != "0" ]
-            then
-            # echo "Got Frame!"
-			echo high > /sys/class/gpio/gpio60/direction
-		fi
-		if [ "$(echo $line | grep SIGINT | wc -l)" = "1" ]
-            then
-            # echo "Got SIGINT!, exiting..."
-			echo low > /sys/class/gpio/gpio60/direction
-			run=false;
-		fi
-		if [ "$(echo $line | grep GPS | wc -l)" = "1" ]
-            then
-            # echo "Got GPS!"
-			echo high > /sys/class/gpio/gpio60/direction
-		fi
+	if ! ps -p $sdr_starterpid > /dev/null
+	then
+		run=false
 	fi
 done
-echo low > /sys/class/gpio/gpio60/direction
+echo low > $led_dir/direction
