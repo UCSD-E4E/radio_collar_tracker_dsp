@@ -23,4 +23,4 @@ BBB_uninstall:
 	update-rc.d mount_RAW_DATA remove
 	rm /etc/init.d/rctstart
 	rm /etc/init.d/mount_RAW_DATA
-	rm /media/RAW_DATA
+	rmdir /media/RAW_DATA
