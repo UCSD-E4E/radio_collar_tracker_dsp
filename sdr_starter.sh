@@ -56,10 +56,13 @@ echo $run >> gps_logger_args
 echo $port >> gps_logger_args
 gps_logger/gps_logger.py &
 mavproxypid=$!
+echo $mavproxypid
 
 sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &
 sdr_record_pid=$!
+echo $sdr_record_pid
 trap "kill -s SIGINT $mavproxypid; kill -s SIGINT $sdr_record_pid; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
+autostart/parser.sh $mavproxypid $sdr_record_pid
 while :
 do
 	sleep 1
