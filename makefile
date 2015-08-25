@@ -19,8 +19,8 @@ BBB_install: sdr_record/sdr_record autostart/rctstart gps_logger/gps_logger.py a
 	update-rc.d mount_RAW_DATA defaults
 	
 BBB_uninstall:
-	update_rc.d rctstart remove
-	update_rc.d mount_RAW_DATA remove
+	update-rc.d rctstart remove
+	update-rc.d mount_RAW_DATA remove
 	rm /etc/init.d/rctstart
 	rm /etc/init.d/mount_RAW_DATA
 	rm /media/RAW_DATA
