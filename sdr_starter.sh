@@ -69,18 +69,18 @@ mavproxypid=$!
 sdr_record_pid=$!
 
 trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record_pid; echo low > $led_dir/direction; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
-run=1
+run=true
 while $run
 do
 	sleep 1
 	echo high > $led_dir/direction
 	if ! ps -p $mavproxypid > /dev/null
 	then
-		run=0
+		run=false
 	fi
 	if ! ps -p $sdr_record_pid > /dev/null
 	then
-		run=0
+		run=false
 	fi
 done
 echo low > $led_dir/direction
