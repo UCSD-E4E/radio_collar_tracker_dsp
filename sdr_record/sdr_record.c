@@ -180,6 +180,9 @@ int main(int argc, char** argv) {
 	FILE* timing_stream = fopen(buf, "w");
 	fprintf(timing_stream, "start_time: %f\n",
 	        start_time.tv_sec + (float)start_time.tv_nsec / 1.e9);
+	fprintf(timing_stream, "center_freq: %d\n", center_freq);
+	fprintf(timing_stream, "sampling_freq: %d\n", samp_freq);
+	fprintf(timing_stream, "gain: %f\n", gain / 10.0);
 	fclose(timing_stream);
 
 	printf("Stopping record\n");
