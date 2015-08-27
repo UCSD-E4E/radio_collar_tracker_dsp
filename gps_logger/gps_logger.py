@@ -46,10 +46,9 @@ while True:
     sleep(0.005)
 
 print("GPS_LOGGER: Connected")
-# TODO fix in later version
-#mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
-#        mavmaster.target_component, mavutil.mavlink.MAV_DATA_STREAM_POSITION,
-#        10, 1)
+mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
+        mavmaster.target_component, mavutil.mavlink.MAV_DATA_STREAM_POSITION,
+        10, 1)
 
 print("GPS_LOGGER: Running")
 
