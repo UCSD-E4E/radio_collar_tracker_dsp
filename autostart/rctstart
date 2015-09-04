@@ -59,6 +59,9 @@ do
 			/bin/kill -s TERM $sdr_starter_pid
 			# killall ct -s INT
 			echo "$(timestamp): Ended program!" >> $log
+			echo "$(timestamp): Begin dmesg dump" >> $log
+			dmesg >> $log
+			echo "$(timestamp): end dmesg dump" >> $log
 			stateVal="startWait"
 			;;
 	esac
