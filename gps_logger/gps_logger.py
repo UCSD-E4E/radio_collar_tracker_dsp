@@ -60,7 +60,6 @@ while runstate:
         if msg.get_type() == 'GLOBAL_POSITION_INT':
     	    logfile.write("%.3f, %d, %d\n" % (time.time(), 
                 msg.lat, msg.lon))
-    time.sleep(0.5)
 print("GPS_LOGGER: Ending thread")
 logfile.close()
 
