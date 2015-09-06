@@ -108,6 +108,7 @@ int main(int argc, char** argv) {
 		printUsage();
 		exit(-1);
 	}
+	printf("SDR_RECORD: Run Number %d\n", run_num);
 	// printf("done\n");
 
 	// Initialize environment
@@ -196,7 +197,7 @@ int main(int argc, char** argv) {
  * and notifies all threads to finish execution.
  */
 void sighandler(int signal) {
-	// printf("Signal caught, exiting\n");
+	printf("Signal caught, exiting\n");
 	run = 0;
 	rtlsdr_cancel_async(dev);
 }
