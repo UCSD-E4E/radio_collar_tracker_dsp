@@ -8,6 +8,7 @@ sampling_freq=2048000
 port="/dev/ttyAMA0"
 led_num=17
 sdr_log="/home/pi/sdr_log.log"
+gps_log="/home/pi/gps_log.log"
 
 
 led_dir="/sys/class/gpio/gpio$led_num"
@@ -63,7 +64,7 @@ echo "GPS_" >> gps_logger_args
 echo "" >> gps_logger_args
 echo $run >> gps_logger_args
 echo $port >> gps_logger_args
-/home/pi/radio_collar_tracker/gps_logger/gps_logger.py &
+/home/pi/radio_collar_tracker/gps_logger/gps_logger.py >> $gps_log&
 mavproxypid=$!
 
 /home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output >> $sdr_log&
