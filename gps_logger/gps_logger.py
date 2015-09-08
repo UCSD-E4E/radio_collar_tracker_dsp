@@ -55,7 +55,7 @@ print("GPS_LOGGER: Running")
 
 
 while runstate:
-    msg = mavmaster.recv_match(blocking=False)
+    msg = mavmaster.recv_match(blocking=True)
     if msg is not None:
         if msg.get_type() == 'GLOBAL_POSITION_INT':
     	    logfile.write("%.3f, %d, %d\n" % (time.time(), 
