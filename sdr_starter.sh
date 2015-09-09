@@ -64,10 +64,10 @@ echo "GPS_" >> gps_logger_args
 echo "" >> gps_logger_args
 echo $run >> gps_logger_args
 echo $port >> gps_logger_args
-/home/pi/radio_collar_tracker/gps_logger/gps_logger.py >> $gps_log&
+/home/pi/radio_collar_tracker/gps_logger/gps_logger.py & > ${gps_log}
 mavproxypid=$!
 
-/home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output >> $sdr_log&
+/home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output & >> ${sdr_log}
 sdr_record_pid=$!
 
 trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record_pid; echo low > $led_dir/direction; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
