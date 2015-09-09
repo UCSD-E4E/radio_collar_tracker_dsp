@@ -59,12 +59,7 @@ if [[ "sampling_freq" -ne $sampling_freq ]]; then
 	exit 1
 fi
 
-echo $output > gps_logger_args
-echo "GPS_" >> gps_logger_args
-echo "" >> gps_logger_args
-echo $run >> gps_logger_args
-echo $port >> gps_logger_args
-/home/pi/radio_collar_tracker/gps_logger/gps_logger.py &>> ${gps_log} &
+/home/pi/radio_collar_tracker/gps_logger/gps_logger.py -o $output -r $run -i $port &>> ${gps_log} &
 mavproxypid=$!
 
 /home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &>> ${sdr_log} &
