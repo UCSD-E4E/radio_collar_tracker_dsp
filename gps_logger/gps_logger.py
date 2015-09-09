@@ -58,8 +58,8 @@ while runstate:
     msg = mavmaster.recv_match(blocking=True)
     if msg is not None:
         if msg.get_type() == 'GLOBAL_POSITION_INT':
-    	    logfile.write("%.3f, %d, %d, %d\n" % (time.time(), 
-                msg.lat, msg.lon, msg.time_boot_ms))
+    	    logfile.write("%.3f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n" % (time.time(), 
+                msg.lat, msg.lon, msg.time_boot_ms, msg.alt, msg.relative_alt, msg.vx, msg.vy, msg.vz, msg.hdg))
 print("GPS_LOGGER: Ending thread")
 logfile.close()
 
