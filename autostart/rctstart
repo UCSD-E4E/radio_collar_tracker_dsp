@@ -8,6 +8,8 @@
 # Short-Description: Start radio collar tracker payload on switch
 ### END INIT INFO
 # setup here
+log="/home/pi/rct.log"
+echo "$(timestamp): Starting..." >> $log
 switch_num="4"
 
 switch_dir="/sys/class/gpio/gpio$switch_num"
@@ -15,17 +17,15 @@ timestamp(){
 	date
 }
 
-log="/home/pi/rct.log"
 # check for autostart file!
 if [ ! -e "/home/pi/autostart" ]
 	then
-		echo "Autostart not found!"
+		echo "$(timestamp): Autostart not found!" >> $log
 	exit
 fi
 
 echo $switch_num > /sys/class/gpio/export
 stateVal="startWait"
-echo "$(timestamp): Starting..." >> $log
 while true
 do
 	case $stateVal in
@@ -44,6 +44,8 @@ do
 			/home/pi/radio_collar_tracker/sdr_starter.sh &
 			sdr_starter_pid=$!
 			echo "$(timestamp): Started program!" >> $log
+			runNum=`/home/pi/radio_collar_tracker/getRunNum.py -e /home/pi/rct/`
+			echo "$(timestamp): $runNum" >> $log
 			stateVal="endWait"
 			;;
 		"endWait" )
@@ -59,6 +61,9 @@ do
 			/bin/kill -s TERM $sdr_starter_pid
 			# killall ct -s INT
 			echo "$(timestamp): Ended program!" >> $log
+			echo "$(timestamp): Begin dmesg dump" >> $log
+			dmesg >> $log
+			echo "$(timestamp): end dmesg dump" >> $log
 			stateVal="startWait"
 			;;
 	esac

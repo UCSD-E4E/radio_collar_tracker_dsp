@@ -24,12 +24,19 @@ global runstate
 print("GPS_LOGGER: Started")
 runstate = True
 
-argfile = open("gps_logger_args", "r")
-dataDir = argfile.readline().strip()
-gpsPrefix = argfile.readline().strip()
-gpsSuffix = argfile.readline().strip()
-runNum = int(argfile.readline().strip())
-port = argfile.readline().strip()
+parser = argparse.ArgumentParser(description = "GPS Logging using MAVLink")
+parser.add_argument('-o', '--output_dir', help = 'Output directory', metavar = 'data_dir', dest = 'dataDir', required = True)
+parser.add_argument('-p', '--prefix', help = 'Output File Prefix, default "GPS_"', metavar = 'prefix', dest = 'prefix', default = 'GPS_')
+parser.add_argument('-s', '--suffix', help = 'Output File Suffix, default ""', metavar = 'suffix', dest = 'suffix', default = '')
+parser.add_argument('-r', '--run', help = 'Run Number', metavar = 'run_num', dest = 'runNum', required = True, type = int)
+parser.add_argument('-i', '--port', help = 'MAVLink port', metavar = 'port', dest = 'port', required = True)
+
+args = parser.parse_args()
+dataDir = args.dataDir
+gpsPrefix = args.prefix
+gpsSuffix = args.suffix
+runNum = args.runNum
+port = args.port
 
 logfile = open("%s/%s%06d" % (dataDir, gpsPrefix, runNum), "w")
 
@@ -55,12 +62,11 @@ print("GPS_LOGGER: Running")
 
 
 while runstate:
-    msg = mavmaster.recv_match(blocking=False)
+    msg = mavmaster.recv_match(blocking=True, timeout = 10)
     if msg is not None:
         if msg.get_type() == 'GLOBAL_POSITION_INT':
-    	    logfile.write("%.3f, %d, %d\n" % (time.time(), 
-                msg.lat, msg.lon))
-    time.sleep(0.5)
+    	    logfile.write("%.3f, %d, %d, %d, %d, %d, %d, %d, %d, %d\n" % (time.time(), 
+                msg.lat, msg.lon, msg.time_boot_ms, msg.alt, msg.relative_alt, msg.vx, msg.vy, msg.vz, msg.hdg))
 print("GPS_LOGGER: Ending thread")
 logfile.close()
 

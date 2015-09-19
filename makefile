@@ -3,7 +3,9 @@
 all:
 	$(MAKE) -C sdr_record
 
-PI_install: sdr_record/sdr_record autostart/rctstart gps_logger/gps_logger.py autostart/parser.sh getRunNum.py
+PI_install: sdr_record/sdr_record autostart/rctstart gps_logger/gps_logger.py autostart/parser.sh getRunNum.py sdr_starter.sh
+	$(MAKE) -c sdr_record clean
+	$(MAKE) -c sdr_record all
 	cp autostart/rctstart /etc/init.d/
 	update-rc.d rctstart defaults
 

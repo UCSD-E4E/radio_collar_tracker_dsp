@@ -1,12 +1,14 @@
 #!/bin/bash
 OPTIND=1
 run=-1
-freq=172464000
+freq=168000000
 gain="19.7"
 output="/home/pi/rct/"
 sampling_freq=2048000
 port="/dev/ttyAMA0"
 led_num=17
+sdr_log="/home/pi/sdr_log.log"
+gps_log="/home/pi/gps_log.log"
 
 
 led_dir="/sys/class/gpio/gpio$led_num"
@@ -57,15 +59,10 @@ if [[ "sampling_freq" -ne $sampling_freq ]]; then
 	exit 1
 fi
 
-echo $output > gps_logger_args
-echo "GPS_" >> gps_logger_args
-echo "" >> gps_logger_args
-echo $run >> gps_logger_args
-echo $port >> gps_logger_args
-/home/pi/radio_collar_tracker/gps_logger/gps_logger.py &
+/home/pi/radio_collar_tracker/gps_logger/gps_logger.py -o $output -r $run -i $port &>> ${gps_log} &
 mavproxypid=$!
 
-/home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &
+/home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &>> ${sdr_log} &
 sdr_record_pid=$!
 
 trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record_pid; echo low > $led_dir/direction; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM

@@ -108,6 +108,7 @@ int main(int argc, char** argv) {
 		printUsage();
 		exit(-1);
 	}
+	printf("SDR_RECORD: Run Number %d\n", run_num);
 	// printf("done\n");
 
 	// Initialize environment
@@ -180,6 +181,9 @@ int main(int argc, char** argv) {
 	FILE* timing_stream = fopen(buf, "w");
 	fprintf(timing_stream, "start_time: %f\n",
 	        start_time.tv_sec + (float)start_time.tv_nsec / 1.e9);
+	fprintf(timing_stream, "center_freq: %d\n", center_freq);
+	fprintf(timing_stream, "sampling_freq: %d\n", samp_freq);
+	fprintf(timing_stream, "gain: %f\n", gain / 10.0);
 	fclose(timing_stream);
 
 	printf("Stopping record\n");
@@ -193,7 +197,7 @@ int main(int argc, char** argv) {
  * and notifies all threads to finish execution.
  */
 void sighandler(int signal) {
-	// printf("Signal caught, exiting\n");
+	printf("Signal caught, exiting\n");
 	run = 0;
 	rtlsdr_cancel_async(dev);
 }
