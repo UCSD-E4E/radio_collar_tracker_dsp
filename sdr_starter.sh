@@ -1,7 +1,7 @@
 #!/bin/bash
 OPTIND=1
 run=-1
-freq=168000000
+freq=167959000
 gain="19.7"
 output="/home/pi/rct/"
 sampling_freq=2048000
