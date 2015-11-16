@@ -11,15 +11,8 @@
 timestamp() {
 	date
 }
-case "$1" in
-	stop)
-		killall rctstart
-		exit
-		;;
-esac
 
 log="/home/pi/rct.log"
-echo "$(timestamp): Starting..." >> $log
 switch_num="4"
 led_num=17
 led_dir="/sys/class/gpio/gpio$led_num"
@@ -28,6 +21,16 @@ keep_alive='/home/pi/radio_collar_tracker/gps_logger/gps_keep_alive.py'
 sdr_starter='/home/pi/radio_collar_tracker/sdr_starter.sh'
 port="/dev/ttyAMA0"
 
+case "$1" in
+	stop)
+		echo "$(timestamp): Payload power off!" >> $log
+		killall rctstart
+		exit
+		;;
+esac
+
+# start
+echo "$(timestamp): Starting..." >> $log
 # check for autostart file!
 if [ ! -e "/home/pi/autostart" ]
 	then
