@@ -8,6 +8,15 @@
 # Short-Description: Start radio collar tracker payload on switch
 ### END INIT INFO
 # setup here
+case $1 in
+	"start" )
+		;;
+	"stop"	)
+		killall rctstart
+		exit
+		;;
+esac
+
 log="/home/pi/rct.log"
 echo "${timestamp}: Starting..." >> $log
 switch_num="4"
