@@ -46,7 +46,7 @@ do
 	case $stateVal in
 		"startWait" )
 		# State 1 - wait for start
-			$(keep_alive) -i $(port) &
+			$(keep_alive) -i $(port) >> /home/pi/gps_keep_log 2&>1&
 			keep_alive_pid=$!
 			switchVal=`cat $switch_dir/value`
 			until [ "$switchVal" = "0" ]; do
