@@ -50,7 +50,6 @@ while True:
 		led_handle.write('low')
 		led_handle.flush()
 		print("GPS_KEEPALIVE: ERROR: Timeout connecting!")
-		break
 		sys.exit(1)
 	if (fail_counter / 30) % 2 == 1:
 		led_handle.write('high')
