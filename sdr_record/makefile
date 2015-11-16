@@ -1,7 +1,9 @@
 CFLAGS=-c -std=gnu99 -Wall -g
 CPPFLAGS=-c -std=c++11 -Wall -g
 LFLAGS=`pkg-config --cflags --libs librtlsdr` -pthread -lrt
-.PHONY: clean test
+.PHONY: clean test all
+
+all: sdr_record
 
 sdr_record: sdr_record.o queue.o
 	gcc sdr_record.o queue.o $(LFLAGS) -o sdr_record
@@ -39,10 +41,6 @@ raw_data_to_complex: raw_data_to_complex.c
 switch_iq: switch_iq.c
 	gcc switch_iq.c $(CFLAGS)
 	gcc switch_iq.o $(LFLAGS) -o switch_iq
-
-rtl_sdr: rtl_sdr.c convenience.h convenience.c
-	gcc rtl_sdr.c convenience.c $(CFLAGS)
-	gcc rtl_sdr.o convenience.o $(LFLAGS) -o rtl_sdr
 
 sample_mag: sample_mag.c
 	gcc -std=gnu99 sample_mag.c -o sample_mag -lm
