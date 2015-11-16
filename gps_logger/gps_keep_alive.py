@@ -20,7 +20,7 @@ print("GPS_KEEPALIVE: Started")
 runstate = True
 
 gpio_export = open("/sys/class/gpio/export", 'w')
-# gpio_export.write('17\n')
+gpio_export.write('17\n')
 gpio_export.close()
 
 if not os.path.exists("/sys/class/gpio/gpio17"):
