@@ -3,8 +3,8 @@
 # Provides: rctstart
 # Required-Start: $portmap $time $remote_fs
 # Required-Stop:
-# Default-Start: 2 3 4 5
-# Default-Stop: 0 1 6
+# Default-Start: 2
+# Default-Stop: 0 1 6 3 4 5
 # Short-Description: Start radio collar tracker payload on switch
 ### END INIT INFO
 # setup here
@@ -16,7 +16,7 @@ led_dir="/sys/class/gpio/gpio$led_num"
 switch_dir="/sys/class/gpio/gpio$switch_num"
 keep_alive='/home/pi/radio_collar_tracker/gps_logger/gps_keep_alive.py'
 sdr_starter='/home/pi/radio_collar_tracker/sdr_starter.sh'
-
+port="/dev/ttyAMA0"
 timestamp(){
 	date
 }
@@ -46,7 +46,7 @@ do
 	case $stateVal in
 		"startWait" )
 		# State 1 - wait for start
-			$(keep_alive) &
+			$(keep_alive) -i $(port) &
 			keep_alive_pid=$!
 			switchVal=`cat $switch_dir/value`
 			until [ "$switchVal" = "0" ]; do
