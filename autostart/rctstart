@@ -12,11 +12,12 @@ function timestamp {
 	date
 }
 case $1 in
-	"start" )
-		;;
-	"stop"	)
+	stop)
 		killall rctstart
 		exit
+		;;
+	start)
+
 		;;
 esac
 
