@@ -8,21 +8,18 @@
 # Short-Description: Start radio collar tracker payload on switch
 ### END INIT INFO
 # setup here
-function timestamp {
+timestamp() {
 	date
 }
-case $1 in
+case "$1" in
 	stop)
 		killall rctstart
 		exit
 		;;
-	start)
-
-		;;
 esac
 
 log="/home/pi/rct.log"
-echo "${timestamp}: Starting..." >> $log
+echo "$(timestamp): Starting..." >> $log
 switch_num="4"
 led_num=17
 led_dir="/sys/class/gpio/gpio$led_num"
@@ -34,7 +31,7 @@ port="/dev/ttyAMA0"
 # check for autostart file!
 if [ ! -e "/home/pi/autostart" ]
 	then
-		echo "${timestamp}: Autostart not found!" >> $log
+		echo "$(timestamp): Autostart not found!" >> $log
 	exit
 fi
 
@@ -63,7 +60,7 @@ do
 				sleep 3
 				switchVal=`cat $switch_dir/value`
 			done
-			echo "${timestamp}: Received start signal!" >> $log
+			echo "$(timestamp): Received start signal!" >> $log
 			/bin/kill -s INT ${keep_alive_pid}
 			stateVal="startgo"
 			;;
@@ -71,9 +68,9 @@ do
 		# State 2 - go for start, initialize
 			${sdr_starter} &
 			sdr_starter_pid=$!
-			echo "${timestamp}: Started program!" >> $log
+			echo "$(timestamp): Started program!" >> $log
 			runNum=`/home/pi/radio_collar_tracker/getRunNum.py -e /home/pi/rct/`
-			echo "${timestamp}: $runNum" >> $log
+			echo "$(timestamp): $runNum" >> $log
 			stateVal="endWait"
 			;;
 		"endWait" )
@@ -82,16 +79,16 @@ do
 				sleep 3
 				switchVal=`cat $switch_dir/value`
 			done
-			echo "${timestamp}: Received stop signal!" >> $log
+			echo "$(timestamp): Received stop signal!" >> $log
 			stateVal="endgo"
 			;;
 		"endgo" )
 			/bin/kill -s TERM ${sdr_starter_pid}
 			# killall ct -s INT
-			echo "${timestamp}: Ended program!" >> $log
-			echo "${timestamp}: Begin dmesg dump" >> $log
+			echo "$(timestamp): Ended program!" >> $log
+			echo "$(timestamp): Begin dmesg dump" >> $log
 			dmesg >> $log
-			echo "${timestamp}: end dmesg dump" >> $log
+			echo "$(timestamp): end dmesg dump" >> $log
 			stateVal="startWait"
 			;;
 	esac
