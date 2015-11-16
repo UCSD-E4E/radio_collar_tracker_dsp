@@ -9,7 +9,7 @@
 ### END INIT INFO
 # setup here
 log="/home/pi/rct.log"
-echo "$(timestamp): Starting..." >> $log
+echo "${timestamp}: Starting..." >> $log
 switch_num="4"
 led_num=17
 led_dir="/sys/class/gpio/gpio$led_num"
@@ -24,7 +24,7 @@ timestamp(){
 # check for autostart file!
 if [ ! -e "/home/pi/autostart" ]
 	then
-		echo "$(timestamp): Autostart not found!" >> $log
+		echo "${timestamp}: Autostart not found!" >> $log
 	exit
 fi
 
@@ -46,24 +46,24 @@ do
 	case $stateVal in
 		"startWait" )
 		# State 1 - wait for start
-			$(keep_alive) -i $(port) >> /home/pi/gps_keep_log 2&>1&
+			$keep_alive -i $port &>> /home/pi/gps_keep.log &
 			keep_alive_pid=$!
 			switchVal=`cat $switch_dir/value`
 			until [ "$switchVal" = "0" ]; do
 				sleep 3
 				switchVal=`cat $switch_dir/value`
 			done
-			echo "$(timestamp): Received start signal!" >> $log
-			/bin/kill -s INT $(keep_alive_pid)
+			echo "${timestamp}: Received start signal!" >> $log
+			/bin/kill -s INT ${keep_alive_pid}
 			stateVal="startgo"
 			;;
 		"startgo" )
 		# State 2 - go for start, initialize
-			$(sdr_starter) &
+			${sdr_starter} &
 			sdr_starter_pid=$!
-			echo "$(timestamp): Started program!" >> $log
+			echo "${timestamp}: Started program!" >> $log
 			runNum=`/home/pi/radio_collar_tracker/getRunNum.py -e /home/pi/rct/`
-			echo "$(timestamp): $runNum" >> $log
+			echo "${timestamp}: $runNum" >> $log
 			stateVal="endWait"
 			;;
 		"endWait" )
@@ -72,16 +72,16 @@ do
 				sleep 3
 				switchVal=`cat $switch_dir/value`
 			done
-			echo "$(timestamp): Received stop signal!" >> $log
+			echo "${timestamp}: Received stop signal!" >> $log
 			stateVal="endgo"
 			;;
 		"endgo" )
-			/bin/kill -s TERM $(sdr_starter_pid)
+			/bin/kill -s TERM ${sdr_starter_pid}
 			# killall ct -s INT
-			echo "$(timestamp): Ended program!" >> $log
-			echo "$(timestamp): Begin dmesg dump" >> $log
+			echo "${timestamp}: Ended program!" >> $log
+			echo "${timestamp}: Begin dmesg dump" >> $log
 			dmesg >> $log
-			echo "$(timestamp): end dmesg dump" >> $log
+			echo "${timestamp}: end dmesg dump" >> $log
 			stateVal="startWait"
 			;;
 	esac
