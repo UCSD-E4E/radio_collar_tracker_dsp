@@ -8,6 +8,9 @@
 # Short-Description: Start radio collar tracker payload on switch
 ### END INIT INFO
 # setup here
+function timestamp {
+	date
+}
 case $1 in
 	"start" )
 		;;
@@ -26,9 +29,6 @@ switch_dir="/sys/class/gpio/gpio$switch_num"
 keep_alive='/home/pi/radio_collar_tracker/gps_logger/gps_keep_alive.py'
 sdr_starter='/home/pi/radio_collar_tracker/sdr_starter.sh'
 port="/dev/ttyAMA0"
-timestamp(){
-	date
-}
 
 # check for autostart file!
 if [ ! -e "/home/pi/autostart" ]
