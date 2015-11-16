@@ -4,8 +4,6 @@ all:
 	$(MAKE) -C sdr_record
 
 PI_install: sdr_record/sdr_record autostart/rctstart gps_logger/gps_logger.py autostart/parser.sh getRunNum.py sdr_starter.sh
-	$(MAKE) -C sdr_record clean
-	$(MAKE) -C sdr_record all
 	cp autostart/rctstart /etc/init.d/
 	update-rc.d rctstart defaults 98 02
 
@@ -27,3 +25,6 @@ BBB_uninstall:
 	-rm /etc/init.d/mount_RAW_DATA
 	-umount /dev/mmcblk0p1
 	-rmdir /media/RAW_DATA
+
+sdr_record/sdr_record:
+	$(MAKE) -C sdr_record all
