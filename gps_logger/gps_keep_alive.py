@@ -35,7 +35,7 @@ args = parser.parse_args()
 port = args.port
 
 # connect to MAV
-mavmaster = mavutil.mavlink_connect(port, 57600)
+mavmaster = mavutil.mavlink_connection(port, 57600)
 fail_counter = 0
 while True:
 	if mavmaster.wait_heartbeat(blocking=False) is not None:
