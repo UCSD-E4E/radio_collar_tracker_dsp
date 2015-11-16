@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 from pymavlink import mavutil
+import time
 import signal
-import os
 import argparse
+import sys
+from time import sleep
 
 def handler(signum, frame):
 	global runstate
