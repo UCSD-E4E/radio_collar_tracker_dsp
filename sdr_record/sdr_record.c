@@ -34,7 +34,7 @@ pthread_mutex_t lock;
 queue data_queue;
 int counter = 0;
 static uint64_t num_samples = 0;
-char* DATA_DIR = "/media/RAW_DATA/test/";
+char* DATA_DIR = "/home/ntlhui/test/";
 
 // Function Prototypes
 void sighandler(int signal);
@@ -48,8 +48,8 @@ void printUsage();
  * Prints the usage statement for this program.
  */
 void printUsage() {
-	printf("usage: sdr_record [-h] [-g <gain>] [-s <sampling_frequency>]\n\t"
-	       "[-f <center_frequency>] [-r <run_number>] [-o <output_dir>]\n");
+	printf("usage: sdr_record -r <run_number> [-h] [-g <gain>]\n\t"
+	       "[-f <center_frequency>] [-s <sampling_frequency>] [-o <output_dir>]\n");
 }
 
 /**
@@ -77,10 +77,12 @@ int main(int argc, char** argv) {
 	pthread_t thread_id;
 	// proc_queue args
 	struct proc_queue_args pargs;
+	// Device ID
+	int dev_id = 0;
 
 	// Get command line options
 	// printf("Getting command line options\n");
-	while ((opt = getopt(argc, argv, "hg:s:f:r:o:")) != -1) {
+	while ((opt = getopt(argc, argv, "hg:s:f:r:o:d:")) != -1) {
 		switch (opt) {
 			case 'h':
 				printUsage();
@@ -99,6 +101,9 @@ int main(int argc, char** argv) {
 				break;
 			case 'o':
 				DATA_DIR = optarg;
+				break;
+			case 'd':
+				dev_id = (atoi(optarg));
 				break;
 		}
 	}
@@ -119,7 +124,7 @@ int main(int argc, char** argv) {
 
 	// Open SDR
 	// printf("Opening SDR\n");
-	if (rtlsdr_open(&dev, 0)) {
+	if (rtlsdr_open(&dev, dev_id)) {
 		fprintf(stderr, "ERROR: Failed to open rtlsdr device\n");
 		exit(1);
 	}
