@@ -17,8 +17,8 @@ switch_num="4"
 led_num=17
 led_dir="/sys/class/gpio/gpio$led_num"
 switch_dir="/sys/class/gpio/gpio$switch_num"
-keep_alive='/home/pi/radio_collar_tracker/gps_logger/gps_keep_alive.py'
-sdr_starter='/home/pi/radio_collar_tracker/sdr_starter.sh'
+keep_alive='/home/pi/radio_collar_tracker_drone/gps_logger/gps_keep_alive.py'
+sdr_starter='/home/pi/radio_collar_tracker_drone/sdr_starter.sh'
 port="/dev/ttyAMA0"
 
 case "$1" in
@@ -72,7 +72,7 @@ do
 			${sdr_starter} &
 			sdr_starter_pid=$!
 			echo "$(timestamp): Started program!" >> $log
-			runNum=`/home/pi/radio_collar_tracker/getRunNum.py -e /home/pi/rct/`
+			runNum=`/home/pi/radio_collar_tracker_drone/getRunNum.py -e /home/pi/rct/`
 			echo "$(timestamp): $runNum" >> $log
 			stateVal="endWait"
 			;;
