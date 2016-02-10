@@ -46,7 +46,7 @@ if [[ "$run" -ne $run ]]; then
 fi
 
 if [[ $run -eq -1 ]]; then
-	run=`/home/pi/radio_collar_tracker/getRunNum.py $output`
+	run=`/home/pi/radio_collar_tracker_drone/getRunNum.py $output`
 fi
 
 if [[ "$freq" -ne $freq ]]; then
@@ -59,10 +59,10 @@ if [[ "sampling_freq" -ne $sampling_freq ]]; then
 	exit 1
 fi
 
-/home/pi/radio_collar_tracker/gps_logger/gps_logger.py -o $output -r $run -i $port &>> ${gps_log} &
+/home/pi/radio_collar_tracker_drone/gps_logger/gps_logger.py -o $output -r $run -i $port &>> ${gps_log} &
 mavproxypid=$!
 
-/home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &>> ${sdr_log} &
+/home/pi/radio_collar_tracker_drone/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &>> ${sdr_log} &
 sdr_record_pid=$!
 
 trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record_pid; echo low > $led_dir/direction; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
