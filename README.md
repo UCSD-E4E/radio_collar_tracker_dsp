@@ -66,3 +66,30 @@ This field is always 6 characters wide, zero padded.  The `file_num` field
 specifies the ordering of the IQ data files.  The first file recorded would have
 a file number of 1, sequential files having sequential numbers.  This field is
 always 6 characters wide, zero padded.
+
+The raw data files contain the raw IQ data recorded as pairs of 8-bit unsigned
+integers.  Each pair represents the in-phase and quadrature components of the
+recorded signal in sequence.  See
+https://en.wikipedia.org/wiki/In-phase_and_quadrature_components for an
+explanation of IQ signal representation.  Each file contains at most 10485760
+samples, or 5.12 seconds of data.  IQ data is recorded at 2.048 MSps.
+
+The GPS data files contain timestamped snapshots of autopilot telemetry.  Fields
+are comma separated, and are: local capture time (UTC in seconds), lat (degrees
+* 1e7), lon (degrees * 1e7), time since autopilot boot (ms), absolute altitude
+(meters MSL), relative altitude (meters AGL), x axis velocity (m/s), y axis
+velocity (m/s), z axis velocity (m/s), heading (degrees).  Note: I do not know
+whether the heading is relative to true north or magnetic north.  The NED frame
+ideally is relative to true north, but I don't know if the heading is reported
+before or after declination offsets are taken into account.
+
+The metadata file contains metadata pertaining to the configuration of the
+payload.  Each line contains one field.  The key for each field is followed by a
+colon, then the value for that field, followed by a newline character:
+```
+[field_name]: [field_value]
+```
+The whitespace between the colon and field value is optional, and preferred for
+readability, but cannot be a newline.  The metadata file contains the following
+fields: local IQ data start time (UTC in seconds), SDR center frequency (Hz),
+SDR sampling frequency (Hz), SDR gain (dB).
