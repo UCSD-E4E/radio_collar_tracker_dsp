@@ -76,7 +76,7 @@ samples, or 5.12 seconds of data.  IQ data is recorded at 2.048 MSps.
 
 The GPS data files contain timestamped snapshots of autopilot telemetry.  Fields
 are comma separated, and are: local capture time (UTC in seconds), lat (degrees
-* 1e7), lon (degrees * 1e7), time since autopilot boot (ms), absolute altitude
+\* 1e7), lon (degrees * 1e7), time since autopilot boot (ms), absolute altitude
 (meters MSL), relative altitude (meters AGL), x axis velocity (m/s), y axis
 velocity (m/s), z axis velocity (m/s), heading (degrees).  Note: I do not know
 whether the heading is relative to true north or magnetic north.  The NED frame
