@@ -1,26 +1,11 @@
-radio_collar_tracker
+radio_collar_tracker_drone
 ====================
-Airborne Wildlife Radio Collar Tracker
+Airborne Wildlife Radio Collar Tracker - UAS Component
 
 Engineers for Exploration, UCSD Project
 
-
-Running the Post-Process Code
-=============================
-1.	Make the make_bin.sh file executable by running `chmod +x make_bin.sh`
-2.	Move the file `bin/run.tar` to a working directory of your choice.
-3.	Extract the binaries from `run.tar` by running `tar -xf run.tar`
-4.	Run the post-process code using any of the run scripts.
-	1.	`run.sh` needs to have the raw data from the SD card in the same working
-		directory.  Usage: `run.sh NUM_COLLARS ALT_AGL`
-	2.	`run2.sh` takes an additional argument for where the raw data is.
-		Usage: `run2.sh NUM_COLLARS ALT_AGL DATA_DIR`
-	3.	`runcli.sh` is an interactive shell script.  Usage: `runcli.sh`
-5.	Note: if you run the PostProcessC code without using the integration
-	scripts, ensure that all paths are fixed paths.
-
-Installing sdr_record
-=====================
+Installing the payload software
+===============================
 1.	Install the required dependencies
 	1.	python
 	2.	pymavlink
@@ -33,12 +18,51 @@ Installing sdr_record
 		5.	`make`
 		6.	`sudo make install`
 		7.	`ldconfig`
-2.	Make sdr_record
-	1.	`cd <radio_collar_tracker>`
-	2.	`cd sdr_record`
-	3.	`make`
+2.	Install the software
+	1.	`cd <radio_collar_tracker_drone>`
+	2.	`make`
+	3.	`sudo make install`
 
-Running sdr_record
+Running the payload software (standalone)
+=========================================
+`<radio_collar_tracker_drone>/autostart/rctstart`
+
+#Running the payload software (hardware-based initialization)
+##Payload Power On Procedure
+1.	Disconnect power to AUTOPILOT, PAYLOD
+2.	Connect power to PAYLOAD
+3.	Connect power to AUTOPILOT
+4.	Flip PAYLOAD SWITCH to the ON position.
+5.	Wait for the PAYLOAD STATUS LIGHT to turn green for at least 10 seconds.
+6.	Flip PAYLOAD SWITCH to the OFF position.
+7.	Wait for the PAYLOAD STATUS LIGHT to turn off within 5 seconds.
+8.	Connect the GROUND CONTROL STATION to the AUTOPILOT.
+9.	Payload Power On Procedure complete.
+
+## Payload Start Procedure
+1.	Complete the Payload Power On Procedure.
+2.	Flip PAYLOAD SWITCH to the ON position.
+3.	Wait for the PAYLOAD STATUS LIGHT to turn green for at least 10 seconds.
+4.	Payload Start Procedure complete.
+
+## Payload Stop Procedure
+1.	Flip PAYLOAD SWITCH to the OFF position.
+2.	Wait for the PAYLOAD STATUS LIGHT to turn off within 5 seconds.
+3.	Payload Stop Procedure complete.
+
+## Payload Power Off Procedure
+1.	Complete the Payload Stop Procedure.
+2.	Disconnect power to the PAYLOAD.
+3.	Payload Power Off Procedure complete.
+
+Output Data Format
 ==================
-usage: `sdr_starter.sh [-r <runNum>] [-f <center_frequency>] [-g <sdr_gain>]
-[-o <output_directory>] [-s <sampling_frequency>] [-p <autopilot_serial_port>]`
+Output data is located in `/home/pi/rct/`.  Each run consists of a number of IQ
+(raw) data files, GPS data files, and a metadata file.  The name format for each
+type of file is `[type]_[run]_[file_num]`.  The `type` field specifies, in
+capital letters, the type of file (i.e. RAW_DATA, GPS, or META).  The `run`
+field specifies a numerical identifier for each run, assigned sequentially.
+This field is always 6 characters wide, zero padded.  The `file_num` field
+specifies the ordering of the IQ data files.  The first file recorded would have
+a file number of 1, sequential files having sequential numbers.  This field is
+always 6 characters wide, zero padded.
