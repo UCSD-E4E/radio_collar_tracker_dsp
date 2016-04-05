@@ -1,4 +1,4 @@
-#!/bin/sh
+# -* bash *-
 ### BEGIN INIT INFO
 # Provides: rctstart
 # Required-Start: $portmap $time $remote_fs
