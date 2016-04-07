@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+# -* python *-
 # Usage: api start ./gps_logger.py [-d <destination>] [-p <prefix>]
 #        [-r <runNum>] [-s <suffix>]
 #
 # Defaults to   destination:    /media/RAW_DATA/rct/
 #               prefix:         GPS_
-#               suffix:         
+#               suffix:
 #               runNum:         1
 from pymavlink import mavutil
 import time
@@ -53,7 +53,7 @@ while True:
     sleep(0.005)
 
 print("GPS_LOGGER: Connected")
-mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
+mavmaster.mav.request_data_stream_send(mavmaster.target_system,
         mavmaster.target_component, mavutil.mavlink.MAV_DATA_STREAM_POSITION,
         10, 1)
 
@@ -65,7 +65,7 @@ while runstate:
     msg = mavmaster.recv_match(blocking=True, timeout = 10)
     if msg is not None:
         if msg.get_type() == 'GLOBAL_POSITION_INT':
-    	    logfile.write("%.3f, %d, %d, %d, %d, %d, %d, %d, %d, %d\n" % (time.time(), 
+    	    logfile.write("%.3f, %d, %d, %d, %d, %d, %d, %d, %d, %d\n" % (time.time(),
                 msg.lat, msg.lon, msg.time_boot_ms, msg.alt, msg.relative_alt, msg.vx, msg.vy, msg.vz, msg.hdg))
 print("GPS_LOGGER: Ending thread")
 logfile.close()
