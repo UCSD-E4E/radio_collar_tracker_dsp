@@ -12,14 +12,15 @@ timestamp() {
 	date
 }
 
-log="/home/pi/rct.log"
-switch_num="4"
-led_num=17
+INSTALL_DIR=&INSTALL_PREFIX
+
+source $INSTALL_DIR/etc/rct_config
+
+log="$log_dir/rctstart_rct.log"
 led_dir="/sys/class/gpio/gpio$led_num"
 switch_dir="/sys/class/gpio/gpio$switch_num"
-keep_alive='/home/pi/radio_collar_tracker_drone/gps_logger/gps_keep_alive.py'
-sdr_starter='/home/pi/radio_collar_tracker_drone/sdr_starter.sh'
-port="/dev/ttyAMA0"
+keep_alive='rct_gps_keep_alive.py'
+sdr_starter='rct_sdr_starter.sh'
 
 case "$1" in
 	stop)
@@ -56,7 +57,7 @@ do
 	case $stateVal in
 		"startWait" )
 		# State 1 - wait for start
-			$keep_alive -i $port &>> /home/pi/gps_keep.log &
+			$keep_alive -i $mav_port &>> $log_dir/gps_keep.log &
 			keep_alive_pid=$!
 			switchVal=`cat $switch_dir/value`
 			until [ "$switchVal" = "0" ]; do
@@ -64,7 +65,7 @@ do
 				switchVal=`cat $switch_dir/value`
 			done
 			echo "$(timestamp): Received start signal!" >> $log
-			/bin/kill -s INT ${keep_alive_pid}
+			kill -s INT ${keep_alive_pid}
 			stateVal="startgo"
 			;;
 		"startgo" )
@@ -72,7 +73,7 @@ do
 			${sdr_starter} &
 			sdr_starter_pid=$!
 			echo "$(timestamp): Started program!" >> $log
-			runNum=`/home/pi/radio_collar_tracker_drone/getRunNum.py -e /home/pi/rct/`
+			runNum=`rct_getRunNum.py -e $output_dir`
 			echo "$(timestamp): $runNum" >> $log
 			stateVal="endWait"
 			;;
@@ -86,7 +87,7 @@ do
 			stateVal="endgo"
 			;;
 		"endgo" )
-			/bin/kill -s TERM ${sdr_starter_pid}
+			kill -s TERM ${sdr_starter_pid}
 			# killall ct -s INT
 			echo "$(timestamp): Ended program!" >> $log
 			echo "$(timestamp): Begin dmesg dump" >> $log

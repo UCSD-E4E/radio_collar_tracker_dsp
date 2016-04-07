@@ -1,15 +1,7 @@
-#!/bin/bash
-OPTIND=1
-run=-1
-freq=172464000
-gain="19.7"
-output="/home/pi/rct/"
-sampling_freq=2048000
-port="/dev/ttyAMA0"
-led_num=17
-sdr_log="/home/pi/sdr_log.log"
-gps_log="/home/pi/gps_log.log"
+# -* bash *-
+INSTALL_DIR=&INSTALL_PREFIX
 
+source $INSTALL_DIR/etc/rct_config
 
 led_dir="/sys/class/gpio/gpio$led_num"
 if [ ! -e $led_dir ]
@@ -17,6 +9,11 @@ then
 	echo $led_num > /sys/class/gpio/export
 fi
 
+sdr_log="$log_dir/rct_sdr_log.log"
+gps_log="$log_dir/rct_gps_log.log"
+run=-1
+
+OPTIND=1
 while getopts "r:f:g:o:s:p:" opt; do
 	case $opt in
 		r)
@@ -46,7 +43,7 @@ if [[ "$run" -ne $run ]]; then
 fi
 
 if [[ $run -eq -1 ]]; then
-	run=`/home/pi/radio_collar_tracker_drone/getRunNum.py $output`
+	run=`rct_getRunNum.py $output_dir`
 fi
 
 if [[ "$freq" -ne $freq ]]; then
@@ -59,13 +56,13 @@ if [[ "sampling_freq" -ne $sampling_freq ]]; then
 	exit 1
 fi
 
-/home/pi/radio_collar_tracker_drone/gps_logger/gps_logger.py -o $output -r $run -i $port &>> ${gps_log} &
+rct_gps_logger.py -o $output_dir -r $run -i $mav_port &>> ${gps_log} &
 mavproxypid=$!
 
-/home/pi/radio_collar_tracker_drone/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &>> ${sdr_log} &
+sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output_dir &>> ${sdr_log} &
 sdr_record_pid=$!
 
-trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record_pid; echo low > $led_dir/direction; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
+trap "echo 'got sigint'; kill -s SIGINT $mavproxypid; kill -s SIGINT $sdr_record_pid; echo low > $led_dir/direction; sleep 1; exit 0" SIGINT SIGTERM
 run=true
 while $run
 do
@@ -81,5 +78,5 @@ do
 	fi
 done
 echo low > $led_dir/direction
-/bin/kill -s SIGINT $mavproxypid
-/bin/kill -s SIGINT $sdr_record_pid
+kill -s SIGINT $mavproxypid
+kill -s SIGINT $sdr_record_pid
