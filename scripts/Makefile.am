@@ -21,3 +21,5 @@ rct_config: rct_config.sh
 	rm -f $@
 	$(SED) -e "s|&INSTALL_PREFIX|\'$(prefix)\'|g" $^ > $@
 
+maintainer-clean-local:
+	rm Makefile.in

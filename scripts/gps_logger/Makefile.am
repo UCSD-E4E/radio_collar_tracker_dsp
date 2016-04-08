@@ -12,3 +12,6 @@ rct_gps_logger.py: $(srcdir)/gps_logger.py
 	echo "#!" $(PYTHON) > $@
 	cat $^ >> $@
 	chmod +x $@
+
+maintainer-clean-local:
+	rm Makefile.in

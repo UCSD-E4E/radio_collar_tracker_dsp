@@ -32,3 +32,7 @@ install-exec-hook: rctstart
 uninstall-hook:
 	rm /etc/init.d/rctstart
 	update-rc.d rctstart remove
+
+maintainer-clean-local:
+	rm Makefile.in
+
