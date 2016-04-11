@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([rct_payload], [1.0], [nthui@eng.ucsd.edu])
-AC_PROG_CC_C_O
+AM_PROG_CC_C_O
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/sdr_record/maxmin.c])
 AC_CONFIG_HEADERS([config.h])
