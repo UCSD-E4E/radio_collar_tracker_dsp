@@ -13,6 +13,7 @@ AC_PATH_PROGS(BASH, bash sh)
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_C_O
 AC_PROG_SED
 
 # Checks for libraries.
