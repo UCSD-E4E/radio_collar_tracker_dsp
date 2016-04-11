@@ -1,4 +1,4 @@
-#!/bin/bash
+# -* bash *-
 OPTIND=1
 
 while getopts "l:i:" opt

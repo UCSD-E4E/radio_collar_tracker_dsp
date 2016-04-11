@@ -1,4 +1,4 @@
-#!/bin/bash
+# -* bash *-
 mavproxypid=$1
 sdr_starterpid=$2
 

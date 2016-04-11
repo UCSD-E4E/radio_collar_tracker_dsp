@@ -1,4 +1,4 @@
-#!/bin/bash
+# -* bash *-
 ### BEGIN INIT INFO
 # Provides: RAW_DATA
 # Required-Start: $local_fs
