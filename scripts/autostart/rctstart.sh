@@ -3,7 +3,7 @@
 # Provides: rctstart
 # Required-Start: $portmap $time $remote_fs
 # Required-Stop:
-# Default-Start: 3
+# Default-Start: 5
 # Default-Stop: 0 1 6
 # Short-Description: Start radio collar tracker payload on switch
 ### END INIT INFO
@@ -11,6 +11,8 @@
 timestamp() {
 	date
 }
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 
 INSTALL_DIR=&INSTALL_PREFIX
 
