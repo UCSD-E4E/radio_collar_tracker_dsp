@@ -3,7 +3,7 @@
 # Provides: rctstart
 # Required-Start: $portmap $time $remote_fs
 # Required-Stop:
-# Default-Start: 5
+# Default-Start: 3
 # Default-Stop: 0 1 6
 # Short-Description: Start radio collar tracker payload on switch
 ### END INIT INFO
