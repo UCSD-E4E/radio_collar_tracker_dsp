@@ -20,12 +20,14 @@ Installing the payload software
 		7.	`ldconfig`
 2.	Install the software
 	1.	`cd <radio_collar_tracker_drone>`
-	2.	`make`
-	3.	`sudo make install`
+	2.  `./autogen.sh`
+	3.  `./configure`
+	4.	`make`
+	5.	`sudo make install`
 
 Running the payload software (standalone)
 =========================================
-`<radio_collar_tracker_drone>/autostart/rctstart`
+`rctstart`
 
 #Running the payload software (hardware-based initialization)
 ##Payload Power On Procedure
