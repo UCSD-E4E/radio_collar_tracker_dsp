@@ -1,27 +1,364 @@
 \documentclass{report}
 \title{Radio Collar Tracker Flight Operations Manual}
-\author{Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
+\author{Eric Lo, Project Manager\\Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
+\usepackage{fullpage}
 \begin{document}
 \maketitle
 \tableofcontents
 \chapter{System Overview}
-\chapter{Checks}
-\section{Delivery Checks (D-Check)}
-\section{Payload Power On Procedure}
-\begin{enumerate}
-	\item Disconnect power to AUTOPILOT, PAYLOAD.
-	\item Connect power to PAYLOAD.
-	\item Connect power to AUTOPILOT.
-	\item Flip PAYLOAD SWITCH to ON.
-	\item Wait for the STATUS LIGHT to turn solid green for at least 10 seconds.
-	\item Flip PAYLOAD SWITCH to OFF.
-	\item Wait for green light to turn off.  Green light should turn off within 5 seconds.
-	\item Connect FMS to the AUTOPILOT.
-	\item Payload Power On Procedure Complete.
-\end{enumerate}
-\chapter{Post-processing Software}
-\section{Installation}
-\section{Operation}
+	\section{Aircraft}
+		\subsection{Aircraft Specifications}
+			\begin{itemize}
+				\item Crew\hfill0
+				\item Length\hfill110 cm
+				\item Width\hfill89 cm
+				\item Height\hfill25 cm
+				\item Empty Weight\hfill
+				\item Maximum Takeoff Weight\hfill
+				\item Diagonal Boom Length\hfill65 cm
+				\item Powerplant\hfill 4 x Navigator Series T-Motor MN4010-11
+				\item Powerplant kV Rating\hfill475
+				\item Powerplant Voltage\hfill12.5 V
+				\item Maximum Speed\hfill 15 m/s
+				\item Maximum Range\hfill 22 km
+				\item Service Ceiling
+				\item Rotor Diameter\hfill 43 cm
+				\item Rotors\hfill4
+				\item Battery\hfill 3S3P 24C LiPo 15300 mAh
+				\item Autopilot\hfill3DR Pixhawk
+				\item RC Receiver\hfill FrSky X8R
+				\item Autopilot Datalink Radio\hfill 3DR 915 MHz Radio
+				\item Motor Controller\hfill 4 x HobbyKing Platinum Pro 30A
+				\item Base Airframe\hfill Tarot Ironman 650 TI65B01
+				\item RC Transmitter\hfill FrSky Taranis X9D
+			\end{itemize}
+	\section{Payload}
+		\subsection{Payload Specifications}
+			\begin{itemize}
+				\item Computer\hfill Raspberry Pi 2
+			\end{itemize}
+	\section{Ground Control System}
+\chapter{Checklists and Flight Procedures}
+	\section{Battery Cold Swap Procedure}
+		\begin{enumerate}
+			\item Disconnect BATTERY PARALLEL ADAPTER from AIRCRAFT POWER.
+			\item Disconnect BATTERY PARALLEL ADAPTER from PAYLOAD POWER.
+			\item Remove the old AIRCRAFT BATTERY.
+			\item Attach the new AIRCRAFT BATTERY to the BATTERY BOOMS.
+			\item Connect the BATTERY PARALLEL ADAPTER to the AIRCRAFT BATTERY.
+			\item Check the AIRCRAFT CENTER OF GRAVITY.
+		\end{enumerate}
+	\section{Before Aircraft and Payload Power On Check}
+		\begin{enumerate}
+			\item AIRCRAFT POWER \hrulefill DISCONNECTED
+			\item AIRCRAFT BATTERIES \hrulefill 4.18 V $\pm$ 0.01 V PER CELL, MATCHED PACKS
+			\item AIRCRAFT CENTER OF GRAVITY \hrulefill CHECK
+			\item AIRCRAFT ROTOR ALIGNMENT \hrulefill CHECK
+			\item AIRCRAFT ROTOR INTEGRITY \hrulefill CHECK
+			\item AIRCRAFT BOOM INTEGRITY \hrulefill CHECK
+			\item AIRCRAFT BATTERY STRAPS \hrulefill SECURED
+			\item PAYLOAD POWER \hrulefill DISCONNECTED
+			\item PAYLOAD SWITCH \hrulefill OFF
+			\item PAYLOAD ANTENNA \hrulefill CHECK
+			\item MAVLINK \hrulefill DISCONNECTED
+			\item GCS DATALINK \hrulefill ACTIVE AND CONFIGURED
+			\item RC TRANSMITTER \hrulefill ACTIVE
+			\begin{enumerate}
+				\item MODE SWITCH \hrulefill MANUAL
+				\item RIGHT STICK \hrulefill CENTERED
+				\item LEFT STICK \hrulefill CENTERED
+				\item TRIMS (ALL) \hrulefill CENTERED
+			\end{enumerate}
+		\end{enumerate}
+	\section{Aircraft and Payload Power On Procedure}
+		\begin{enumerate}
+			\item Connect PAYLOAD POWER.
+			\item Connect AUTOPILOT POWER.
+			\item Do not rock the aircraft.
+			\item Verify PAYLOAD STATUS LIGHT is flashing slowly within 15 seconds.
+			\item Verify AUTOPILOT STATUS LIGHT is flashing slowly within 30 seconds.
+			\item Connect the GCS MAVLINK.
+		\end{enumerate}
+	\section{Pre-Takeoff Check}
+		\begin{enumerate}
+			\item GPS STATUS \hrulefill AT LEAST 6
+			\item GPS LOCATION \hrulefill STABLE, REASONABLE
+			\item ORIENTATION \hrulefill HORIZONTAL
+			\item AIRSPACE \hrulefill CLEAR
+			\item TAKEOFF CLEARANCE \hrulefill CLEAR
+			\item AUTOPILOT OPERATOR \hrulefill NOTIFIED
+			\item PAYLOAD SWITCH \hrulefill ON
+		\end{enumerate}
+	\section{Takeoff Procedure}
+		\begin{enumerate}
+			\item Set the RC TRANSMITTER MODE SWITCH to LOITER.
+			\item Set THROTTLE to 0\%.
+			\item Disengage aircraft safeties by pressing and holding the AIRCRAFT SAFETY SWITCH.
+			\item Confirm that the AIRCRAFT SAFETY SWITCH is solid red.
+			\item Arm the THROTTLE ARM by holding the left stick down and to the right.
+			\item Advance THROTTLE to 50\%.
+			\item Add takeoff power.
+			\item Reduce THROTTLE when approaching hover altitude.
+		\end{enumerate}
+	\section{Takeoff Procedure with Less-Than-Optimal GPS or Less-Than-Optimal Clearance}
+		\begin{enumerate}
+			\item Set the RC TRANSMITTER MODE SWITCH to MANUAL.
+			\item Set THROTTLE to 0\%.
+			\item Disengage aircraft safeties by pressing and holding the AIRCRAFT SAFETY SWITCH.
+			\item Confirm that the AIRCRAFT SAFETY SWITCH is solid red.
+			\item Arm the THROTTLE ARM by holding the left stick down and to the right.
+			\item Advance THROTTLE to 15\%.
+			\item Check for control authority.
+			\item Add takeoff power.
+			\item Manuever to clear obstacles, until adequate clearance and/or GPS stability.
+			\item Reduce THROTTLE when approaching hover altitude.
+		\end{enumerate}
+	\section{Climb to Hover in LOITER or ALT\_HOLD Procedure}
+		\begin{enumerate}
+			\item Add power to climb.
+			\item Reduce THROTTLE to 50\% when approaching hover altitude.
+			\item Check with GCS for status.
+		\end{enumerate}
+	\section{Climb to Hover in MANUAL Procedure}
+		\begin{enumerate}
+			\item Add power to climb.
+			\item Reduce THROTTLE when approaching hover altitude.  Adjust to maintain altitude.
+			\item Check with GCS for status.
+		\end{enumerate}
+	\section{Pre-Mission Start Check}
+		\begin{enumerate}
+			\item LOITER CLEARANCE\hrulefill CHECK
+			\item MISSION\hrulefill UPLOADED
+			\item WINDS\hrulefill LESS THAN 8 M/S
+		\end{enumerate}
+	\section{Mission Start Procedure}
+		\begin{enumerate}
+			\item Set the RC TRANSMITTER MODE SWITCH to LOITER.
+			\item Confirm with GCS that LOITER mode is set and stable.
+			\item Notify GCS of intent to enter AUTO mode.
+			\item Set the RC TRANSMITTER MODE SWITCH to AUTO.
+			\item Confirm switch to WAYPOINT with GCS.
+		\end{enumerate}
+	\section{Mission End Procedure}
+		\begin{enumerate}
+			\item Check that the RC TRANSMITTER is on and active.
+			\item Check that the aircraft is within visual range.
+			\item Check that there is enough battery to land safely.
+			\item Notify GCS of intent to take control of the aircraft.
+			\item Set the RC TRANSMITTER MODE SWITCH to LOITER.
+			\item Confirm with GCS that the pilot has control of the aircraft.
+		\end{enumerate}
+	\section{Failed Mission End Procedure}
+		\begin{enumerate}
+			\item Set the RC TRANSMITTER MODE SWITCH to AUTO.
+			\item Notify GCS of failure to take control of the aircraft.
+			\item Have GCS set the RETURN TO HOME mode.
+			\item Continuously retry the MISSION END PROCEDURE until control is regained.
+			\item If control cannot be regained, but the aircraft is in RETURN TO HOME mode, allow the aircraft to autonomously land.
+			\item If control cannot be regained, and the aircraft is not in RETURN TO HOME mode, execute the LOSS OF AUTOPILOT DATALINK procedure.
+		\end{enumerate}
+	\section{Pre-Approach Checks}
+		\begin{enumerate}
+			\item APPROACH \hrulefill CLEAR
+			\item TRAFFIC \hrulefill CLEAR
+			\item RC TRANSMITTER MODE SWITCH \hrulefill LOITER
+		\end{enumerate}
+	\section{Approach Procedure}
+		\begin{enumerate}
+			\item Reduce THROTTLE to begin descent.
+			\item Fly the approach at a non-vertical angle, with a descent rate no greater than XXX %TODO set max descent
+			\item Enter a hover at 2-5 meters AGL above the landing area.
+		\end{enumerate}
+	\section{Landing Procedure}
+		\begin{enumerate}
+			\item Reduce THROTTLE to enter a controlled vertical descent, with a descent rate no greater than 2 m/s.
+			\item When the aircraft makes contact with the ground. set the RC TRANSMITTER MODE SWITCH to MANUAL.
+			\item Set THROTTLE to 0\%.
+			\item Disarm the THROTTLE ARM by holding the left stick down and to the left.
+			\item Engage aircraft safeties by holding the AIRCRAFT SAFETY SWITCH down.
+			\item Confirm aircraft safeties by checking that the AIRCRAFT SAFETY SWITCH is blinking red.
+		\end{enumerate}
+	\section{Payload Stop Procedure}
+		\begin{enumerate}
+			\item Set the PAYLOAD SWITCH to OFF.
+			\item Confirm that the PAYLOAD STATUS LIGHT begins to blink slowly within 15 seconds.
+		\end{enumerate}
+	\section{Post-Landing Procedure}
+\chapter{Emergency Procedures}
+	\section{Battery Fire on Ground}
+	\section{Battery Fire in Flight}
+	\section{Battery Undervoltaged in Flight}
+	\section{Loss of Autopilot Datalink}
+\chapter{Maintenance}
+	\section{Delivery Check}
+		\begin{enumerate}
+			\item Boom Integrity\hrulefill CHECK
+				\begin{itemize}
+					\item Check for cracks, nicks, flexing, and other defects
+				\end{itemize}
+			\item Boom Body Attachment\hrulefill CHECK
+				\begin{enumerate}
+					\item Boom Plastic Keeper\hrulefill CHECK
+						\begin{itemize}
+							\item 4 screws to the body plate
+							\item No Cracks
+							\item Engaged
+						\end{itemize}
+					\item Boom Hinge\hrulefill CHECK
+						\begin{itemize}
+							\item 2x screws to the body plate
+							\item 1x screw to boom
+						\end{itemize}
+				\end{enumerate}
+			\item Boom Motor Attachment\hrulefill CHECK
+				\begin{enumerate}
+					\item 2x Boom Clamps\hrulefill CHECK
+						\begin{itemize}
+							\item 2x screws
+							\item Tightened
+							\item Blue in front, orange in rear
+						\end{itemize}
+					\item Baseplate\hrulefill CHECK
+					\item 4x Motor Mounting Screws\hrulefill CHECK
+				\end{enumerate}
+			\item Motor Integrity\hrulefill CHECK
+				\begin{itemize}
+					\item Check that motors spin freely, without noticeable cogging
+				\end{itemize}
+			\item Rotor Mount\hrulefill CHECK
+				\begin{itemize}
+					\item 2x screws, tightened
+					\item FL and RR CW, FR and RL CCW
+				\end{itemize}
+			\item Rotor Integrity\hrulefill CHECK
+				\begin{itemize}
+					\item Check for cracks, nicks, excessive flexing, and other defects
+				\end{itemize}
+			\item Rotor Alignment\hrulefill CHECK
+				\begin{itemize}
+					\item Rotate two adjacent rotors so that the tips are pointed towards each other.
+					\item Adjust the BOOM MOTOR ATTACHMENT so that the rotors are parallel with each other.
+					\item Continue around the aircraft until all rotors are parallel with each other.
+					\item Tighten all BOOM MOTOR ATTACHMENT points.
+				\end{itemize}
+			\item Aircraft Body\hrulefill CHECK
+				\begin{enumerate}
+					\item 12x Standoffs\hrulefill CHECK
+						\begin{itemize}
+							\item 2x screws, tightened
+							% add image showing locations
+						\end{itemize}
+					\item Plate Integrity\hrulefill CHECK
+						\begin{itemize}
+							\item Check for cracks, nicks, excess flexing, and other defects
+						\end{itemize}
+					\item Battery Mount\hrulefill CHECK
+						\begin{enumerate}
+							\item 4x Battery Boom Clamps\hrulefill CHECK
+								\begin{itemize}
+									\item 2x screws, tightened
+									\item Rubber grommet
+									\item Black in front, orange in back
+									\item Check for cracks, excess abrasion
+								\end{itemize}
+							\item 2x Battery Boom\hrulefill CHECK
+								\begin{itemize}
+									\item Check for proper interfacing with 2x grommets on clamps
+									\item Check for cracks, nicks, flexing, and other defects
+								\end{itemize}
+							\item 2x Battery Straps\hrulefill CHECK
+								\begin{itemize}
+									\item Check for presence
+									\item Check for 40 cm length
+								\end{itemize}
+						\end{enumerate}
+				\end{enumerate}
+			\item Autopilot\hrulefill CHECK
+				\begin{itemize}
+					\item Check for 4x adhesive foam support blocks
+					\item Check that maximum deflection of the autopilot in any direction does not impact any other device.
+					\item Check that the arrow on the Pixhawk points the front of the copter
+				\end{itemize}
+			\item GPS Antenna\hrulefill CHECK
+				\begin{itemize}
+					\item Check for 2 screws in mount.
+					\item Check that the arrow on the antenna is pointed exactly forward.
+					\item Check that there is not significant deflection in the boom.
+				\end{itemize}
+			\item Autopilot Radio\hrulefill CHECK
+				\begin{itemize}
+					\item Check for security
+					\item Ensure that the antenna is attached and oriented vertically, out of the rotor disk.
+				\end{itemize}
+			\item RC Receiver\hrulefill CHECK
+				\begin{itemize}
+					\item Check for security
+					\item Ensure that the antennae (2) are secured to the airframe so that they cannot be blown into the rotor disk, and that they are not within the body.
+				\end{itemize}
+			\item Arming Switch\hrulefill CHECK
+				\begin{itemize}
+					\item Check for security in mount
+					\item Check that the switch is easily accessible and visible, and not being pressed by another device
+				\end{itemize}
+			\item Buzzer\hrulefill CHECK
+				\begin{itemize}
+					\item Check for security in mount
+					\item Check that there is nothing obstructing the buzzer.
+				\end{itemize}
+			\item Avionics\hrulefill CHECK
+				\begin{enumerate}
+					\item AUTOPILOT WIRING\hrulefill CHECK
+						\begin{enumerate}
+							\item RC IN \dotfill RC Receiver SUBS
+							\item RCOP 4 \dotfill Rear Right ESC
+							\item RCOP 3 \dotfill Front Left ESC
+							\item RCOP 2 \dotfill Rear Left ESC
+							\item RCOP 1 \dotfill Front Right ESC
+							\item BUZZER \dotfill Buzzer
+							\item SWITCH \dotfill ARMING SWITCH
+							\item TELEM 1 \dotfill AUTOPILOT RADIO
+							\item TELEM 2 \dotfill PAYLOAD
+							\item GPS \dotfill GPS ANTENNA GPS PORT
+							\item I2C \dotfill GPS ANTENNA MAG PORT
+							\item POWER \dotfill Power Cable Autopilot Port
+						\end{enumerate}
+					\item AUTOPILOT SD CARD\hrulefill CHECK
+				\end{enumerate}
+			\item Power Wiring\hrulefill CHECK
+				\begin{itemize}
+					\item Check that all wiring is intact and not shorting
+					\item Check against the below diagram
+					% TODO add power wiring diagram
+				\end{itemize}
+			\item Flight Checks\hrulefill CHECK
+				\begin{enumerate}
+					\item Power On Check
+					\item Avionics Check
+					\item Spin Up Check
+					\item Navigations Check
+					\item Controls Check
+				\end{enumerate}
+		\end{enumerate}
+	\section{Replacing Props}
+	\section{Replacing Arms}
+	\section{Replacing the Payload Antenna}
+	\section{Replacing the Payload}
+	\section{Reseting the Payload}
+	\section{Charging Batteries}
+	\section{Maintaining Batteries}
 \chapter{Flight Management Software}
-\section{Installation}
+	\section{Requirements}
+		\begin{itemize}
+			\item Minimum Operating System: Windows 7
+			\item Known Good Versions: 1.3.32
+		\end{itemize}
+	\section{Installation}
+		\begin{enumerate}
+			\item Download the Mission Planner Installer from http://ardupilot.com
+			\item Accept the default settings
+		\end{enumerate}
+	\section{Setup}
+	\section{Flight Planning}
+	\section{Uploading a Mission}
+	\section{Operating a Mission}
 \end{document}
