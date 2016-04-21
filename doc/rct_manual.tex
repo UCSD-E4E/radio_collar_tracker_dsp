@@ -21,7 +21,6 @@
 				\item Powerplant Voltage\hfill12.5 V
 				\item Maximum Speed\hfill 15 m/s
 				\item Maximum Range\hfill 22 km
-				\item Service Ceiling
 				\item Rotor Diameter\hfill 43 cm
 				\item Rotors\hfill4
 				\item Battery\hfill 3S3P 24C LiPo 15300 mAh
@@ -38,6 +37,9 @@
 				\item Computer\hfill Raspberry Pi 2
 			\end{itemize}
 	\section{Ground Control System}
+	\section{Crew Roles}
+		\subsection{Pilot in Command}
+		\subsection{Autopilot Operator}
 \chapter{Checklists and Flight Procedures}
 	\section{Battery Cold Swap Procedure}
 		\begin{enumerate}
@@ -186,9 +188,10 @@
 	\section{Post-Landing Procedure}
 \chapter{Emergency Procedures}
 	\section{Battery Fire on Ground}
-	\section{Battery Fire in Flight}
-	\section{Battery Undervoltaged in Flight}
 	\section{Loss of Autopilot Datalink}
+		%automatic abort
+	\section{Loss of RC Link}
+		%automatic abort
 \chapter{Maintenance}
 	\section{Delivery Check}
 		\begin{enumerate}
@@ -333,13 +336,95 @@
 			\item Flight Checks\hrulefill CHECK
 				\begin{enumerate}
 					\item Power On Check
+						\begin{enumerate}
+							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
+							\item Connect the AIRCRAFT BATTERY PACK to the BATTERY PARALLEL ADAPTER.
+							\item Connect the BATTERY PARALLEL ADAPTER to AIRCRAFT POWER.
+							\item Check that the AUTOPILOT comes online and initializes.
+							\item Check that the AUTOPILOT STATUS LIGHT begins to slowly flash within 30 seconds.
+							\item Check that the SAFETY SWITCH is blinking red.
+							\item Connect the BATTERY PARALLEL ADAPTER to PAYLOAD POWER.
+							\item Check that the PAYLOAD STATUS LIGHT immediately begins to quickly flash green.
+							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
+						\end{enumerate}
 					\item Avionics Check
+						\begin{enumerate}
+							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
+							\item Connect the AIRCRAFT BATTERY PACK to the BATTERY PARALLEL ADAPTER.
+							\item Connect the BATTERY PARALLEL ADAPTER to AIRCRAFT POWER.
+							\item Check that the AUTOPILOT comes online and initializes.
+							\item Check that the AUTOPILOT STATUS LIGHT begins to slowly flash within 30 seconds.
+							\item Check that the SAFETY SWITCH is blinking red.
+							\item Connect the GCS MAVLINK to the AUTOPILOT.
+							\item In the GCS, check that the GPS satellite count is climbing to at least 6, and that the GPS location is stable and sane.
+							\item In the GCS, check that the attitude and orientation indicated by the artificial horizon is sane and reacting properly to inputs to the airframe.
+							\item In the GCS, check that the heading indicated by the compass is sane and reacting properly to inputs to the airframe.
+							\item In the GCS, check that the AUTOPILOT is receiving commands from the RC TRANSMITTER.
+							\item In the GCS, check that the battery voltage is sane and agrees with the current battery state.
+							\item Connect the BATTERY PARALLEL ADAPTER to PAYLOAD POWER.
+							\item Check that the PAYLOAD STATUS LIGHT begins to slowly flash green within 15 seconds.
+							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
+						\end{enumerate}
 					\item Spin Up Check
-					\item Navigations Check
-					\item Controls Check
+						\begin{enumerate}
+							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
+							\item Connect the AIRCRAFT BATTERY PACK to the BATTERY PARALLEL ADAPTER.
+							\item Connect the BATTERY PARALLEL ADAPTER to AIRCRAFT POWER.
+							\item Check that the AUTOPILOT comes online and initializes.
+							\item Check that the AUTOPILOT STATUS LIGHT begins to slowly flash within 30 seconds.
+							\item Check that the SAFETY SWITCH is blinking red.
+							\item Check that the RC TRANSMITTER is on and active.
+							\item Set the THROTTLE to 0\%.
+							\item Set the RC TRANSMITTER MODE SWITCH to MANUAL.
+							\item Disable aircraft safeties by pressing and holding the AIRCRAFT SAFETY SWITCH.
+							\item Arm the THROTTLE ARM by holding the left stick down and to the right.
+							\item Confirm that the rotors begin spinning in the proper directions.
+							\item Advance THROTTLE to 10\%.
+							\item Confirm that the right stick inputs are properly executed by the aircraft.
+							\item Reduce THROTTLE to 0\%.
+							\item Disarm the THROTTLE ARM by holding the left stick down and to the left.
+							\item Enable aircraft safeties by pressing and holding the AIRCRAFT SAFETY SWITCH.
+							\item Confirm that aircraft safeties are enabled (AIRCRAFT SAFETY SWITCH should be blinking red).
+							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
+						\end{enumerate}
+					\item Flight Check
+						\begin{enumerate}
+							\item Plan a mission with the following parameters:
+								\begin{itemize}
+									\item Takeoff waypoint immediately above the takeoff area, altitude at least 10 meters AGL.
+									\item Waypoint 2 at least 100 meters away, at least 20 meters above takeoff waypoint.
+									\item Waypoint 3 at least 100 meters away from previous waypoints, within VLOS, same altitude as Waypoint 2.
+									\item Waypoint 4 is a RETURN TO HOME command.
+								\end{itemize}
+							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
+							\item Connect the AIRCRAFT BATTERY PACK to the BATTERY PARALLEL ADAPTER.
+							\item Connect the BATTERY PARALLEL ADAPTER to AIRCRAFT POWER.
+							\item Check that the AUTOPILOT comes online and initializes.
+							\item Check that the AUTOPILOT STATUS LIGHT begins to slowly flash within 30 seconds.
+							\item Check that the SAFETY SWITCH is blinking red.
+							\item Check that the RC TRANSMITTER is on and active.
+							\item Connect the GCS MAVLINK to the AUTOPILOT.
+							\item Upload the planned mission.
+							\item Conduct the mission with a takeoff in LOITER.  Check for abnormal wobbling, uncertain tracking, etc.  All waypoint transitions should be smooth.
+							\item Allow aircraft to autoland and manually disarm and safe.
+						\end{enumerate}
+					\item Failsafe Check
+						\begin{enumerate}
+							\item Plan a mission with the following parameters:
+								\begin{itemize}
+									\item Takeoff waypoint at least 50 meters AGL.
+									\item Waypoint 2 at 1 km, 100 meters AGL.
+									\item Waypoint 3 at no more than 50 meters distance, at least 20 meters AGL.
+									\item Waypoint 4 is a RETURN TO HOME command.
+								\end{itemize}
+							\item Execute the mission.  When the copter is about 100 meters away, turn off the RC TRANSMITTER.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
+							\item Restart the mission.  When the copter is about 100 meters away, turn off the GCS MAVLINK by turning off the GCS AUTOPILOT RADIO.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
+							\item Land and safe the aircraft.
+						\end{enumerate}
 				\end{enumerate}
 		\end{enumerate}
 	\section{Replacing Props}
+		Carbon fiber propellers should be replaced if they show signs of cracking or damage.  This manifests as cracks or delamination of the propeller, usually near the tip, but occasionally near the root of the propeller.  To check for cracks or delamination of the propeller, feel along all surfaces of the propeller for any sharp edges or nicks - this is usually the starting point of delamination.  Additionally, flex the propellers a
 	\section{Replacing Arms}
 	\section{Replacing the Payload Antenna}
 	\section{Replacing the Payload}
