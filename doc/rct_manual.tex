@@ -6,7 +6,11 @@
 \maketitle
 \tableofcontents
 \chapter{System Overview}
+	\section{Mission Profile}
+		This system is designed to conduct aerial surveys for the purpose of tracking and localizing wildlife collars used for biological and ecological research.  We approach this problem by flying a radio across the search area, recording the signal strength for any pings from any collars we can detect.  We can then determine the location of a collar by correlating the signal strength and the locations where we detected that particular signal strength.
 	\section{Aircraft}
+		\subsection{Aircraft Summary}
+			The airframe used in this UAS is a Tarot Ironman 650, which is a carbon-fiber quadcopter airframe.  We have then integrated a commercial open-source autopilot, the 3DR PixHawk, to use as our primary flight controller.  To maximize flight time, we have settled on a battery pack consisting of 3 3S 5.1 Ah batteries connected in parallel.  As a result of this configuration, we can acheive a total flight time of 20-25 minutes at a maximum speed of 15 m/s.
 		\subsection{Aircraft Specifications}
 			\begin{itemize}
 				\item Crew\hfill0
@@ -32,14 +36,19 @@
 				\item RC Transmitter\hfill FrSky Taranis X9D
 			\end{itemize}
 	\section{Payload}
+		\subsection{Payload Summary}
+			The payload for this UAS is basically a computerized radio recorder.  We have elected to use a software defined radio as our radio frontend, as this allows us to rapidly reconfigure the payload for any range of frequencies.  This is connected to a Raspberry PI 2, which handles all of the data collection, including collecting position data from the autopilot system.  Recorded data is organized into runs, which are stored on a removeable USB drive.
 		\subsection{Payload Specifications}
 			\begin{itemize}
 				\item Computer\hfill Raspberry Pi 2
 			\end{itemize}
 	\section{Ground Control System}
+		The Ground Control System for this UAS consists of a laptop running a Windows OS and the open source flight management software MissionPlanner.  This connects to the aircraft over a 3DR 900 MHz radio, permitting 2 way digital communications between the UAS and the GCS.  From the GCS, we are able to plan, upload, and control all missions, as well as provide the pilot with flight and diagnostic information.
 	\section{Crew Roles}
 		\subsection{Pilot in Command}
+			The Pilot in Command (PIC) is responsible for the safe operation of the aircraft.  He or she is responsible for takeoff, transition to mission, return, and landing, as well as for the general pacing of the mission.
 		\subsection{Autopilot Operator}
+			The Autopilot Operator is responsible for monitoring the flight management software and mission progress.  He or she must plan and upload the mission plan to the aircraft, confirm clearance for switching to autonomous flight modes, and monitor the UAS as it completes the mission.
 \chapter{Checklists and Flight Procedures}
 	\section{Battery Cold Swap Procedure}
 		\begin{enumerate}
@@ -333,6 +342,21 @@
 					\item Check against the below diagram
 					% TODO add power wiring diagram
 				\end{itemize}
+			\item Payload Mount \hrulefill CHECK
+				\begin{itemize}
+					\item Check that the 2 screws are fully threaded and tightened.
+					\item Check that the mount is not cracked, twisted, or otherwise damaged.
+				\end{itemize}
+			\item Payload Wiring\hrulefill CHECK
+				\begin{enumerate}
+					\item RF IN \dotfill PAYLOAD ANTENNA
+					\item DATA STORAGE \dotfill USB PORT
+				\end{enumerate}
+			\item Payload Antenna\hrulefill CHECK
+				\begin{itemize}
+					\item Check that the antenna is straight and not touching anything other than where it is mounted on the aircraft.
+					\item Check that the antenna is mounted on the insulated part of the boom.
+				\end{itemize}
 			\item Flight Checks\hrulefill CHECK
 				\begin{enumerate}
 					\item Power On Check
@@ -395,6 +419,7 @@
 									\item Waypoint 2 at least 100 meters away, at least 20 meters above takeoff waypoint.
 									\item Waypoint 3 at least 100 meters away from previous waypoints, within VLOS, same altitude as Waypoint 2.
 									\item Waypoint 4 is a RETURN TO HOME command.
+									\item Total flight time is at lest 5 minutes.
 								\end{itemize}
 							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
 							\item Connect the AIRCRAFT BATTERY PACK to the BATTERY PARALLEL ADAPTER.
@@ -421,16 +446,26 @@
 							\item Restart the mission.  When the copter is about 100 meters away, turn off the GCS MAVLINK by turning off the GCS AUTOPILOT RADIO.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
 							\item Land and safe the aircraft.
 						\end{enumerate}
+					\item Payload Check
+						\begin{enumerate}
+							\item Activate and deploy a known collar at a known location.
+							\item Plan a mission starting at least 50 meters away from the known collar that overflies the known collar location.
+							\item Run the above mission at an altitude of no more than 30 meters AGL.
+							\item Process the data, and confirm that the collar was detected.
+						\end{enumerate}
 				\end{enumerate}
 		\end{enumerate}
 	\section{Replacing Props}
-		Carbon fiber propellers should be replaced if they show signs of cracking or damage.  This manifests as cracks or delamination of the propeller, usually near the tip, but occasionally near the root of the propeller.  To check for cracks or delamination of the propeller, feel along all surfaces of the propeller for any sharp edges or nicks - this is usually the starting point of delamination.  Additionally, flex the propellers a
+		Carbon fiber propellers should be replaced if they show signs of cracking or damage.  This manifests as cracks or delamination of the propeller, usually near the tip, but occasionally near the root of the propeller.  To check for cracks or delamination of the propeller, feel along all surfaces of the propeller for any sharp edges or nicks - this is usually the starting point of delamination.  Additionally, flex the propellers to check for any cracking - this will manifest as cracking sounds and the feeling that the propeller is abnormally easier to flex.
+
+		To remove the propeller, remove the two screws and plate holding the propeller to the motor.  Remove the propeller.
+
+		To install the propeller, place the propeller on the rotor shaft, and align the propeller to the screw holes.  Install the top plate and the screws.  Tighten.
 	\section{Replacing Arms}
 	\section{Replacing the Payload Antenna}
 	\section{Replacing the Payload}
 	\section{Reseting the Payload}
 	\section{Charging Batteries}
-	\section{Maintaining Batteries}
 \chapter{Flight Management Software}
 	\section{Requirements}
 		\begin{itemize}
@@ -440,10 +475,13 @@
 	\section{Installation}
 		\begin{enumerate}
 			\item Download the Mission Planner Installer from http://ardupilot.com
-			\item Accept the default settings
+			\item Accept the default settings.
+			\item Install the additional drivers when prompted to.
+			\item Click finish.
 		\end{enumerate}
 	\section{Setup}
 	\section{Flight Planning}
 	\section{Uploading a Mission}
 	\section{Operating a Mission}
+\chapter{Definitions}
 \end{document}
