@@ -75,7 +75,7 @@
 			\item GCS DATALINK \hrulefill ACTIVE AND CONFIGURED
 			\item RC TRANSMITTER \hrulefill ACTIVE
 			\begin{enumerate}
-				\item MODE SWITCH \hrulefill MANUAL
+				\item MODE SWITCH \hrulefill STABILIZE
 				\item RIGHT STICK \hrulefill CENTERED
 				\item LEFT STICK \hrulefill CENTERED
 				\item TRIMS (ALL) \hrulefill CENTERED
@@ -113,7 +113,7 @@
 		\end{enumerate}
 	\section{Takeoff Procedure with Less-Than-Optimal GPS or Less-Than-Optimal Clearance}
 		\begin{enumerate}
-			\item Set the RC TRANSMITTER MODE SWITCH to MANUAL.
+			\item Set the RC TRANSMITTER MODE SWITCH to STABILIZE.
 			\item Set THROTTLE to 0\%.
 			\item Disengage aircraft safeties by pressing and holding the AIRCRAFT SAFETY SWITCH.
 			\item Confirm that the AIRCRAFT SAFETY SWITCH is solid red.
@@ -130,7 +130,7 @@
 			\item Reduce THROTTLE to 50\% when approaching hover altitude.
 			\item Check with GCS for status.
 		\end{enumerate}
-	\section{Climb to Hover in MANUAL Procedure}
+	\section{Climb to Hover in STABILIZE Procedure}
 		\begin{enumerate}
 			\item Add power to climb.
 			\item Reduce THROTTLE when approaching hover altitude.  Adjust to maintain altitude.
@@ -183,7 +183,7 @@
 	\section{Landing Procedure}
 		\begin{enumerate}
 			\item Reduce THROTTLE to enter a controlled vertical descent, with a descent rate no greater than 2 m/s.
-			\item When the aircraft makes contact with the ground. set the RC TRANSMITTER MODE SWITCH to MANUAL.
+			\item When the aircraft makes contact with the ground. set the RC TRANSMITTER MODE SWITCH to STABILIZE.
 			\item Set THROTTLE to 0\%.
 			\item Disarm the THROTTLE ARM by holding the left stick down and to the left.
 			\item Engage aircraft safeties by holding the AIRCRAFT SAFETY SWITCH down.
@@ -399,7 +399,7 @@
 							\item Check that the SAFETY SWITCH is blinking red.
 							\item Check that the RC TRANSMITTER is on and active.
 							\item Set the THROTTLE to 0\%.
-							\item Set the RC TRANSMITTER MODE SWITCH to MANUAL.
+							\item Set the RC TRANSMITTER MODE SWITCH to STABILIZE.
 							\item Disable aircraft safeties by pressing and holding the AIRCRAFT SAFETY SWITCH.
 							\item Arm the THROTTLE ARM by holding the left stick down and to the right.
 							\item Confirm that the rotors begin spinning in the proper directions.
@@ -430,20 +430,21 @@
 							\item Check that the RC TRANSMITTER is on and active.
 							\item Connect the GCS MAVLINK to the AUTOPILOT.
 							\item Upload the planned mission.
-							\item Conduct the mission with a takeoff in LOITER.  Check for abnormal wobbling, uncertain tracking, etc.  All waypoint transitions should be smooth.
+							\item Conduct the mission with a takeoff in STABILIZE.  Check for abnormal wobbling, uncertain tracking, etc.  All waypoint transitions should be smooth.
 							\item Allow aircraft to autoland and manually disarm and safe.
+							\item Repeat the mission with a takeoff in LOITER.
 						\end{enumerate}
 					\item Failsafe Check
 						\begin{enumerate}
 							\item Plan a mission with the following parameters:
 								\begin{itemize}
 									\item Takeoff waypoint at least 50 meters AGL.
-									\item Waypoint 2 at 1 km, 100 meters AGL.
+									\item Waypoint 2 at 100-200 meters distance, 100 meters AGL.
 									\item Waypoint 3 at no more than 50 meters distance, at least 20 meters AGL.
 									\item Waypoint 4 is a RETURN TO HOME command.
 								\end{itemize}
-							\item Execute the mission.  When the copter is about 100 meters away, turn off the RC TRANSMITTER.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
-							\item Restart the mission.  When the copter is about 100 meters away, turn off the GCS MAVLINK by turning off the GCS AUTOPILOT RADIO.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
+							\item Execute the mission.  When the copter is heading away, turn off the RC TRANSMITTER.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
+							\item Restart the mission.  When the copter is heading away, turn off the GCS MAVLINK by turning off the GCS AUTOPILOT RADIO.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
 							\item Land and safe the aircraft.
 						\end{enumerate}
 					\item Payload Check
@@ -470,7 +471,7 @@
 	\section{Requirements}
 		\begin{itemize}
 			\item Minimum Operating System: Windows 7
-			\item Known Good Versions: 1.3.32
+			\item Known Good Versions: 1.3.37
 		\end{itemize}
 	\section{Installation}
 		\begin{enumerate}
@@ -479,8 +480,42 @@
 			\item Install the additional drivers when prompted to.
 			\item Click finish.
 		\end{enumerate}
-	\section{Setup}
 	\section{Flight Planning}
+		\subsection{Selecting a Search Area}
+			\begin{enumerate}
+				\item Right click to open the context menu.
+				\item Under ``Draw Polygon'', select ``Add Polygon Point''.
+				\item Click ``OK''.
+				\item Drag the first point to the desired location.
+				\item Click to set additional points.
+			\end{enumerate}
+		\subsection{Loading a Search Area}
+			\begin{enumerate}
+				\item Right click to open the context menu.
+				\item Under ``Draw Polygon'', select ``Load Polygon''.
+				\item Select the polygon file you wish to load.
+			\end{enumerate}
+		\subsection{Saving a Search Area}
+			\begin{enumerate}
+				\item Right click to open the context menu.
+				\item Under ``Draw Polygon'', select ``Save Polygon''.
+				\item Enter the filename and directory in which you would like to save the polygon file.
+				\item Click ``Save''.
+			\end{enumerate}
+		\subsection{Plotting a Search Grid}
+			\begin{enumerate}
+				\item Set a search area.
+				\item Right click to open the context menu.
+				\item Under ``Auto WP'', select ``Survey (Grid)''.
+				\item Check the ``Advanced Options'' checkbox under ``Display'' on the right-hand side bar.
+				\item Set the desired altitude and flight speed.
+				\item Check the ``Add Takeoff and Land WP's'' and ``Use RTL'' checkboxes.
+				\item Open the ``Grid Options'' tab.
+				\item Set the ``Distance between lines [m]'' to 30 meters.
+				\item Check that the ``Flight Time (est)'' field on the bottom bar is less than 20 minutes.
+				\item Click ``Accept''.
+				\item Check that the waypoints have been properly set.
+			\end{enumerate}
 	\section{Uploading a Mission}
 	\section{Operating a Mission}
 \chapter{Definitions}
