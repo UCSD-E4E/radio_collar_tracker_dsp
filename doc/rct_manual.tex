@@ -1,4 +1,7 @@
 \documentclass{report}
+\usepackage{draftwatermark}
+\SetWatermarkText{DRAFT}
+\SetWatermarkScale{7}
 \title{Radio Collar Tracker Flight Operations Manual}
 \author{Eric Lo, Project Manager\\Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
 \usepackage{fullpage}
@@ -10,10 +13,9 @@
 		This system is designed to conduct aerial surveys for the purpose of tracking and localizing wildlife collars used for biological and ecological research.  We approach this problem by flying a radio across the search area, recording the signal strength for any pings from any collars we can detect.  We can then determine the location of a collar by correlating the signal strength and the locations where we detected that particular signal strength.
 	\section{Aircraft}
 		\subsection{Aircraft Summary}
-			The airframe used in this UAS is a Tarot Ironman 650, which is a carbon-fiber quadcopter airframe.  We have then integrated a commercial open-source autopilot, the 3DR PixHawk, to use as our primary flight controller.  To maximize flight time, we have settled on a battery pack consisting of 3 3S 5.1 Ah batteries connected in parallel.  As a result of this configuration, we can acheive a total flight time of 20-25 minutes at a maximum speed of 15 m/s.
+			The airframe used in this UAS is a Tarot Ironman 650, which is a carbon-fiber quadcopter airframe.  We have then integrated a commercial open-source autopilot, the 3DR PixHawk, to use as our primary flight controller.  To maximize flight time, we have settled on a battery pack consisting of 3 3S 5.1 Ah batteries connected in parallel.  As a result of this configuration, we can acheive a total flight time of 20-23 minutes at a maximum speed of 5 m/s.
 		\subsection{Aircraft Specifications}
 			\begin{itemize}
-				\item Crew\hfill0
 				\item Length\hfill110 cm
 				\item Width\hfill89 cm
 				\item Height\hfill25 cm
@@ -23,8 +25,8 @@
 				\item Powerplant\hfill 4 x Navigator Series T-Motor MN4010-11
 				\item Powerplant kV Rating\hfill475
 				\item Powerplant Voltage\hfill12.5 V
-				\item Maximum Speed\hfill 15 m/s
-				\item Maximum Range\hfill 22 km
+				\item Maximum Speed\hfill 5 m/s
+				\item Maximum Range\hfill 6 km
 				\item Rotor Diameter\hfill 43 cm
 				\item Rotors\hfill4
 				\item Battery\hfill 3S3P 24C LiPo 15300 mAh
@@ -35,6 +37,8 @@
 				\item Base Airframe\hfill Tarot Ironman 650 TI65B01
 				\item RC Transmitter\hfill FrSky Taranis X9D
 			\end{itemize}
+		\subsection{Transmitter Layout}
+		\subsection{Aircraft Layout}
 	\section{Payload}
 		\subsection{Payload Summary}
 			The payload for this UAS is basically a computerized radio recorder.  We have elected to use a software defined radio as our radio frontend, as this allows us to rapidly reconfigure the payload for any range of frequencies.  This is connected to a Raspberry PI 2, which handles all of the data collection, including collecting position data from the autopilot system.  Recorded data is organized into runs, which are stored on a removeable USB drive.
@@ -42,8 +46,10 @@
 			\begin{itemize}
 				\item Computer\hfill Raspberry Pi 2
 			\end{itemize}
+		\subsection{Payload Layout}
 	\section{Ground Control System}
 		The Ground Control System for this UAS consists of a laptop running a Windows OS and the open source flight management software MissionPlanner.  This connects to the aircraft over a 3DR 900 MHz radio, permitting 2 way digital communications between the UAS and the GCS.  From the GCS, we are able to plan, upload, and control all missions, as well as provide the pilot with flight and diagnostic information.
+		\subsection{GCS Layout}
 	\section{Crew Roles}
 		\subsection{Pilot in Command}
 			The Pilot in Command (PIC) is responsible for the safe operation of the aircraft.  He or she is responsible for takeoff, transition to mission, return, and landing, as well as for the general pacing of the mission.
@@ -68,6 +74,7 @@
 			\item AIRCRAFT ROTOR INTEGRITY \hrulefill CHECK
 			\item AIRCRAFT BOOM INTEGRITY \hrulefill CHECK
 			\item AIRCRAFT BATTERY STRAPS \hrulefill SECURED
+			\item BATTERY PARALLEL ADAPTER \hrulefill ATTACHED TO BATTERIES
 			\item PAYLOAD POWER \hrulefill DISCONNECTED
 			\item PAYLOAD SWITCH \hrulefill OFF
 			\item PAYLOAD ANTENNA \hrulefill CHECK
@@ -76,9 +83,11 @@
 			\item RC TRANSMITTER \hrulefill ACTIVE
 			\begin{enumerate}
 				\item MODE SWITCH \hrulefill STABILIZE
-				\item RIGHT STICK \hrulefill CENTERED
+				\item RIGHT STICK \hrulefill CENTERED/DOWN
 				\item LEFT STICK \hrulefill CENTERED
 				\item TRIMS (ALL) \hrulefill CENTERED
+				\item AUTO SWITCH \hrulefill OFF
+				\item RTL SWITCH \hrulefill OFF
 			\end{enumerate}
 		\end{enumerate}
 	\section{Aircraft and Payload Power On Procedure}
@@ -100,6 +109,8 @@
 			\item AUTOPILOT OPERATOR \hrulefill NOTIFIED
 			\item PAYLOAD SWITCH \hrulefill ON
 		\end{enumerate}
+	\section{Paylaod Start Procedure}
+		% TODO
 	\section{Takeoff Procedure}
 		\begin{enumerate}
 			\item Set the RC TRANSMITTER MODE SWITCH to LOITER.
@@ -177,7 +188,7 @@
 	\section{Approach Procedure}
 		\begin{enumerate}
 			\item Reduce THROTTLE to begin descent.
-			\item Fly the approach at a non-vertical angle, with a descent rate no greater than XXX %TODO set max descent
+			\item Fly the approach at a non-vertical angle, with a descent rate no greater than 2 m/s
 			\item Enter a hover at 2-5 meters AGL above the landing area.
 		\end{enumerate}
 	\section{Landing Procedure}
