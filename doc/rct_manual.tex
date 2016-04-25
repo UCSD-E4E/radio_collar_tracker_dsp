@@ -5,6 +5,16 @@
 \title{Radio Collar Tracker Flight Operations Manual}
 \author{Eric Lo, Project Manager\\Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
 \usepackage{fullpage}
+\usepackage{hyperref}
+\usepackage[final]{pdfpages}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=blue
+}
+
 \begin{document}
 \maketitle
 \tableofcontents
@@ -518,7 +528,7 @@
 				\item Set a search area.
 				\item Right click to open the context menu.
 				\item Under ``Auto WP'', select ``Survey (Grid)''.
-				\item Check the ``Advanced Options'' checkbox under ``Display'' on the right-hand side bar.
+				\item Check the ``Advanced Options'' checkbox under ``Display'' on the right-hand sidebar.
 				\item Set the desired altitude and flight speed.
 				\item Check the ``Add Takeoff and Land WP's'' and ``Use RTL'' checkboxes.
 				\item Open the ``Grid Options'' tab.
@@ -527,7 +537,25 @@
 				\item Click ``Accept''.
 				\item Check that the waypoints have been properly set.
 			\end{enumerate}
+		\subsection{Saving a Mission}
+			\begin{enumerate}
+				\item Click the ``Save WPs'' button in the right-hand sidebar.
+				\item Select the desired directory and filename and save.
+			\end{enumerate}
+		\subsection{Opening a Saved Mission}
+			\begin{enumerate}
+				\item Click the ``Load WPs'' button in the right-hand sidebar.
+				\item Navigate to the desired waypoints file and click ``Open''.
+				\item Click ``OK'' when prompted to replace the HOME location.
+			\end{enumerate}
 	\section{Uploading a Mission}
+		\begin{enumerate}
+			\item Load a mission into Mission Planner.
+			\item Click the ``Write WPs'' button on the right-hand sidebar.
+			\item Click the ``Read WPs'' button on the right-hand sidebar.
+			\item Click ``OK'' to the dialog prompting you to reset the HOME location.
+			\item Verify that the waypoints now displayed are the desired mission waypoints.
+		\end{enumerate}
 	\section{Operating a Mission}
 \chapter{Definitions}
 \end{document}
