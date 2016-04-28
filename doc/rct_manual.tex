@@ -29,7 +29,7 @@
 				\item Length\hfill110 cm
 				\item Width\hfill89 cm
 				\item Height\hfill25 cm
-				\item Empty Weight\hfill
+				\item Empty Weight\hfill1.5 kg
 				\item Maximum Takeoff Weight\hfill
 				\item Diagonal Boom Length\hfill65 cm
 				\item Powerplant\hfill 4 x Navigator Series T-Motor MN4010-11
@@ -40,6 +40,7 @@
 				\item Rotor Diameter\hfill 43 cm
 				\item Rotors\hfill4
 				\item Battery\hfill 3S3P 24C LiPo 15300 mAh
+				\item Battery Weight\hfill 1 kg
 				\item Autopilot\hfill3DR Pixhawk
 				\item RC Receiver\hfill FrSky X8R
 				\item Autopilot Datalink Radio\hfill 3DR 915 MHz Radio
@@ -55,6 +56,7 @@
 		\subsection{Payload Specifications}
 			\begin{itemize}
 				\item Computer\hfill Raspberry Pi 2
+				\item Weight \hfill 125 g
 			\end{itemize}
 		\subsection{Payload Layout}
 	\section{Ground Control System}
@@ -495,8 +497,20 @@
 		To remove the payload, first disconnect the payload power, autopilot telemetry cable, and payload antenna from the payload.  Next, remove the two screws holding the payload to the aircraft.
 
 		To install the payload, align the payload with the existing screw holes on the aircraft so that the user interface devices face the outside of the aircraft.  Install the two screws to secure the payload to the aircraft.  Connect the payload power, autopilot telemetry cable, and payload antenna to the payload.
-	\section{Reseting the Payload}
 	\section{Charging Batteries}
+		When charging batteries, it is important to ensure that the batteries assigned to a flight pack are charged and discharged together.  This ensures that all the cells are balanced and taking the same amount of wear and tear, reducing the risk of a single cell being depleted and destroying the rest of the cells.
+
+		The first time the batteries are charged, charge all of the batteries individually, then split them into their flight packs.
+
+		For the remaining time that batteries are charged, charge all batteries in their flight packs.
+
+		To charge a single battery, connect the battery's main plug into the charging adapter and insert the battery's balance plug into the charger.  Configure the charger for a maximum current of 5.3 amps, 3 cell LiPo, and a maximum charge of 5500 mAh.
+
+		To charge a complete pack (3 matched batteries), connect each battery's main plug into to the charging adapter and each battery's balance plug into the parallel adapter.  Configure the charger for a maximum current of 16 amps, 3 cell LiPo, and a maximum charge of 16000 mAh.
+
+		To initiate the charging process, press and hold the ``Start'' button until the charger beeps and initiates the ``Battery Check'' sequence.  The charger will then begin the charging process.
+
+		To end the charging process, press the ``Stop'' button.  Verify that the charger has stopped charging, and disconnect the battery's main plug and balance plug.
 \chapter{Flight Management Software}
 	\section{Requirements}
 		\begin{itemize}
