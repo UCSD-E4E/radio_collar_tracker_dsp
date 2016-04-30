@@ -6,7 +6,8 @@
 \author{Eric Lo, Project Manager\\Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
 \usepackage{fullpage}
 \usepackage{hyperref}
-\usepackage[final]{pdfpages}
+\usepackage[toc]{glossaries}
+\makeglossaries
 \hypersetup{
     colorlinks,
     citecolor=black,
@@ -15,15 +16,42 @@
     urlcolor=blue
 }
 
+% Glossaries Definition
+\newacronym{uas}{UAS}{Unmanned Aerial System}
+\newacronym{gcs}{GCS}{Ground Control System}
+\newacronym{pic}{PIC}{Pilot In Command}
+\newglossaryentry{multirotor}{
+	name=multirotor,
+	description={is an unammed aircraft with multiple propellers for lift},
+	plural=multirotors
+}
+\newglossaryentry{quadcopter}{
+	name=quadcopter,
+	description={is a multirotor with 4 propellers},
+	plural=quadcopters
+}
+\newglossaryentry{LiPo}{
+	name=LiPo,
+	description={is a battery using a lithium polymer chemistry},
+	plural=LiPos
+}
+\newglossaryentry{software defined radio}{
+	name={software defined radio},
+	description={is a radio that uses software instead of hardware to process and interpret the signal}
+	plural={software defined radios}
+}
+
 \begin{document}
 \maketitle
 \tableofcontents
+\chapter{Manual Objective}
+	This manual is intended for the end user of the Radio Collar Tracker system.  It is written with the expectation that the end user has some experience flying \glspl{multirotor} in semi-autonomous or autonomous modes.  This manual should not be regarded as standalone training manual for flight operations, rather, it should part of hands-on training on how to operate this system safely.  This manual contains procedures on how to safely operate this system, as well as information on how to maintain and repair the system.
 \chapter{System Overview}
 	\section{Mission Profile}
 		This system is designed to conduct aerial surveys for the purpose of tracking and localizing wildlife collars used for biological and ecological research.  We approach this problem by flying a radio across the search area, recording the signal strength for any pings from any collars we can detect.  We can then determine the location of a collar by correlating the signal strength and the locations where we detected that particular signal strength.
 	\section{Aircraft}
 		\subsection{Aircraft Summary}
-			The airframe used in this UAS is a Tarot Ironman 650, which is a carbon-fiber quadcopter airframe.  We have then integrated a commercial open-source autopilot, the 3DR PixHawk, to use as our primary flight controller.  To maximize flight time, we have settled on a battery pack consisting of 3 3S 5.1 Ah batteries connected in parallel.  As a result of this configuration, we can acheive a total flight time of 20-23 minutes at a maximum speed of 5 m/s.
+			The airframe used in this \gls{uas} is a Tarot Ironman 650, which is a carbon-fiber \gls{quadcopter} airframe.  We have then integrated a commercial open-source autopilot, the 3DR PixHawk, to use as our primary flight controller.  To maximize flight time, we have settled on a battery pack consisting of 3 3S 5.1 Ah batteries connected in parallel.  As a result of this configuration, we can acheive a total flight time of 20-23 minutes at a maximum speed of 5 m/s.
 		\subsection{Aircraft Specifications}
 			\begin{itemize}
 				\item Length\hfill110 cm
@@ -39,7 +67,7 @@
 				\item Maximum Range\hfill 6 km
 				\item Rotor Diameter\hfill 43 cm
 				\item Rotors\hfill4
-				\item Battery\hfill 3S3P 24C LiPo 15300 mAh
+				\item Battery\hfill 3S 3P 24C \gls{LiPo} 15300 mAh
 				\item Battery Weight\hfill 1 kg
 				\item Autopilot\hfill3DR Pixhawk
 				\item RC Receiver\hfill FrSky X8R
@@ -52,7 +80,7 @@
 		\subsection{Aircraft Layout}
 	\section{Payload}
 		\subsection{Payload Summary}
-			The payload for this UAS is basically a computerized radio recorder.  We have elected to use a software defined radio as our radio frontend, as this allows us to rapidly reconfigure the payload for any range of frequencies.  This is connected to a Raspberry PI 2, which handles all of the data collection, including collecting position data from the autopilot system.  Recorded data is organized into runs, which are stored on a removeable USB drive.
+			The payload for this \gls{uas} is basically a computerized radio recorder.  We have elected to use a software defined radio as our radio frontend, as this allows us to rapidly reconfigure the payload for any range of frequencies.  This is connected to a Raspberry PI 2, which handles all of the data collection, including collecting position data from the autopilot system.  Recorded data is organized into runs, which are stored on a removeable USB drive.
 		\subsection{Payload Specifications}
 			\begin{itemize}
 				\item Computer\hfill Raspberry Pi 2
@@ -60,14 +88,15 @@
 			\end{itemize}
 		\subsection{Payload Layout}
 	\section{Ground Control System}
-		The Ground Control System for this UAS consists of a laptop running a Windows OS and the open source flight management software MissionPlanner.  This connects to the aircraft over a 3DR 900 MHz radio, permitting 2 way digital communications between the UAS and the GCS.  From the GCS, we are able to plan, upload, and control all missions, as well as provide the pilot with flight and diagnostic information.
-		\subsection{GCS Layout}
+		The \gls{gcs} for this \gls{uas} consists of a laptop running a Windows OS and the open source flight management software, MissionPlanner.  This connects to the aircraft over a 3DR 900 MHz radio, permitting 2-way digital communications between the \gls{uas} and the \gls{gcs}.  From the \gls{gcs}, we are able to plan, upload, and control all missions, as well as provide the pilot with flight and diagnostic information.
+		\subsection{Ground Control System Layout}
 	\section{Crew Roles}
 		\subsection{Pilot in Command}
-			The Pilot in Command (PIC) is responsible for the safe operation of the aircraft.  He or she is responsible for takeoff, transition to mission, return, and landing, as well as for the general pacing of the mission.
+			The \gls{pic} is responsible for the safe operation of the aircraft.  He or she is responsible for takeoff, transition to mission, return, and landing, as well as for the general pacing of the mission.
 		\subsection{Autopilot Operator}
-			The Autopilot Operator is responsible for monitoring the flight management software and mission progress.  He or she must plan and upload the mission plan to the aircraft, confirm clearance for switching to autonomous flight modes, and monitor the UAS as it completes the mission.
+			The Autopilot Operator is responsible for monitoring the flight management software and mission progress.  He or she must plan and upload the mission plan to the aircraft, confirm clearance for switching to autonomous flight modes, and monitor the \gls{uas} as it completes the mission.
 \chapter{Checklists and Flight Procedures}
+	The \gls{uas} operator must use the below checklists and procedures when operating the system to ensure safe and proper operation of the system.  Failure to complete all items in either checklists or procedures may result in system misconfiguration or system failure.  The PIC is responsible for the operation of the aircraft in accordance with all relevant rules and procedures, except that the PIC may deviate from these rules where such deviation is necessary in the interests of safety.
 	\section{Battery Cold Swap Procedure}
 		\begin{enumerate}
 			\item Disconnect BATTERY PARALLEL ADAPTER from AIRCRAFT POWER.
@@ -91,7 +120,7 @@
 			\item PAYLOAD SWITCH \hrulefill OFF
 			\item PAYLOAD ANTENNA \hrulefill CHECK
 			\item MAVLINK \hrulefill DISCONNECTED
-			\item GCS DATALINK \hrulefill ACTIVE AND CONFIGURED
+			\item \gls{gcs} DATALINK \hrulefill ACTIVE AND CONFIGURED
 			\item RC TRANSMITTER \hrulefill ACTIVE
 			\begin{enumerate}
 				\item MODE SWITCH \hrulefill STABILIZE
@@ -109,7 +138,7 @@
 			\item Do not rock the aircraft.
 			\item Verify PAYLOAD STATUS LIGHT is flashing slowly within 15 seconds.
 			\item Verify AUTOPILOT STATUS LIGHT is flashing slowly within 30 seconds.
-			\item Connect the GCS MAVLINK.
+			\item Connect the \gls{gcs} MAVLINK.
 		\end{enumerate}
 	\section{Pre-Takeoff Check}
 		\begin{enumerate}
@@ -134,7 +163,7 @@
 			\item Add takeoff power.
 			\item Reduce THROTTLE when approaching hover altitude.
 		\end{enumerate}
-	\section{Takeoff Procedure with Less-Than-Optimal GPS or Less-Than-Optimal Clearance}
+	\section{Sub-optimal Takeoff Procedure}
 		\begin{enumerate}
 			\item Set the RC TRANSMITTER MODE SWITCH to STABILIZE.
 			\item Set THROTTLE to 0\%.
@@ -151,13 +180,13 @@
 		\begin{enumerate}
 			\item Add power to climb.
 			\item Reduce THROTTLE to 50\% when approaching hover altitude.
-			\item Check with GCS for status.
+			\item Check with \gls{gcs} for status.
 		\end{enumerate}
 	\section{Climb to Hover in STABILIZE Procedure}
 		\begin{enumerate}
 			\item Add power to climb.
 			\item Reduce THROTTLE when approaching hover altitude.  Adjust to maintain altitude.
-			\item Check with GCS for status.
+			\item Check with \gls{gcs} for status.
 		\end{enumerate}
 	\section{Pre-Mission Start Check}
 		\begin{enumerate}
@@ -168,25 +197,25 @@
 	\section{Mission Start Procedure}
 		\begin{enumerate}
 			\item Set the RC TRANSMITTER MODE SWITCH to LOITER.
-			\item Confirm with GCS that LOITER mode is set and stable.
-			\item Notify GCS of intent to enter AUTO mode.
+			\item Confirm with \gls{gcs} that LOITER mode is set and stable.
+			\item Notify \gls{gcs} of intent to enter AUTO mode.
 			\item Set the RC TRANSMITTER MODE SWITCH to AUTO.
-			\item Confirm switch to WAYPOINT with GCS.
+			\item Confirm switch to WAYPOINT with \gls{gcs}.
 		\end{enumerate}
 	\section{Mission End Procedure}
 		\begin{enumerate}
 			\item Check that the RC TRANSMITTER is on and active.
 			\item Check that the aircraft is within visual range.
 			\item Check that there is enough battery to land safely.
-			\item Notify GCS of intent to take control of the aircraft.
+			\item Notify \gls{gcs} of intent to take control of the aircraft.
 			\item Set the RC TRANSMITTER MODE SWITCH to LOITER.
-			\item Confirm with GCS that the pilot has control of the aircraft.
+			\item Confirm with \gls{gcs} that the pilot has control of the aircraft.
 		\end{enumerate}
 	\section{Failed Mission End Procedure}
 		\begin{enumerate}
 			\item Set the RC TRANSMITTER MODE SWITCH to AUTO.
-			\item Notify GCS of failure to take control of the aircraft.
-			\item Have GCS set the RETURN TO HOME mode.
+			\item Notify \gls{gcs} of failure to take control of the aircraft.
+			\item Have \gls{gcs} set the RETURN TO HOME mode.
 			\item Continuously retry the MISSION END PROCEDURE until control is regained.
 			\item If control cannot be regained, but the aircraft is in RETURN TO HOME mode, allow the aircraft to autonomously land.
 			\item If control cannot be regained, and the aircraft is not in RETURN TO HOME mode, execute the LOSS OF AUTOPILOT DATALINK procedure.
@@ -225,6 +254,7 @@
 	\section{Loss of RC Link}
 		%automatic abort
 \chapter{Maintenance}
+	This section contains checklists and procedures to facilitate the maintenance and repair of the UAS.  The UAS must pass all items within the Delivery Check before being placed into service.  Failure of any one of these checks may result in system failure.
 	\section{Delivery Check}
 		\begin{enumerate}
 			\item Boom Integrity\hrulefill CHECK
@@ -402,12 +432,12 @@
 							\item Check that the AUTOPILOT comes online and initializes.
 							\item Check that the AUTOPILOT STATUS LIGHT begins to slowly flash within 30 seconds.
 							\item Check that the SAFETY SWITCH is blinking red.
-							\item Connect the GCS MAVLINK to the AUTOPILOT.
-							\item In the GCS, check that the GPS satellite count is climbing to at least 6, and that the GPS location is stable and sane.
-							\item In the GCS, check that the attitude and orientation indicated by the artificial horizon is sane and reacting properly to inputs to the airframe.
-							\item In the GCS, check that the heading indicated by the compass is sane and reacting properly to inputs to the airframe.
-							\item In the GCS, check that the AUTOPILOT is receiving commands from the RC TRANSMITTER.
-							\item In the GCS, check that the battery voltage is sane and agrees with the current battery state.
+							\item Connect the \gls{gcs} MAVLINK to the AUTOPILOT.
+							\item In the \gls{gcs}, check that the GPS satellite count is climbing to at least 6, and that the GPS location is stable and sane.
+							\item In the \gls{gcs}, check that the attitude and orientation indicated by the artificial horizon is sane and reacting properly to inputs to the airframe.
+							\item In the \gls{gcs}, check that the heading indicated by the compass is sane and reacting properly to inputs to the airframe.
+							\item In the \gls{gcs}, check that the AUTOPILOT is receiving commands from the RC TRANSMITTER.
+							\item In the \gls{gcs}, check that the battery voltage is sane and agrees with the current battery state.
 							\item Connect the BATTERY PARALLEL ADAPTER to PAYLOAD POWER.
 							\item Check that the PAYLOAD STATUS LIGHT begins to slowly flash green within 15 seconds.
 							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
@@ -451,7 +481,7 @@
 							\item Check that the AUTOPILOT STATUS LIGHT begins to slowly flash within 30 seconds.
 							\item Check that the SAFETY SWITCH is blinking red.
 							\item Check that the RC TRANSMITTER is on and active.
-							\item Connect the GCS MAVLINK to the AUTOPILOT.
+							\item Connect the \gls{gcs} MAVLINK to the AUTOPILOT.
 							\item Upload the planned mission.
 							\item Conduct the mission with a takeoff in STABILIZE.  Check for abnormal wobbling, uncertain tracking, etc.  All waypoint transitions should be smooth.
 							\item Allow aircraft to autoland and manually disarm and safe.
@@ -467,7 +497,7 @@
 									\item Waypoint 4 is a RETURN TO HOME command.
 								\end{itemize}
 							\item Execute the mission.  When the copter is heading away, turn off the RC TRANSMITTER.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
-							\item Restart the mission.  When the copter is heading away, turn off the GCS MAVLINK by turning off the GCS AUTOPILOT RADIO.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
+							\item Restart the mission.  When the copter is heading away, turn off the \gls{gcs} MAVLINK by turning off the \gls{gcs} AUTOPILOT RADIO.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
 							\item Land and safe the aircraft.
 						\end{enumerate}
 					\item Payload Check
@@ -479,7 +509,7 @@
 						\end{enumerate}
 				\end{enumerate}
 		\end{enumerate}
-	\section{Replacing Props}
+	\section{Replacing Propellers}
 		Carbon fiber propellers should be replaced if they show signs of cracking or damage.  This manifests as cracks or delamination of the propeller, usually near the tip, but occasionally near the root of the propeller.  To check for cracks or delamination of the propeller, feel along all surfaces of the propeller for any sharp edges or nicks - this is usually the starting point of delamination.  Additionally, flex the propellers to check for any cracking - this will manifest as cracking sounds and the feeling that the propeller is abnormally easier to flex.
 
 		To remove the propeller, remove the two screws and plate holding the propeller to the motor.  Remove the propeller.
@@ -574,13 +604,13 @@
 	\section{Uploading a Mission}
 		\begin{enumerate}
 			\item Load a mission into Mission Planner.
-			\item Connect to the UAS with MAVLINK.
+			\item Connect to the \gls{uas} with MAVLINK.
 			\item Click the ``Write WPs'' button on the right-hand sidebar.
 			\item Click the ``Read WPs'' button on the right-hand sidebar.
 			\item Click ``OK'' to the dialog prompting you to reset the HOME location.
 			\item Verify that the waypoints now displayed are the desired mission waypoints.
 		\end{enumerate}
 	\section{Operating a Mission}
-		The primary responsiblity of the autopilot operator is to monitor the UAS as it progresses through its programmed mission.  During this time, the autopilot operator should be monitoring the vital signs from the UAS, including ground speed, mission progress, altitude, attitude, stability, battery voltage, battery consumption, power draw, and navigation stability, among other things.  In most cases, monitoring the artificial horizon and flight map will suffice - check that the UAS is tracking properly to the waypoints, and that the airctaft has a reasonable attitude for its current speed and heading.  Occasionally, check the battery voltage and consumption to ensure that the UAS has enough power to complete the mission and return.
-\chapter{Definitions}
+		The primary responsiblity of the autopilot operator is to monitor the \gls{uas} as it progresses through its programmed mission.  During this time, the autopilot operator should be monitoring the vital signs from the \gls{uas}, including ground speed, mission progress, altitude, attitude, stability, battery voltage, battery consumption, power draw, and navigation stability, among other things.  In most cases, monitoring the artificial horizon and flight map will suffice - check that the \gls{uas} is tracking properly to the waypoints, and that the airctaft has a reasonable attitude for its current speed and heading.  Occasionally, check the battery voltage and consumption to ensure that the \gls{uas} has enough power to complete the mission and return.
+\printglossaries
 \end{document}
