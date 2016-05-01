@@ -6,6 +6,7 @@
 \author{Eric Lo, Project Manager\\Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
 \usepackage{fullpage}
 \usepackage{hyperref}
+\usepackage{mdframed}
 \usepackage[toc]{glossaries}
 \makeglossaries
 \hypersetup{
@@ -40,6 +41,9 @@
 	description={is a radio that uses software instead of hardware to process and interpret the signal}
 	plural={software defined radios}
 }
+\newacronym[see={[Glossary:]{software defined radio}}]{SDR}{SDR}{\gls{software defined radio}}
+\newacronym{rtl}{RTL}{Return To Launch}
+\newacronym{AO}{AO}{Autopilot Operator}
 
 \begin{document}
 \maketitle
@@ -77,6 +81,43 @@
 				\item RC Transmitter\hfill FrSky Taranis X9D
 			\end{itemize}
 		\subsection{Transmitter Layout}
+			\begin{figure}[ht]
+				\centering
+				\includegraphics[width=\textwidth]{taranis_layout.png}
+				\caption{FrSky Taranis X9D Switch Assignments}
+			\end{figure}
+			\subsubsection{Flight Modes}
+				This \gls{uas} has multiple flight modes that allow the \gls{pic} various amounts of control, and permit the \gls{uas} to perform a variety of tasks.  These flight modes are all to some extent controlled by the computer, and can be controlled from either the RC transmitter or the \gls{gcs}.
+				\paragraph{Stabilize}
+					Stabilize (shown as STABILIZE) is the most basic mode available.  In this mode, the \gls{pic} has direct control over the attidue and throttle of the aircraft. See Figure 2.2 for stick layout.
+					\begin{figure}[ht]
+						\centering
+						\includegraphics[width=0.5\textwidth]{stabilize_stick_layout.png}
+						\caption{Stabilize Stick Layout}
+					\end{figure}
+				\paragraph{Altitude Hold}
+					Altitude Hold (shown as ALT\_HOLD) is one step above STABILIZE in computer control.  In this mode, the \gls{pic} has direct control over the attidue of the aircraft, however, the autopilot is responsible for maintaining the altitude of the aircraft.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.  Altitude is held by placing the throttle stick to 50\%.  Pushing the throttle stick up moves the altitude setpoint up at a rate proportional to the stick value, and vice versa.  See Figure 2.3 for stick layout.
+					\begin{figure}[ht]
+						\centering
+						\includegraphics[width=0.5\textwidth]{althold_stick_layout.png}
+						\caption{Altitude Hold Stick Layout}
+					\end{figure}
+				\paragraph{Loiter}
+					Loiter (shown as LOITER) is one step below complete computer control.  In this mode, the \gls{pic} can only tell the aircraft to move.  The autopilot is responsible for maintaining the altitude, attitude, and responsiveness of the aircraft.  Essentially, the aircraft is simply loitering at a point in space, and the \gls{pic} is simply telling the aircraft that it should go loiter somewhere else.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.  Altitude is held by placing the throttle stick to 50\%.  Pushing the throttle stick up moves the altitude setpoint up at a rate proportional to the stick value, and vice versa.  See Figure 2.4 for stick layout.
+					\begin{figure}[ht]
+						\centering
+						\includegraphics[width=0.5\textwidth]{loiter_stick_layout.png}
+						\caption{Loiter Stick Layout}
+					\end{figure}
+				\paragraph{Auto}
+					Auto (shown as AUTO) is the autonomous mission mode.  In this mode, the autopilot has complete control authority over the aircraft.  The \gls{pic} can only command the \gls{uas} to enter or exit this mode.  The autopilot will execute the loaded mission, controlled from the \gls{gcs}.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.
+				\paragraph{Return-to-Launch}
+					\gls{rtl} is an emergency retrieval mode.  In this mode, the autopilot has complete control authority over the aircraft.  The \gls{pic} can only command the \gls{uas} to enter or exit this mode.  The autopilot will command the aircraft to fly directly to the launch GPS coordinates, then gently land.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.  During the landing phase, the \gls{pic} can nudge the aircraft using the right stick to avoid any obstacles.  This is similar to loiter, however, the \gls{pic} cannot override the descent phase without exiting the \gls{rtl} mode.  See Figure 2.5 for stick layout.
+					\begin{figure}[ht]
+						\centering
+						\includegraphics[width=0.5\textwidth]{rtl_stick_layout.png}
+						\caption{RTL Stick Layout}
+					\end{figure}
 		\subsection{Aircraft Layout}
 	\section{Payload}
 		\subsection{Payload Summary}
@@ -91,12 +132,12 @@
 		The \gls{gcs} for this \gls{uas} consists of a laptop running a Windows OS and the open source flight management software, MissionPlanner.  This connects to the aircraft over a 3DR 900 MHz radio, permitting 2-way digital communications between the \gls{uas} and the \gls{gcs}.  From the \gls{gcs}, we are able to plan, upload, and control all missions, as well as provide the pilot with flight and diagnostic information.
 		\subsection{Ground Control System Layout}
 	\section{Crew Roles}
-		\subsection{Pilot in Command}
+		\subsection{Pilot In Command}
 			The \gls{pic} is responsible for the safe operation of the aircraft.  He or she is responsible for takeoff, transition to mission, return, and landing, as well as for the general pacing of the mission.
 		\subsection{Autopilot Operator}
-			The Autopilot Operator is responsible for monitoring the flight management software and mission progress.  He or she must plan and upload the mission plan to the aircraft, confirm clearance for switching to autonomous flight modes, and monitor the \gls{uas} as it completes the mission.
+			The \gls{AO} is responsible for monitoring the flight management software and mission progress.  He or she must plan and upload the mission plan to the aircraft, confirm clearance for switching to autonomous flight modes, and monitor the \gls{uas} as it completes the mission.
 \chapter{Checklists and Flight Procedures}
-	The \gls{uas} operator must use the below checklists and procedures when operating the system to ensure safe and proper operation of the system.  Failure to complete all items in either checklists or procedures may result in system misconfiguration or system failure.  The PIC is responsible for the operation of the aircraft in accordance with all relevant rules and procedures, except that the PIC may deviate from these rules where such deviation is necessary in the interests of safety.
+	The \gls{pic} must use the below checklists and procedures when operating the system to ensure safe and proper operation of the system.  Failure to complete all items in either checklists or procedures may result in system misconfiguration or system failure.  The PIC is responsible for the operation of the aircraft in accordance with all relevant rules and procedures, except that the PIC may deviate from these rules where such deviation is necessary in the interests of safety.
 	\section{Battery Cold Swap Procedure}
 		\begin{enumerate}
 			\item Disconnect BATTERY PARALLEL ADAPTER from AIRCRAFT POWER.
@@ -128,7 +169,7 @@
 				\item LEFT STICK \hrulefill CENTERED
 				\item TRIMS (ALL) \hrulefill CENTERED
 				\item AUTO SWITCH \hrulefill OFF
-				\item RTL SWITCH \hrulefill OFF
+				\item \gls{rtl} SWITCH \hrulefill OFF
 			\end{enumerate}
 		\end{enumerate}
 	\section{Aircraft and Payload Power On Procedure}
@@ -249,12 +290,27 @@
 	\section{Post-Landing Procedure}
 \chapter{Emergency Procedures}
 	\section{Battery Fire on Ground}
+		Battery fires are caused by extreme physical or electrical damage to the battery pack.  Battery fires may be preceeded by significant warming and/or puffing of the battery pack.
+		\begin{mdframed}[linecolor=red,linewidth=4pt]
+			WARNING: \gls{LiPo} fires are chemical fires, and can release dangerous chemicals.  ABC fire extinguishers are NOT effective against the primary battery fire, but may prevent the fire from spreading.  If available, use a CO2, dry chemical, or foam extinguisher to contain the primary fire.  Do not use water to extinguish the primary fire, however, water may be used to cool a battery and fight secondary fires as appropriate.
+		\end{mdframed}
+		\begin{enumerate}
+			\item If the battery has not caught fire yet, but is extremely warm, immediately unplug it from any devices and take the battery outside.  Place it away from flammable items and in a well ventilated area. Allow the battery to sit for at least 30 minutes.  If the battery has cooled down in 30 minutes, it will likely not catch fire, however, the battery must be disposed of properly.  If the battery is still hot, allow it to remain outside until it has cooled off.
+			\item If the battery catches fire while connected to a charger, disconnect the charger from the wall, and, if safe to do so, carry the entire charging setup outside, away from flammable items and place in a well ventilated area. If not safe to do so, remove flammable items from the area and fight any secondary fires.  Do not fight the battery fire itself, as it is self-oxidizing.
+
+			Even if the primary fire is out, if the pack is warm, additional cells may catch fire due to thermal loading.  The battery pack is not safe until the entire pack is cooled to room temperature.
+			\item If the battery catches fire while connected to the aircraft, if safe to do so, remove the battery from the aircraft.  If unable to remove the battery, if safe to do so, flip the aircraft so that the battery is on top of the aircraft to reduce damage to the aircraft.  Carry the batteries and any attached items outside, away from flammable items and place in a well ventilated area.  If not safe to move the batteries, remove flammable items from the area and fight any secondary fires.  Do not fight the primary battery fire itself, as it is self-oxidizing.
+
+			Even if the primary fire is out, if the pack is warm, additional cells may catch fire due to thermal loading.  The battery pack is not safe until the entire pack is cooled to room temperature.
+		\end{enumerate}
 	\section{Loss of Autopilot Datalink}
-		%automatic abort
+		If the autopilot operator reports loss of link to the \gls{uas} (characterized by no data packets received for about 5 seconds), then the \gls{pic} should immediately place the \gls{uas} into \gls{rtl} by setting the \gls{rtl} switch on the RC transmitter.  Visually verify that \gls{uas} is in \gls{rtl}.  If the \gls{uas} is not in \gls{rtl}, go to the Loss of Control procedure.
 	\section{Loss of RC Link}
-		%automatic abort
+		If the RC transmitter reports loss of link to the \gls{uas}, the the \gls{AO} should immediately place the \gls{uas} into \gls{rtl} by mannually ordering \gls{rtl} through the \gls{gcs}.  Visually verify that the \gls{uas} is in \gls{rtl}.  If the \gls{uas} is not in \gls{rtl}, go to the Loss of Control procedure.
+	\section{Loss of Control}
+		Set the \gls{rtl} switch on the RC transmitter.  If the \gls{uas} was in on a mission, move the RC transmitter towards the mission area to regain connection.  If the \gls{uas} was in a loiter mode, move the RC transmitter towards the last known position to regain connection.  Because the radio failsafes are configured to automatically return the \gls{uas} in the event that the \gls{uas} notices a loss of connection, connection should be reestablished fairly quickly.
 \chapter{Maintenance}
-	This section contains checklists and procedures to facilitate the maintenance and repair of the UAS.  The UAS must pass all items within the Delivery Check before being placed into service.  Failure of any one of these checks may result in system failure.
+	This section contains checklists and procedures to facilitate the maintenance and repair of the \gls{uas}.  The \gls{uas} must pass all items within the Delivery Check before being placed into service.  Failure of any one of these checks may result in system failure.
 	\section{Delivery Check}
 		\begin{enumerate}
 			\item Boom Integrity\hrulefill CHECK
@@ -583,7 +639,7 @@
 				\item Under ``Auto WP'', select ``Survey (Grid)''.
 				\item Check the ``Advanced Options'' checkbox under ``Display'' on the right-hand sidebar.
 				\item Set the desired altitude and flight speed.
-				\item Check the ``Add Takeoff and Land WP's'' and ``Use RTL'' checkboxes.
+				\item Check the ``Add Takeoff and Land WP's'' and ``Use \gls{rtl}'' checkboxes.
 				\item Open the ``Grid Options'' tab.
 				\item Set the ``Distance between lines [m]'' to 30 meters.
 				\item Check that the ``Flight Time (est)'' field on the bottom bar is less than 20 minutes.
@@ -611,6 +667,6 @@
 			\item Verify that the waypoints now displayed are the desired mission waypoints.
 		\end{enumerate}
 	\section{Operating a Mission}
-		The primary responsiblity of the autopilot operator is to monitor the \gls{uas} as it progresses through its programmed mission.  During this time, the autopilot operator should be monitoring the vital signs from the \gls{uas}, including ground speed, mission progress, altitude, attitude, stability, battery voltage, battery consumption, power draw, and navigation stability, among other things.  In most cases, monitoring the artificial horizon and flight map will suffice - check that the \gls{uas} is tracking properly to the waypoints, and that the airctaft has a reasonable attitude for its current speed and heading.  Occasionally, check the battery voltage and consumption to ensure that the \gls{uas} has enough power to complete the mission and return.
-\printglossaries
+		The primary responsiblity of the \gls{AO} is to monitor the \gls{uas} as it progresses through its programmed mission.  During this time, the autopilot operator should be monitoring the vital signs from the \gls{uas}, including ground speed, mission progress, altitude, attitude, stability, battery voltage, battery consumption, power draw, and navigation stability, among other things.  In most cases, monitoring the artificial horizon and flight map will suffice - check that the \gls{uas} is tracking properly to the waypoints, and that the airctaft has a reasonable attitude for its current speed and heading.  Occasionally, check the battery voltage and consumption to ensure that the \gls{uas} has enough power to complete the mission and return.
+\printglossary[type=main,nonumberlist]
 \end{document}
