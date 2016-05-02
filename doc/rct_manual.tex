@@ -7,6 +7,7 @@
 \usepackage{fullpage}
 \usepackage{hyperref}
 \usepackage{mdframed}
+\usepackage{bookmark}
 \usepackage[toc]{glossaries}
 \makeglossaries
 \hypersetup{
@@ -36,12 +37,12 @@
 	description={is a battery using a lithium polymer chemistry},
 	plural=LiPos
 }
-\newglossaryentry{software defined radio}{
+\newglossaryentry{sdr_gls}{
 	name={software defined radio},
 	description={is a radio that uses software instead of hardware to process and interpret the signal}
 	plural={software defined radios}
 }
-\newacronym[see={[Glossary:]{software defined radio}}]{SDR}{SDR}{\gls{software defined radio}}
+\newacronym[see={[Glossary:]{sdr_gls}}]{SDR}{SDR}{\gls{sdr_gls}}
 \newacronym{rtl}{RTL}{Return To Launch}
 \newacronym{AO}{AO}{Autopilot Operator}
 
@@ -128,6 +129,12 @@
 				\item Weight \hfill 125 g
 			\end{itemize}
 		\subsection{Payload Layout}
+			See Figure 2.6.
+			\begin{figure}[ht]
+				\centering
+				\includegraphics[width=\textwidth]{payload_layout.png}
+				\caption{Payload Layout}
+			\end{figure}
 	\section{Ground Control System}
 		The \gls{gcs} for this \gls{uas} consists of a laptop running a Windows OS and the open source flight management software, MissionPlanner.  This connects to the aircraft over a 3DR 900 MHz radio, permitting 2-way digital communications between the \gls{uas} and the \gls{gcs}.  From the \gls{gcs}, we are able to plan, upload, and control all missions, as well as provide the pilot with flight and diagnostic information.
 		\subsection{Ground Control System Layout}
@@ -448,8 +455,12 @@
 			\item Power Wiring\hrulefill CHECK
 				\begin{itemize}
 					\item Check that all wiring is intact and not shorting
-					\item Check against the below diagram
-					% TODO add power wiring diagram
+					\item Check against Figure 5.1.
+						\begin{figure}[ht]
+							\centering
+							\includegraphics[width=\textwidth]{power_wiring.png}
+							\caption{Power Wiring Diagram}
+						\end{figure}
 				\end{itemize}
 			\item Payload Mount \hrulefill CHECK
 				\begin{itemize}
