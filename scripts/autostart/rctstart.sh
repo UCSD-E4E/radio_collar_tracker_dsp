@@ -31,8 +31,8 @@ case "$1" in
 		exit
 		;;
 	restart|reload|condrestart)
-		killall rctrun
-		$INSTALL_DIR/rctrun &
+		killall rct
+		$INSTALL_DIR/bin/rctrun &
 		exit
 		;;
 esac
