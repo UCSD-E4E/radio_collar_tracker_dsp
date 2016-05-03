@@ -18,7 +18,7 @@ INSTALL_DIR=&INSTALL_PREFIX
 
 case "$1" in
 	stop)
-		killall rctrun
+		killall rct
 		rm -f /var/lock/rctstart
 		exit
 		;;
