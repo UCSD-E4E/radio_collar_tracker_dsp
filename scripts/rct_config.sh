@@ -4,5 +4,5 @@ freq=172464000
 sampling_freq=2048000
 gain="19.7"
 mav_port="/dev/ttyAMA0"
-output_dir="/home/pi/rct/"
+output_dir="/media/RAW_DATA/rct"
 log_dir="/home/pi"
