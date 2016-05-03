@@ -191,6 +191,7 @@
 			\item MAVLINK \hrulefill DISCONNECTED
 			\item \gls{gcs} DATALINK \hrulefill ACTIVE AND CONFIGURED
 			\item RC TRANSMITTER \hrulefill ACTIVE
+			\item RC TRANSMITTER MODEL \hrulefill CONFIGURED
 			\begin{enumerate}
 				\item MODE SWITCH \hrulefill STABILIZE
 				\item LEFT STICK \hrulefill CENTERED/DOWN
@@ -728,7 +729,7 @@
 			\includegraphics[width=\textwidth]{mp_hud_full.jpg}
 			\label{fig:mp_flt_data}
 		\end{figure}
-		The primary responsiblity of the \gls{AO} is to monitor the \gls{uas} as it progresses through its programmed mission using the Flight Data Screen (Figure \ref{fig:mp_flt_data}).  During this time, the autopilot operator should be monitoring the vital signs from the \gls{uas}, including ground speed, mission progress, altitude, attitude, stability, battery voltage, battery consumption, power draw, and navigation stability, among other things.  In most cases, monitoring the artificial horizon and flight map will suffice - check that the \gls{uas} is tracking properly to the waypoints, and that the airctaft has a reasonable attitude for its current speed and heading.  Occasionally, check the battery voltage and consumption to ensure that the \gls{uas} has enough power to complete the mission and return.
+		The primary responsiblity of the \gls{AO} is to monitor the \gls{uas} as it progresses through its programmed mission using the Flight Data Screen (Figure \ref{fig:mp_flt_data}).  During this time, the autopilot operator should be monitoring the vital signs from the \gls{uas}, including ground speed, mission progress, altitude, attitude, stability, battery voltage, battery consumption, power draw, and navigation stability, among other things.  In most cases, monitoring the artificial horizon and flight map will suffice - check that the \gls{uas} is tracking properly to the waypoints, and that the airctaft has a reasonable attitude for its current speed and heading.  In addition, the \gls{AO} can use the wireless telemetery connection readout as a guage of the quality of the autopilot datalink.  Occasionally, check the battery voltage and consumption to ensure that the \gls{uas} has enough power to complete the mission and return.
 	\section{Connecting GCS MAVLINK}
 		\begin{enumerate}
 			\item Select the proper COM port.  See Figure~\ref{fig:MP_Connect}.
