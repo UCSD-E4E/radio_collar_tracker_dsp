@@ -19,6 +19,7 @@ INSTALL_DIR=&INSTALL_PREFIX
 case "$1" in
 	stop)
 		killall rct -r
+		echo "Service stopped!"
 		rm -f /var/lock/rctstart
 		exit
 		;;
@@ -26,12 +27,14 @@ case "$1" in
 		# start
 		if [ ! -f /var/lock/rctstart ]; then
 			$INSTALL_DIR/bin/rctrun &
+			echo "Service started!"
 			touch /var/lock/rctstart
 		fi
 		exit
 		;;
 	restart|reload|condrestart)
 		killall rct -r
+		echo "Service started!"
 		$INSTALL_DIR/bin/rctrun &
 		exit
 		;;

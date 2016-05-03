@@ -37,6 +37,8 @@ while getopts "r:f:g:o:s:p:" opt; do
 	esac
 done
 
+echo "SDR_STARTER starting"
+
 if [[ "$run" -ne $run ]]; then
 	echo "ERROR: Bad run number"
 	exit 1
