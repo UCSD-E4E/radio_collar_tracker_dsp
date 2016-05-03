@@ -1,5 +1,5 @@
-EXTRA_DIST = blinky.sh mount_RAW_DATA.sh parser.sh rctstart.sh run.sh
-bin_SCRIPTS = rct_blinky rct_mount_RAW_DATA rct_parser rctstart
+EXTRA_DIST = blinky.sh mount_RAW_DATA.sh parser.sh rctstart.sh run.sh rctrun.sh
+bin_SCRIPTS = rct_blinky rct_mount_RAW_DATA rct_parser rctstart rctrun
 CLEANFILES = $(bin_SCRIPTS)
 rct_blinky: $(srcdir)/blinky.sh
 	rm -f $@
@@ -40,3 +40,8 @@ uninstall-hook:
 maintainer-clean-local:
 	rm Makefile.in
 
+rctrun: $(srcdir)/rctrun.sh
+	rm -f $@
+	echo "#!" $(BASH) > $@
+	$(SED) -e "s|&INSTALL_PREFIX|\'$(prefix)\'|g" $^ >> $@
+	chmod +x $@
