@@ -25,7 +25,7 @@ case "$1" in
 	start)
 		# start
 		if [ ! -f /var/lock/rctstart ]; then
-			$INSTALL_DIR/rctrun &
+			$INSTALL_DIR/bin/rctrun &
 			touch /var/lock/rctstart
 		fi
 		exit
