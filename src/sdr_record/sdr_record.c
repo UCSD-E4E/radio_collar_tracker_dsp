@@ -232,7 +232,7 @@ void* proc_queue(void* args) {
 	struct proc_queue_args* pargs = (struct proc_queue_args*) args;
 	int run_num = pargs->run_num;
 	int frame_len = pargs->frame_len;
-	FILE* data_stream;
+	FILE* data_stream = NULL;
 	char buff[256];
 	int frame_num;
 	uint64_t num_samples = 0;
