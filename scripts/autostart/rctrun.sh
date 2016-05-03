@@ -15,17 +15,21 @@ log="$log_dir/rctstart_rct.log"
 led_dir="/sys/class/gpio/gpio$led_num"
 switch_dir="/sys/class/gpio/gpio$switch_num"
 keep_alive='rct_gps_keep_alive.py'
-sdr_starter='rct_sdr_starter.sh'
+sdr_starter='rct_sdr_starter'
+
+echo "$(timestamp): Starting..." >> $log
 
 # check for autostart file!
-if [ ! -e "/home/pi/autostart" ] then
-	echo "$(timestamp): Autostart not found!" >> $log
+if [ ! -e "/home/pi/autostart" ]
+	then
+		echo "$(timestamp): Autostart not found!" >> $log
 	exit
 fi
 
 # check for output directory
-if [ ! -e output_dir ] then
-	echo "$(timestamp): Output Directory not found!" >> $log
+if [ ! -e $output_dir ]
+	then
+		echo "$(timestamp): Output Directory not found!" >> $log
 	exit
 fi
 

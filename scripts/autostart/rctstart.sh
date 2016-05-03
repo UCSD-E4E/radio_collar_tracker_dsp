@@ -32,7 +32,7 @@ case "$1" in
 		;;
 	restart|reload|condrestart)
 		killall rctrun
-		INSTALL_DIR/rctrun &
+		$INSTALL_DIR/rctrun &
 		exit
 		;;
 esac
