@@ -4,7 +4,7 @@
 \SetWatermarkScale{7}
 \title{Radio Collar Tracker Flight Operations Manual}
 \author{Eric Lo, Project Manager\\Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
-\date{\today\\v0.4}
+\date{\today\\v0.5}
 \usepackage{fullpage}
 \usepackage{hyperref}
 \usepackage{mdframed}
@@ -168,7 +168,13 @@
 					\item Click the ``EXIT'' button to return to the main screen.
 				\end{enumerate}
 		\subsection{Aircraft Layout}
-			% TODO add layout diagram
+			See Figure \ref{fig:copter_layout}.
+			\begin{figure}[ht]
+				\centering
+				\caption{Aircraft Layout}
+				\includegraphics[width=\textwidth]{copter_layout.png}
+				\label{fig:copter_layout}
+			\end{figure}
 	\section{Payload}
 		\subsection{Payload Summary}
 			The payload for this \gls{uas} is basically a computerized radio recorder.  We have elected to use a software defined radio as our radio frontend, as this allows us to rapidly reconfigure the payload for any range of frequencies.  This is connected to a Raspberry PI 2, which handles all of the data collection, including collecting position data from the autopilot system.  Recorded data is organized into runs, which are stored on a removable USB drive.
