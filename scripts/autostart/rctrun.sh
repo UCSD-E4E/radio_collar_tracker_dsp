@@ -87,6 +87,8 @@ do
 			echo "$(timestamp): Begin dmesg dump" >> $log
 			dmesg >> $log
 			echo "$(timestamp): end dmesg dump" >> $log
+			# Sync all devices
+			sync
 			stateVal="startWait"
 			;;
 	esac
