@@ -4,7 +4,7 @@
 \SetWatermarkScale{7}
 \title{Radio Collar Tracker Flight Operations Manual}
 \author{Eric Lo, Project Manager\\Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
-\date{\today\\v0.5}
+\date{\today\\v0.6}
 \usepackage{fullpage}
 \usepackage{hyperref}
 \usepackage{mdframed}
@@ -108,17 +108,17 @@
 			\end{figure}
 			\subsubsection{Flight Modes}
 				This \gls{uas} has multiple flight modes that allow the \gls{pic} various amounts of control, and permit the \gls{uas} to perform a variety of tasks.  These flight modes are all to some extent controlled by the computer, and can be controlled from either the RC transmitter or the \gls{gcs}.  To change flight modes, simply adjust switches SF, SG, and SC as desired.  See Figure \ref{fig:tx_layout} for switch locations and settings.
-				\paragraph{Stabilize}
-					Stabilize (shown as STABILIZE) is the most basic mode available.  In this mode, the \gls{pic} has direct control over the attitude and throttle of the aircraft. See Figure \ref{fig:stabilize_sticks} for stick layout.
+				% \paragraph{Stabilize}
+				% 	Stabilize (shown as STABILIZE) is the most basic mode available.  In this mode, the \gls{pic} has direct control over the attitude and throttle of the aircraft. See Figure \ref{fig:stabilize_sticks} for stick layout.
 
-					\begin{figure}[ht]
-						\centering
-						\caption{Stabilize Stick Layout}
-						\includegraphics[width=0.5\textwidth]{stabilize_stick_layout.png}
-						\label{fig:stabilize_sticks}
-					\end{figure}
+				% 	\begin{figure}[ht]
+				% 		\centering
+				% 		\caption{Stabilize Stick Layout}
+				% 		\includegraphics[width=0.5\textwidth]{stabilize_stick_layout.png}
+				% 		\label{fig:stabilize_sticks}
+				% 	\end{figure}
 
-					To set this mode, set switch SC to the topmost position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
+				% 	To set this mode, set switch SC to the topmost position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
 				\paragraph{Altitude Hold}
 					Altitude Hold (shown as ALT\_HOLD) is one step above STABILIZE in computer control.  In this mode, the \gls{pic} has direct control over the attitude of the aircraft, however, the autopilot is responsible for maintaining the altitude of the aircraft.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.  Altitude is held by placing the throttle stick to 50\%.  Pushing the throttle stick up moves the altitude setpoint up at a rate proportional to the stick value, and vice versa.  See Figure \ref{fig:alt_hold_sticks} for stick layout.
 
@@ -129,7 +129,7 @@
 						\label{fig:alt_hold_sticks}
 					\end{figure}
 
-					To set this mode, set switch SC to the center position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
+					To set this mode, set switch SC to the topmost position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
 				\paragraph{Loiter}
 					Loiter (shown as LOITER) is one step below complete computer control.  In this mode, the \gls{pic} can only tell the aircraft to move.  The autopilot is responsible for maintaining the altitude, attitude, and responsiveness of the aircraft.  Essentially, the aircraft is simply loitering at a point in space, and the \gls{pic} is simply telling the aircraft that it should go loiter somewhere else.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.  Altitude is held by placing the throttle stick to 50\%.  Pushing the throttle stick up moves the altitude setpoint up at a rate proportional to the stick value, and vice versa.  See Figure \ref{fig:loiter_sticks} for stick layout.
 
@@ -140,11 +140,11 @@
 						\label{fig:loiter_sticks}
 					\end{figure}
 
-					To set this mode, set switch SC to the lowest position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
+					To set this mode, set switch SC to the center position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
 				\paragraph{Auto}
 					Auto (shown as AUTO) is the autonomous mission mode.  In this mode, the autopilot has complete control authority over the aircraft.  The \gls{pic} can only command the \gls{uas} to enter or exit this mode.  The autopilot will execute the loaded mission, controlled from the \gls{gcs}.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.
 
-					To set this mode, set switch SF to the up position, and switches SG to the down position.  Switch SC may be placed in any position, but should optimally be left in LOITER (lowest position).  See Figure \ref{fig:tx_layout} for switch locations.
+					To set this mode, set switch SC to the down position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
 				\paragraph{Return-to-Launch}
 					\gls{rtl} is an emergency retrieval mode.  In this mode, the autopilot has complete control authority over the aircraft.  The \gls{pic} can only command the \gls{uas} to enter or exit this mode.  The autopilot will command the aircraft to fly directly to the launch GPS coordinates, then gently land.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.  During the landing phase, the \gls{pic} can nudge the aircraft using the right stick to avoid any obstacles.  This is similar to loiter, however, the \gls{pic} cannot override the descent phase without exiting the \gls{rtl} mode.  See Figure \ref{fig:rtl_sticks} for stick layout.
 
