@@ -60,13 +60,20 @@ mavmaster.mav.request_data_stream_send(mavmaster.target_system,
 print("GPS_LOGGER: Running")
 
 
+ref_time = time.time()
+gps_time = 0
+offset = gps_time - ref_time
 
 while runstate:
     msg = mavmaster.recv_match(blocking=True, timeout = 10)
     if msg is not None:
         if msg.get_type() == 'GLOBAL_POSITION_INT':
-    	    logfile.write("%.3f, %d, %d, %d, %d, %d, %d, %d, %d, %d\n" % (time.time(),
-                msg.lat, msg.lon, msg.time_boot_ms, msg.alt, msg.relative_alt, msg.vx, msg.vy, msg.vz, msg.hdg))
+    	    logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (time.time(),
+                msg.lat, msg.lon, time.time() + offset, msg.alt, msg.relative_alt, msg.vx, msg.vy, msg.vz, msg.hdg))
+        if msg.get_type() == 'GPS_RAW_INT':
+            ref_time = time.time()
+            gps_time = msg.time_usec / 1000000.0
+            offset = gps_time - ref_time
 print("GPS_LOGGER: Ending thread")
 logfile.close()
 
