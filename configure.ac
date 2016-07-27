@@ -7,6 +7,7 @@ AM_PROG_CC_C_O
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/sdr_record/maxmin.c])
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIRS([m4])
 
 # Checks for python.
 AM_PATH_PYTHON(2.7)
