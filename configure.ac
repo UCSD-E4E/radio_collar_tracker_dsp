@@ -20,7 +20,7 @@ AC_PROG_SED
 PKG_CHECK_MODULES([rtlsdr], [librtlsdr])
 
 # Checks for Python libraries
-AC_PYTHON_MODULE([pymavlink])
+AC_PYTHON_MODULE([pymavlink], [fatal])
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdint.h stdlib.h string.h unistd.h])
