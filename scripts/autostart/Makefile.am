@@ -28,6 +28,7 @@ rctstart: $(srcdir)/rctstart.sh
 install-exec-hook: rctstart
 	cp $(srcdir)/rct_mount_RAW_DATA /etc/init.d/
 	update-rc.d rct_mount_RAW_DATA defaults 97 03
+	mkdir /media/RAW_DATA
 	cp $(srcdir)/rctstart /etc/init.d/
 	update-rc.d rctstart defaults 98 02
 
