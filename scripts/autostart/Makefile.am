@@ -26,17 +26,20 @@ rctstart: $(srcdir)/rctstart.sh
 	chmod +x $@
 
 install-exec-hook: rctstart
+	-mkdir /media/RAW_DATA
 	cp $(srcdir)/rct_mount_RAW_DATA /etc/init.d/
 	update-rc.d rct_mount_RAW_DATA defaults 97 03
-	-mkdir /media/RAW_DATA
+	service rct_mount_RAW_DATA start
 	cp $(srcdir)/rctstart /etc/init.d/
 	update-rc.d rctstart defaults 98 02
 
 uninstall-hook:
-	rm /etc/init.d/rctstart
 	update-rc.d rctstart remove
-	rm /etc/init.d/rct_mount_RAW_DATA
+	rm /etc/init.d/rctstart
+	service rct_mount_RAW_DATA stop
 	update-rc.d rct_mount_RAW_DATA remove
+	rm /etc/init.d/rct_mount_RAW_DATA
+	rmdir /media/RAW_DATA
 
 maintainer-clean-local:
 	rm Makefile.in
