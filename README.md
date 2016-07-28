@@ -10,11 +10,13 @@ Installing the payload software
 	1.	python
 	2.	pymavlink
 		1.	`pip install pymavlink`
+	3.  pyserial
+		1.  `sudo apt-get install python-serial`
 	3.	rtl-sdr
 		1.	`git clone https://github.com/steve-m/librtlsdr`
 		2.	`mkdir librtlsdr/build`
 		3.	`cd librtlsddr/build`
-		4.	`sudo cmake ../ -DINSTALL_UDEV_RULES=ON`
+		4.	`sudo cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON`
 		5.	`make`
 		6.	`sudo make install`
 		7.	`ldconfig`
