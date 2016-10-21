@@ -10,6 +10,7 @@ Installing the payload software
 	1.	python
 	2.	pymavlink
 		1.	`pip install pymavlink`
+	3.	libusb-1.0-0-dev
 	3.	rtl-sdr
 		1.	`git clone https://github.com/steve-m/librtlsdr`
 		2.	`mkdir librtlsdr/build`
