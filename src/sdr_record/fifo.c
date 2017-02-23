@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "rct_sdr.h"
+#include "sdr_record.h"
 #include <semaphore.h>
 
 DATA_T fifo_pop( rct_fifo_t * fifo )
