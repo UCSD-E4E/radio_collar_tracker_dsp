@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "rct_sdr.h"
+#include "sdr_record.h"
 #include <semaphore.h>
 
 
