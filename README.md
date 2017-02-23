@@ -12,18 +12,11 @@ Installing the payload software
 		1.	`pip install pymavlink`
 	3.  pyserial
 		1.  `sudo apt-get install python-serial`
-	<!-- 3.	rtl-sdr
-		1.	`git clone https://github.com/steve-m/librtlsdr`
-		2.	`mkdir librtlsdr/build`
-		3.	`cd librtlsddr/build`
-		4.	`sudo cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON`
-		5.	`make`
-		6.	`sudo make install`
-		7.	`ldconfig` -->
 	4.	libuhd
-		1.	`sudo apt-get install libboost-all-dev libusb-1.0-0-dev python-mako doxygen python-docutils cmake build-essential`
+		1.	`sudo apt-get install libboost-all-dev libusb-1.0-0-dev python-mako`
+		2.	`sudo apt-get install doxygen python-docutils cmake build-essential`
 		2.	`git clone git://github.com/EttusResearch/uhd.git`
-		3.	`cd uhd/host`
+		3.	`cd <uhd_repo>/host`
 		4.	`mkdir build`
 		5.	`cd build`
 		6.	`cmake ../`
