@@ -431,7 +431,7 @@ int main( int argc, char* argv[] )
     pthread_t push, pop;
 
 #ifndef RCT_VERBOSE
-    fp_err = fopen("./err_log/err.log", "a");
+    fp_err = fopen("/var/log/sdr_record.log", "a");
 #endif
 
     if( uhd_set_thread_priority(uhd_default_thread_priority, true) )
