@@ -83,11 +83,11 @@ int fifo_init( rct_fifo_t* fifo, uint32_t size );
 /////////////////////////////////////////////////////////////////////////
 
 #ifdef RCT_VERBOSE
-#define vprintf(...)        fprintf(stderr, __VA_ARGS__)
-#define eprintf(...)        fprintf(stderr, __VA_ARGS__)
+	#define vprintf(...)        fprintf(stderr, __VA_ARGS__)
+	#define eprintf(...)        fprintf(stderr, __VA_ARGS__)
 #else
-FILE * fp_err;
-#define vprintf(...)    
-#define eprintf(...)        fprintf(fp_err, __VA_ARGS__)
+	FILE * fp_err;
+	#define vprintf(...)    
+	#define eprintf(...)        fprintf(fp_err, __VA_ARGS__)
 #endif
 
