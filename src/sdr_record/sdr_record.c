@@ -124,7 +124,7 @@ uhd_stream_args_t stream_args = {
 
 void print_help( void )
 {
-    vprintf("sdr_record - Radio Collar Tracker drone application to pull IQ samples from USRP and dump to disk\n\n"
+    printf("sdr_record - Radio Collar Tracker drone application to pull IQ samples from USRP and dump to disk\n\n"
             "Options:\n"
             "    -r (run_number)\n"
             "    -f (center frequency in Hz)\n"
