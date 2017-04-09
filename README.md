@@ -29,6 +29,8 @@ Installing the payload software
 	3.  `./configure`
 	4.	`make`
 	5.	`sudo make install`
+3.	Configure the USRP for the first time
+	1.	`/usr/local/lib/uhd/utils/uhd_images_downloader.py`
 
 Running the payload software (standalone)
 =========================================
