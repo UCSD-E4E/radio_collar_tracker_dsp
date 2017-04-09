@@ -29,7 +29,7 @@
 #include <semaphore.h>
 
 //Uncomment to enable verbose. Alternative: make verbose
-//#define RCT_VERBOSE           		1
+#define RCT_VERBOSE           		1
 
 /////////////////////////////////////////////////////////////////////////
 //Semaphore Locking
