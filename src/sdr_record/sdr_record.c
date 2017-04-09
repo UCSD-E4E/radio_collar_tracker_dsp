@@ -306,7 +306,7 @@ void * queue_pop_thread( void * args )
     data_stream = fopen(file_name_buff, "wb");
 
 
-    while( still_pushing_into_fifo )
+    while( program_on == 1 )
     {
 
         if( fifo_is_empty(&rct_fifo) )
@@ -356,6 +356,39 @@ void * queue_pop_thread( void * args )
                 fwrite(data_buffer, sizeof(float), buf_len, data_stream);
             }
 
+        }
+
+    }
+
+    while( !fifo_is_empty(&rct_fifo) )
+    {
+
+        if( num_samples_written == SAMPLES_PER_FILE  )
+        {
+            frame_num++;
+            num_samples_written = 0;
+            fclose(data_stream);
+            snprintf(file_name_buff, sizeof(file_name_buff), "%s/RAW_DATA_%06d_%06d", DATA_DIR, run_num, frame_num);
+            vprintf("File: %s\n", file_name_buff);             
+            data_stream = fopen(file_name_buff, "wb");
+        }
+
+
+        if(fifo_is_empty(&rct_fifo))
+        {
+            vprintf("Incorrectly kicked\n");
+            break;
+        }      
+
+        val = fifo_pop( &rct_fifo );
+
+        data_buffer[buffer_i++] = val;
+        num_samples_written++;
+
+        if( buffer_i == buf_len )
+        {
+            buffer_i = 0;
+            fwrite(data_buffer, sizeof(float), buf_len, data_stream);
         }
 
     }
