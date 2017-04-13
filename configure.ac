@@ -23,7 +23,7 @@ AC_PYTHON_MODULE([pymavlink], [fatal])
 AC_PYTHON_MODULE([serial], [fatal])
 
 # Checks for header files.
-AC_CHECK_HEADERS([float.h stdint.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([float.h stdint.h stdlib.h string.h unistd.h getopt.h syslog.h uhd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
