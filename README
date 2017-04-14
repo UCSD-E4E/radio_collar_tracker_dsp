@@ -8,8 +8,8 @@ Installing the payload software
 ===============================
 1.	Install the required dependencies
 	1.	python
-	2.	pymavlink
-		1.	`pip install pymavlink`
+	2.	pynmea2
+		1.	`pip install pynmea2`
 	3.  pyserial
 		1.  `sudo apt-get install python-serial`
 	4.	libusb-1.0-0-dev
