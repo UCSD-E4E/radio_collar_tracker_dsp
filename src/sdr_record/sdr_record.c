@@ -31,7 +31,7 @@
 
 #include <uhd.h>
 #include <signal.h>
-#include "getopt.h"
+#include <getopt.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,7 +39,9 @@
 #include <unistd.h>
 #include "sdr_record.h"
 #include <semaphore.h>
-
+#include "queue.h"
+#include <syslog.h>
+#include <time.h>
 
 /////////////////////////////////////////////////////////
 // Constants
@@ -55,6 +57,9 @@
 #define DEFAULT_FREQ            -1
 #define DEFAULT_GAIN            -1
 #define DEFAULT_RUN             -1
+
+#define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS    50
+#define FRAMES_PER_FILE 80
 
 
 /////////////////////////////////////////////////////////
@@ -77,7 +82,6 @@ double freq = DEFAULT_FREQ;
 double rate = DEFAULT_RATE;
 double gain = DEFAULT_GAIN;
 int run_num = DEFAULT_RUN;
-volatile int still_pushing_into_fifo = 1;
 volatile int waiting_for_kick = 0;
 volatile int program_on = 1;
 
@@ -92,6 +96,7 @@ void **buffs_ptr = NULL;
 FILE *fp = NULL;
 
 rct_fifo_t rct_fifo;
+queue_t data_queue;
 
 uhd_usrp_handle usrp;
 uhd_rx_metadata_handle md;
@@ -117,13 +122,16 @@ uhd_stream_args_t stream_args = {
     .n_channels = 1
 };
 
+uint8_t push_complete = 0;
+pthread_mutex_t thread_compete_mutex;
+pthread_cond_t thread_complete;
+
 
 /////////////////////////////////////////////////////////
 // Function Definitions
 /////////////////////////////////////////////////////////
 
-void print_help( void )
-{
+void print_help( void ){
     printf("sdr_record - Radio Collar Tracker drone application to pull IQ samples from USRP and dump to disk\n\n"
             "Options:\n"
             "    -r (run_number)\n"
@@ -141,12 +149,11 @@ void print_help( void )
 
 }
 
-void radio_init( void )
-{
+void radio_init( void ){
     double temp_param;
 
     /* Init USRP object */
-    vprintf("Creating USRP with args \"%s\"...\n", device_args);
+    syslog(LOG_DEBUG, "Creating USRP with args \"%s\"...\n", device_args);
     uhd_usrp_make(&usrp, device_args);
 
     /* Create RX streamer */
@@ -157,46 +164,46 @@ void radio_init( void )
 
     /* Set rate */
     temp_param = rate;
-    vprintf("Setting RX Rate: %f...\n", rate);
+    syslog(LOG_DEBUG, "Setting RX Rate: %f...\n", rate);
     uhd_usrp_set_rx_rate(usrp, rate, channel);
 
     /* See what rate actually is */
     uhd_usrp_get_rx_rate(usrp, channel, &rate);
-    vprintf("Actual RX Rate: %f...\n", rate);
+    syslog(LOG_INFO, "Actual RX Rate: %f...\n", rate);
 
     if (temp_param != rate)
     {
-        eprintf("WARNING: RX rate not correctly set\n");
+        syslog(LOG_WARNING, "WARNING: RX rate not correctly set\n");
     }
 
 
     /* Set gain */
     temp_param = gain;
-    vprintf("Setting RX Gain: %f dB...\n", gain);
+    syslog(LOG_DEBUG, "Setting RX Gain: %f dB...\n", gain);
     uhd_usrp_set_rx_gain(usrp, gain, channel, ""); 
 
     /* See what gain actually is */
     uhd_usrp_get_rx_gain(usrp, channel, "", &gain);
-    vprintf("Actual RX Gain: %f...\n", gain);
+    syslog(LOG_INFO, "Actual RX Gain: %f...\n", gain);
 
     if (temp_param != gain)
     {
-        eprintf("WARNING: RX gain not correctly set\n");
+        syslog(LOG_WARNING, "WARNING: RX gain not correctly set\n");
     }
 
     /*Set frequency*/
     temp_param = tune_request.target_freq;
-    vprintf("Setting RX frequency: %f MHz...\n", tune_request.target_freq / 1e6);
+    syslog(LOG_DEBUG, "Setting RX frequency: %f MHz...\n", tune_request.target_freq / 1e6);
     uhd_usrp_set_rx_freq(usrp, &tune_request, channel, &tune_result);
 
     /*See what frequency actually is*/
     uhd_usrp_get_rx_freq(usrp, channel, &freq);
-    vprintf("Actual RX frequency: %f MHz...\n", freq / 1e6);
+    syslog(LOG_INFO, "Actual RX frequency: %f MHz...\n", freq / 1e6);
 
-    if (temp_param != freq)
+    if ((freq - temp_param) / temp_param * 1e9 > 5)
     {
-        vprintf("%f \t %f\n", temp_param, freq);
-        eprintf("WARNING: RX freq not correctly set\n");
+        syslog(LOG_WARNING, "%f \t %f\n", temp_param, freq);
+        syslog(LOG_WARNING, "WARNING: RX freq not correctly set, %.2f ppb offset\n", (freq - temp_param) / temp_param * 1e9);
     }
 
 
@@ -206,12 +213,10 @@ void radio_init( void )
 
     /*Set up buffer*/
     uhd_rx_streamer_max_num_samps(rx_streamer, &samps_per_buff);
-    vprintf("Buffer size in samples: %zu\n", samps_per_buff);
-
+    syslog(LOG_INFO, "Buffer size in samples: %zu\n", samps_per_buff);
 }
 
-void print_meta_data(void)
-{
+void print_meta_data(void){
 
     struct timespec start_time;
     char buf[256];
@@ -230,8 +235,7 @@ void print_meta_data(void)
     fclose(timing_stream);
 }
 
-void radio_deinit( void )
-{
+void radio_deinit( void ){
 
     vprintf("Cleaning up RX streamer.\n");
     uhd_rx_streamer_free(&rx_streamer);
@@ -254,8 +258,7 @@ void radio_deinit( void )
 
 }
 
-int is_rx_error( uhd_rx_metadata_error_code_t error_code )
-{
+int is_rx_error( uhd_rx_metadata_error_code_t error_code ){
 
     switch ( error_code )
     {
@@ -289,158 +292,159 @@ int is_rx_error( uhd_rx_metadata_error_code_t error_code )
 }
 
 
-void * queue_pop_thread( void * args )
-{
-
-    int frame_num = 1;
-    int num_samples_written = 0;
-    char file_name_buff[256];
+void * queue_pop_thread( void * args ){
+    syslog(LOG_INFO, "wx: starting thread");
+    int run_num = run_num;
+    int frame_len = 2044 * 2;
     FILE* data_stream = NULL;
-    float val;
-    const int buf_len = 1024*4;
-    float data_buffer[buf_len];
-    int buffer_i = 0;
+    char buf[256];
+    int frame_num = 0;
+    uint64_t num_samples = 0;
+    uint64_t num_bytes = 0;
+    int file_num = 0;
 
-    snprintf(file_name_buff, sizeof(file_name_buff), "%s/RAW_DATA_%06d_%06d", DATA_DIR, run_num, frame_num);
-    vprintf("File: %s\n", file_name_buff);             
-    data_stream = fopen(file_name_buff, "wb");
+    float data_buf[frame_len];
 
+    bool empty = true;
+    syslog(LOG_DEBUG, "wx: Initializing loop variables");
+    empty = queue_isEmpty(&data_queue);
 
-    while( program_on == 1 )
-    {
+    syslog(LOG_INFO, "wx: starting loop");
+    while(program_on || !empty){
+        empty = queue_isEmpty(&data_queue);
 
-        if( fifo_is_empty(&rct_fifo) )
-        {
-            LOCK();
-            waiting_for_kick = 1;
-            UNLOCK();
- 
-            WAIT_FOR_FIFO_TO_FILL();
-        }
-
-#ifdef RCT_VERBOSE
-        if(fifo_is_empty(&rct_fifo))
-        {
-            vprintf("WARNING: Unexpected Busy Wait, FIFO should not be empty\n");
-        }
-#endif
-
-        while( !fifo_is_empty(&rct_fifo) )
-        {
-
-            if( num_samples_written == SAMPLES_PER_FILE  )
-            {
-                frame_num++;
-                num_samples_written = 0;
-                fclose(data_stream);
-                snprintf(file_name_buff, sizeof(file_name_buff), "%s/RAW_DATA_%06d_%06d", DATA_DIR, run_num, frame_num);
-                vprintf("File: %s\n", file_name_buff);             
-                data_stream = fopen(file_name_buff, "wb");
+        if(!empty){
+            if(frame_num / FRAMES_PER_FILE + 1 != file_num){
+                if(data_stream){
+                    fclose(data_stream);
+                }
+                snprintf(buf, sizeof(buf), "%s/RAW_DATA_%06d_%06d", DATA_DIR, run_num,
+                    frame_num / FRAMES_PER_FILE + 1);
+                file_num++;
+                data_stream = fopen(buf, "wb");
             }
+            float* data_ptr = NULL;
+            data_ptr = (float*) queue_pop(&data_queue);
 
-
-            if(fifo_is_empty(&rct_fifo))
-            {
-                vprintf("Incorrectly kicked\n");
-                break;
-            }      
-
-            val = fifo_pop( &rct_fifo );
-
-            data_buffer[buffer_i++] = val;
-            num_samples_written++;
-
-            if( buffer_i == buf_len )
-            {
-                buffer_i = 0;
-                fwrite(data_buffer, sizeof(float), buf_len, data_stream);
+            for(int i = 0; i < frame_len; i++){
+                data_buf[i] = (float) data_ptr[i];
             }
-
-        }
-
-    }
-
-    while( !fifo_is_empty(&rct_fifo) )
-    {
-
-        if( num_samples_written == SAMPLES_PER_FILE  )
-        {
+            num_bytes += fwrite(data_buf, sizeof(float), frame_len, data_stream) * sizeof(float);
+            free(data_ptr);
             frame_num++;
-            num_samples_written = 0;
-            fclose(data_stream);
-            snprintf(file_name_buff, sizeof(file_name_buff), "%s/RAW_DATA_%06d_%06d", DATA_DIR, run_num, frame_num);
-            vprintf("File: %s\n", file_name_buff);             
-            data_stream = fopen(file_name_buff, "wb");
+            num_samples += frame_len / 2;
+        }else{
+            usleep(FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
         }
-
-
-        if(fifo_is_empty(&rct_fifo))
-        {
-            vprintf("Incorrectly kicked\n");
-            break;
-        }      
-
-        val = fifo_pop( &rct_fifo );
-
-        data_buffer[buffer_i++] = val;
-        num_samples_written++;
-
-        if( buffer_i == buf_len )
-        {
-            buffer_i = 0;
-            fwrite(data_buffer, sizeof(float), buf_len, data_stream);
-        }
-
     }
+    syslog(LOG_DEBUG, "wx: ended loop");
 
-    vprintf("Exit Loop\n");
+    pthread_mutex_lock(&thread_compete_mutex);
+    while(!push_complete){
+        pthread_cond_wait(&thread_complete, &thread_compete_mutex);
+    }
+    pthread_mutex_unlock(&thread_compete_mutex);
+
+    while(!queue_isEmpty(&data_queue)){
+        if(frame_num / FRAMES_PER_FILE + 1 != file_num){
+            if(data_stream){
+                fclose(data_stream);
+            }
+            snprintf(buf, sizeof(buf), "%s/RAW_DATA_%06d_%06d", DATA_DIR, run_num,
+                frame_num / FRAMES_PER_FILE + 1);
+            file_num++;
+            data_stream = fopen(buf, "wb");
+        }
+        float* data_ptr = NULL;
+        data_ptr = (float*) queue_pop(&data_queue);
+
+        for(int i = 0; i < frame_len; i++){
+            data_buf[i] = (float) data_ptr[i];
+        }
+        num_bytes += fwrite(data_buf, sizeof(float), frame_len, data_stream) * sizeof(float);
+        free(data_ptr);
+        frame_num++;
+        num_samples += frame_len / 2;
+    }
 
     fclose(data_stream);
-
+    syslog(LOG_INFO, "Recorded %f seconds of data to disk\n", num_samples / 2048000.0);
+    syslog(LOG_INFO, "Recorded %ld bytes of data to disk\n", num_bytes);
+    syslog(LOG_INFO, "Queue length at end: %d.\n", data_queue.length);
     return NULL;
 }
 
-void * stream_push_thread( void * args )
-{
+void * stream_push_thread( void * args ){
 
     uhd_rx_metadata_error_code_t error_code;
     size_t num_rx_samps = 0;
 
-
+    syslog(LOG_INFO, "rx: Starting USRP stream");
     uhd_rx_streamer_issue_stream_cmd(rx_streamer, &stream_cmd);
 
+    syslog(LOG_DEBUG, "rx: allocating buffers");
     buff = malloc(samps_per_buff * 2 * sizeof(float));
     buffs_ptr = (void**)&buff;
+    uint64_t sample_counter = 0;
 
+    syslog(LOG_INFO, "rx: Starting loop");
     while(program_on)
     {
         num_rx_samps = 0;
         uhd_rx_streamer_recv(rx_streamer, buffs_ptr, samps_per_buff, &md, TIMEOUT_SEC, false, &num_rx_samps);
         uhd_rx_metadata_error_code(md, &error_code);
-        is_rx_error(error_code);
+        if(is_rx_error(error_code)){
+            syslog(LOG_WARNING, "rx: USRP issued warning");
+        }else{
+            syslog(LOG_DEBUG, "rx: USRP no warnings");
+        }
 
         if(num_rx_samps > 0)
         {    
-            fifo_enqueue_multiple_elements( &rct_fifo, buff, num_rx_samps*2  );
+            // syslog(LOG_INFO, "rx: USRP has data");
+            // syslog(LOG_DEBUG, "rx: enqueing data Jacob");
+            // fifo_enqueue_multiple_elements( &rct_fifo, buff, num_rx_samps*2  );
             
-            LOCK();
-            if(waiting_for_kick)
-            {    
-                SET_FIFO_NONEMPTY();
-                waiting_for_kick = 0;
+            // LOCK();
+            // if(waiting_for_kick)
+            // {    
+            //     SET_FIFO_NONEMPTY();
+            //     waiting_for_kick = 0;
+            // }
+            // UNLOCK();
+
+            syslog(LOG_DEBUG, "rx: enqueing data nathan");
+            syslog(LOG_DEBUG, "rx: allocating new frame of size %lu", num_rx_samps * 2 * sizeof(float));
+            sample_counter += num_rx_samps;
+            float* newframe = malloc(num_rx_samps * 2 * sizeof(float));
+            if(newframe == NULL){
+                syslog(LOG_CRIT, "rx: Failed to allocate new frame!");
+                return NULL;
             }
-            UNLOCK();
+            syslog(LOG_DEBUG, "rx: copying data");
+            for(int i = 0; i < num_rx_samps * 2; i++){
+                newframe[i] = buff[i];
+            }
+            syslog(LOG_DEBUG, "rx: pushing frame");
+            queue_push(&data_queue, (void*) newframe);
         }
     }
 
-    vprintf("Exit Loop\n");
+    syslog(LOG_INFO, "rx: Recorded %lu samples, expect %lu bytes\n", sample_counter, sample_counter * sizeof(float) * 2);
 
+    syslog(LOG_INFO, "rx: stopping USRP");
     stream_cmd.stream_mode = UHD_STREAM_MODE_STOP_CONTINUOUS;
     uhd_rx_streamer_issue_stream_cmd(rx_streamer, &stream_cmd);
 
+    syslog(LOG_INFO, "rx: cleaning resources");
     free(buff);
 
-    still_pushing_into_fifo = 0;
+    pthread_mutex_lock(&thread_compete_mutex);
+    push_complete = 1;
+    pthread_cond_signal(&thread_complete);
+    pthread_mutex_unlock(&thread_compete_mutex);
+
+    syslog(LOG_DEBUG, "rx: exiting");
 
     return NULL;
 
@@ -450,123 +454,156 @@ void sig_handler( int sig )
 {
 
     program_on = 0;
-    vprintf("\nCought Interrupt\n");
+    syslog(LOG_NOTICE, "Caught termination signal");
 
 }
 
 int main( int argc, char* argv[] )
 {
-
-    int option = 0;
-#ifdef RCT_VERBOSE
-    int err = 0;
-#endif
     pthread_t push, pop;
 
-#ifndef RCT_VERBOSE
-    fp_err = fopen("/var/log/sdr_record.log", "a");
-#endif
+    pthread_mutex_init(&thread_compete_mutex, NULL);
+    pthread_cond_init(&thread_complete, NULL);
+
+    openlog("sdr_record", LOG_PERROR, LOG_USER);
+
+    syslog(LOG_DEBUG, "Setting UHD thread priority to default");
 
     if( uhd_set_thread_priority(uhd_default_thread_priority, true) )
     {
-        eprintf("Unable to set thread priority. Continuing anyway.\n");
+        syslog(LOG_WARNING, "Unable to set thread priority. Continuing anyway.");
     }
 
     /*Process options*/
-    while((option = getopt(argc, argv, "hg:s:f:r:o:")) != -1)
+    syslog(LOG_INFO, "Getting command line options");
+    int option = 0;
+    while((option = getopt(argc, argv, "hg:s:f:r:o:v:")) != -1)
     {
         switch(option)
         {
             case 'h':
+                syslog(LOG_INFO, "Got help flag");
                 print_help();
+                break;
             case 'g':
                 gain = (int)(atof(optarg));
+                syslog(LOG_INFO, "Got gain setting of %.2f", gain);
                 break;
             case 's':
                 rate = (int)(atof(optarg));
+                syslog(LOG_INFO, "Got sampling rate setting of %lf", rate);
                 break;
             case 'f':
                 tune_request.target_freq = atof(optarg);
+                syslog(LOG_INFO, "Got center frequency target of %lf", tune_request.target_freq);
                 break;
             case 'r':
                 run_num = atoi(optarg);
+                syslog(LOG_INFO, "Got run number of %d", run_num);
                 break;
             case 'o':
                 strcat(DATA_DIR, optarg );
+                syslog(LOG_INFO, "Got an output directory of %s", DATA_DIR);
+                break;
+            case 'v':
+                syslog(LOG_INFO, "Setting log output to %d", atoi(optarg));
+                int mask = 0;
+                for(int i = 0; i <= atoi(optarg); i++){
+                    mask |= 1 << i;
+                }
+                setlogmask(mask);
                 break;
         }
     }
 
+    syslog(LOG_INFO, "Sanity checking args");
 
     if (run_num == DEFAULT_RUN) 
     {
-        eprintf("ERROR: Must set run number\n");
+        syslog(LOG_ERR, "Must set run number\n");
         print_help();
     }
 
     if (gain == DEFAULT_GAIN)
     {
-        eprintf("ERROR: Must set gain\n");
+        syslog(LOG_ERR, "Must set gain\n");
         print_help();
     }
 
-    if ( strlen(DATA_DIR) == 0 )
+    if (strlen(DATA_DIR) == 0)
     {
-        eprintf("ERROR: Must set directory\n");
+        syslog(LOG_ERR, "Must set directory\n");
         print_help();
     }
 
     if (tune_request.target_freq == DEFAULT_FREQ)
     {
-        eprintf("ERROR: Must set freq\n");
+        syslog(LOG_ERR, "Must set freq\n");
         print_help();
     }
 
     if (rate == DEFAULT_RATE)
     {
-        eprintf("ERROR: Must set rate\n");
+        syslog(LOG_ERR, "Must set rate\n");
         print_help();
     }
 
-    signal(SIGINT, sig_handler); 
-    fifo_init(&rct_fifo, FIFO_SIZE);
+    syslog(LOG_INFO, "Setting signal handler");
+    signal(SIGINT, sig_handler);
 
-    vprintf("\n\n========================= Initializing Radio... =========================\n");
+    syslog(LOG_INFO, "Initializing data queue");
+    syslog(LOG_DEBUG, "Initializing Jacob FIFO");
+    fifo_init(&rct_fifo, FIFO_SIZE);
+    syslog(LOG_DEBUG, "Initializing Nathan FIFO");
+    queue_init(&data_queue);
+
+    printf("\n\n========================= Initializing Radio... =========================\n");
+    syslog(LOG_INFO, "Initializing Radio");
     radio_init();
+    syslog(LOG_DEBUG, "Printing metadata to file");
     print_meta_data();
 
+    syslog(LOG_INFO, "Initializing thread semaphores");
     THREAD_SYNC(sem_init(&sem, SEMAPHORE_BETWEEN_THREADS, SEMAPHORE_INIT));
     THREAD_SYNC(sem_init(&mutex, SEMAPHORE_BETWEEN_THREADS, MUTEX_INIT));
 
-    vprintf("\n\n========================== Getting Samples... ===========================\n");
-
+    printf("\n\n========================== Getting Samples... ===========================\n");
+    syslog(LOG_INFO, "Starting threads");
+    syslog(LOG_DEBUG, "Starting receiver thread");
     pthread_create(&push, NULL, stream_push_thread, NULL);
+    syslog(LOG_DEBUG, "Starting writer thread");
     pthread_create(&pop, NULL, queue_pop_thread, NULL);
 
+    syslog(LOG_INFO, "main thread sleeping");
     pthread_join(pop, NULL);
+    syslog(LOG_DEBUG, "writer thread joined with main");
     pthread_join(push, NULL);
+    syslog(LOG_DEBUG, "receiver thread joined with main");
 
-#ifdef RCT_VERBOSE
-    err = rct_fifo.err;
-#endif
+    syslog(LOG_INFO, "main thread awoke");
 
     if(!fifo_is_empty(&rct_fifo)) 
     {
-        eprintf("ERROR: Program exit without writing FIFO to disk\n");
+        syslog(LOG_ERR, "Program exit without writing FIFO to disk\n");
+    }
+    if(!queue_isEmpty(&data_queue)){
+        syslog(LOG_ERR, "Program exit without writing FIFO to disk\n");
     }
 
-    radio_deinit();    
+    syslog(LOG_INFO, "cleaning up resources");
+    syslog(LOG_DEBUG, "deinitializing radio");
+    radio_deinit();
+
+    syslog(LOG_DEBUG, "deinitializing queues");
     fifo_deinit(&rct_fifo);
+    queue_destroy(&data_queue);
+
+    syslog(LOG_DEBUG, "deinitializing semaphores");
     THREAD_SYNC(sem_destroy(&sem));
     THREAD_SYNC(sem_destroy(&mutex));
-
-#ifndef RCT_VERBOSE
-    fclose(fp_err);
-#endif
-
-    vprintf("\n\n============ Program Terminated With %d FIFO Overflow Errors ============\n", err);
+    pthread_mutex_destroy(&thread_compete_mutex);
+    pthread_cond_destroy(&thread_complete);
     return 0;
-
 }
 
 
