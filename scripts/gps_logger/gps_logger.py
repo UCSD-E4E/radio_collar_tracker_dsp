@@ -51,16 +51,40 @@ gps_time = 0
 offset = gps_time - ref_time
 
 while runstate:
-    line = stream.readline()
+    line = None
+    try:
+        line = stream.readline()
+    except serial.serialutil.SerialException, e:
+        continue
 
     if line is not None:
-        msg = pynmea2.parse(line);
-        logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (time.time(),
-            msg.latitude, msg.longitude, msg.timestamp))
+        msg = None
+        try:
+            msg = pynmea2.parse(line);
+        except pynmea2.ParseError, e:
+            continue
+        # logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (time.time(),
+        #     msg.latitude, msg.longitude, msg.timestamp))
+        print(msg.sentence_type)
         if msg.sentence_type == 'GGA':
-    	    logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (time.time(),
-                msg.latitude, msg.longitude, time.time() + offset, msg.altitude, -1, -1, -1, -1, 999))
-                # msg.latitude, msg.longitude, time.time() + offset, msg.altitude, msg.relative_alt, msg.vx, msg.vy, msg.vz, msg.hdg))
+            local_timestamp = time.time()
+            lat = 0
+            if(msg.latitude is not None):
+                lat = msg.latitude
+            lon = 0
+            if(msg.longitude is not None):
+                lon = msg.longitude
+            global_timestamp = time.time() + offset
+            alt = 0;
+            if(msg.altitude is not None):
+                alt = msg.altitude
+            rel_alt = -1
+            vx = -1
+            vy = -1
+            vz = -1
+            hdg = 999
+            logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (local_timestamp,
+                lat, lon, global_timestamp, alt, rel_alt, vx, vy, vz, hdg))
         if msg.sentence_type == 'ZDA':
             ref_time = time.time()
             gps_time = time.mktime(time.strptime(msg.datetime.ctime()))
