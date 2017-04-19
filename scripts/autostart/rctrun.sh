@@ -20,7 +20,7 @@ sdr_starter='rct_sdr_starter'
 echo "$(timestamp): Starting..." >> $log
 
 # check for autostart file!
-if [ ! -e "/home/pi/autostart" ]
+if [ ! -e "/usr/local/etc/rct_autostart" ]
 	then
 		echo "$(timestamp): Autostart not found!" >> $log
 	exit
