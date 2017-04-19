@@ -29,52 +29,35 @@
 #include <semaphore.h>
 
 
-/////////////////////////////////////////////////////////////////////////
-//Semaphore Locking
-/////////////////////////////////////////////////////////////////////////
 
-sem_t sem, mutex;
-#define WAIT_FOR_FIFO_TO_FILL()         sem_wait(&sem)
-#define SET_FIFO_NONEMPTY()             sem_post(&sem)
-
-#define LOCK()                          sem_wait(&mutex)
-#define UNLOCK()                        sem_post(&mutex)
-
-#define SEMAPHORE_BETWEEN_THREADS       0
-#define SEMAPHORE_BETWEEN_PROCESSES     1
-#define SEMAPHORE_INIT                  0   /*init semaphore to block initially*/
-#define MUTEX_INIT                      1   /*init mutex - initially available*/
-
-#define THREAD_SYNC(x)                  x
-
-/////////////////////////////////////////////////////////////////////////
-//FIFO Header
-/////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////
+// //FIFO Header
+// /////////////////////////////////////////////////////////////////////////
 
 
-#define data_type float
+// #define data_type float
 
-typedef data_type DATA_T;
-typedef unsigned int uint32_t;
+// typedef data_type DATA_T;
+// typedef unsigned int uint32_t;
 
-typedef struct
-{
-    data_type * buffer;
-    uint32_t size;
-    uint32_t used;
-    volatile unsigned int tail;
-    volatile unsigned int head;
-    volatile unsigned int err;
-} rct_fifo_t;
+// typedef struct
+// {
+//     data_type * buffer;
+//     uint32_t size;
+//     uint32_t used;
+//     volatile unsigned int tail;
+//     volatile unsigned int head;
+//     volatile unsigned int err;
+// } rct_fifo_t;
 
-#define SUCCESS     0
-#define FAIL        1
+// #define SUCCESS     0
+// #define FAIL        1
 
-int fifo_enqueue_multiple_elements(  rct_fifo_t * fifo, DATA_T * data_in, uint32_t len );
-DATA_T fifo_pop( rct_fifo_t * fifo );
-int fifo_is_empty( rct_fifo_t * fifo );
-int fifo_deinit( rct_fifo_t * fifo );
-int fifo_init( rct_fifo_t* fifo, uint32_t size );
+// int fifo_enqueue_multiple_elements(  rct_fifo_t * fifo, DATA_T * data_in, uint32_t len );
+// DATA_T fifo_pop( rct_fifo_t * fifo );
+// int fifo_is_empty( rct_fifo_t * fifo );
+// int fifo_deinit( rct_fifo_t * fifo );
+// int fifo_init( rct_fifo_t* fifo, uint32_t size );
 
 /////////////////////////////////////////////////////////////////////////
 //RCT Header
