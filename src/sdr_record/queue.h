@@ -18,22 +18,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __QUEUE_H
 #define __QUEUE_H
 
-typedef struct queue queue;
-typedef struct node node;
+#include <pthread.h>
+
+typedef struct queue queue_t;
+typedef struct node node_t;
 struct queue{
-	node* head;
-	node* tail;
+	node_t* head;
+	node_t* tail;
 	int length;
+	pthread_mutex_t* queue_mutex;
 };
 
 struct node{
 	void* data;
-	node* next;
+	node_t* next;
 };
 
-void queue_init(queue* queue);
-void queue_push(queue* queue, void* ptr);
-void* queue_pop(queue* queue);
-int queue_isEmpty(queue* queue);
+int queue_init(queue_t* queue);
+void queue_push(queue_t* queue, void* ptr);
+void* queue_pop(queue_t* queue);
+int queue_isEmpty(queue_t* queue);
+int queue_destroy(queue_t* queue);
 
 #endif

@@ -9,24 +9,28 @@ Installing the payload software
 1.	Install the required dependencies
 	1.	python
 	2.	pymavlink
-		1.	`sudo pip install pymavlink`
+		1.	`pip install pymavlink`
 	3.  pyserial
 		1.  `sudo apt-get install python-serial`
-	4.	libusb-1.0-0-dev
-	3.	rtl-sdr
-		1.	`git clone https://github.com/steve-m/librtlsdr`
-		2.	`mkdir librtlsdr/build`
-		3.	`cd librtlsddr/build`
-		4.	`cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON`
-		5.	`make`
-		6.	`sudo make install`
-		7.	`sudo ldconfig`
+	4.	libuhd
+		1.	`sudo apt-get install libboost-all-dev libusb-1.0-0-dev python-mako`
+		2.	`sudo apt-get install doxygen python-docutils cmake build-essential`
+		2.	`git clone git://github.com/EttusResearch/uhd.git`
+		3.	`cd <uhd_repo>/host`
+		4.	`mkdir build`
+		5.	`cd build`
+		6.	`cmake ../`
+		7.	`make`
+		8.	`sudo make install`
+		9.	`sudo ldconfig`
 2.	Install the software
 	1.	`cd <radio_collar_tracker_drone>`
 	2.  `./autogen.sh`
 	3.  `./configure`
 	4.	`make`
 	5.	`sudo make install`
+3.	Configure the USRP for the first time
+	1.	`/usr/local/lib/uhd/utils/uhd_images_downloader.py`
 
 Running the payload software (standalone)
 =========================================

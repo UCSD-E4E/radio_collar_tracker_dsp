@@ -5,7 +5,6 @@ AC_PREREQ([2.69])
 AC_INIT([rct_payload], [1.0], [nthui@eng.ucsd.edu])
 AM_PROG_CC_C_O
 AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([src/sdr_record/maxmin.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
 
@@ -17,7 +16,7 @@ AC_PATH_PROGS(BASH, bash sh)
 AC_PROG_SED
 
 # Checks for libraries.
-PKG_CHECK_MODULES([rtlsdr], [librtlsdr])
+PKG_CHECK_MODULES([uhd], [uhd])
 
 # Checks for Python libraries
 AC_PYTHON_MODULE([pynmea2], [fatal])
@@ -25,7 +24,7 @@ AC_PYTHON_MODULE([pynmea2], [fatal])
 AC_PYTHON_MODULE([serial], [fatal])
 
 # Checks for header files.
-AC_CHECK_HEADERS([float.h stdint.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([float.h stdint.h stdlib.h string.h unistd.h getopt.h syslog.h uhd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL

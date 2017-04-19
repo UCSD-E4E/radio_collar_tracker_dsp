@@ -3,12 +3,6 @@ INSTALL_DIR=&INSTALL_PREFIX
 
 source $INSTALL_DIR/etc/rct_config
 
-led_dir="/sys/class/gpio/gpio$led_num"
-if [ ! -e $led_dir ]
-then
-	echo $led_num > /sys/class/gpio/export
-fi
-
 sdr_log="$log_dir/rct_sdr_log.log"
 gps_log="$log_dir/rct_gps_log.log"
 run=-1
@@ -61,24 +55,24 @@ fi
 rct_gps_logger.py -o $output_dir -r $run -i $mav_port &>> ${gps_log} &
 mavproxypid=$!
 
-sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output_dir &>> ${sdr_log} &
+sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output_dir &
 sdr_record_pid=$!
 
-trap "echo 'got sigint'; kill -s SIGINT $mavproxypid; kill -s SIGINT $sdr_record_pid; echo low > $led_dir/direction; sleep 1; exit 0" SIGINT SIGTERM
+trap "echo 'got sigint'; kill -s SIGINT $mavproxypid; kill -s SIGINT $sdr_record_pid; sleep 1; exit 0" SIGINT SIGTERM
 run=true
 while $run
 do
 	sleep 1
-	echo high > $led_dir/direction
 	if ! ps -p $mavproxypid > /dev/null
 	then
-		run=false
+		echo "WARNING: Could not find gps logger!"
+		# run=false
 	fi
 	if ! ps -p $sdr_record_pid > /dev/null
 	then
+		echo "WARNING: Could not find sdr_starter!"
 		run=false
 	fi
 done
-echo low > $led_dir/direction
 kill -s SIGINT $mavproxypid
 kill -s SIGINT $sdr_record_pid
