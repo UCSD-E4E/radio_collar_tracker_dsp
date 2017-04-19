@@ -433,7 +433,7 @@ void * stream_push_thread(void* args){
 
 void sig_handler(int sig){
 	program_on = 0;
-	syslog(LOG_NOTICE, "Caught termination signal");
+	syslog(LOG_WARNING, "Caught termination signal");
 
 }
 
@@ -565,6 +565,7 @@ int main(int argc, char* argv[]){
 	syslog(LOG_DEBUG, "deinitializing semaphores");
 	pthread_mutex_destroy(&thread_compete_mutex);
 	pthread_cond_destroy(&thread_complete);
+	syslog(LOG_WARNING, "Exiting");
 	return 0;
 }
 
