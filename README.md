@@ -10,9 +10,11 @@ Installing the payload software
 	1.	python
 	2.	pymavlink
 		1.	`pip install pymavlink`
-	3.  pyserial
+	3.	pynmea2
+		1.	`pip install pynmea2`
+	4.  pyserial
 		1.  `sudo apt-get install python-serial`
-	4.	libuhd
+	5.	libuhd
 		1.	`sudo apt-get install libboost-all-dev libusb-1.0-0-dev python-mako`
 		2.	`sudo apt-get install doxygen python-docutils cmake build-essential`
 		2.	`git clone git://github.com/EttusResearch/uhd.git`
