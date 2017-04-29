@@ -20,7 +20,7 @@ while getopts "r:f:g:o:s:p:" opt; do
 			gain=$OPTARG
 			;;
 		o)
-			output=$OPTARG
+			output_dir=$OPTARG
 			;;
 		s)
 			sampling_freq=$OPTARG
