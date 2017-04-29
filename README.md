@@ -8,13 +8,13 @@ Installing the payload software
 ===============================
 1.	Install the required dependencies
 	1.	python
-	2.	pymavlink
-		1.	`pip install pymavlink`
-	3.	pynmea2
+	<!-- 2.	pymavlink
+		1.	`pip install  -->pymavlink`
+	2.	pynmea2
 		1.	`pip install pynmea2`
-	4.  pyserial
+	3.  pyserial
 		1.  `sudo apt-get install python-serial`
-	5.	libuhd
+	4.	libuhd
 		1.	`sudo apt-get install libboost-all-dev libusb-1.0-0-dev python-mako`
 		2.	`sudo apt-get install doxygen python-docutils cmake build-essential`
 		2.	`git clone git://github.com/EttusResearch/uhd.git`
@@ -39,7 +39,9 @@ Running the payload software (standalone)
 `rctstart`
 
 #Running the payload software (hardware-based initialization)
+
 ##Payload Power On Procedure
+
 1.	Disconnect power to AUTOPILOT, PAYLOD
 2.	Connect power to PAYLOAD
 3.	Connect power to AUTOPILOT
