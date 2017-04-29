@@ -20,7 +20,6 @@ PKG_CHECK_MODULES([uhd], [uhd])
 
 # Checks for Python libraries
 AC_PYTHON_MODULE([pynmea2], [fatal])
-# AC_PYTHON_MODULE([pymavlink], [fatal])
 AC_PYTHON_MODULE([serial], [fatal])
 
 # Checks for header files.
