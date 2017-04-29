@@ -52,7 +52,7 @@ if [[ "sampling_freq" -ne $sampling_freq ]]; then
 	exit 1
 fi
 
-rct_gps_logger.py -o $output_dir -r $run -i $mav_port &>> ${gps_log} &
+rct_gps_logger.py -o $output_dir -r $run -i $gps_port -b $gps_baud &>> ${gps_log} &
 mavproxypid=$!
 
 sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output_dir &
