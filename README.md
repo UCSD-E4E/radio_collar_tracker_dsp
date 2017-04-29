@@ -38,10 +38,9 @@ Running the payload software (standalone)
 =========================================
 `rctstart`
 
-#Running the payload software (hardware-based initialization)
+# Running the payload software (hardware-based initialization)
 
-##Payload Power On Procedure
-
+## Payload Power On Procedure
 1.	Disconnect power to AUTOPILOT, PAYLOD
 2.	Connect power to PAYLOAD
 3.	Connect power to AUTOPILOT
