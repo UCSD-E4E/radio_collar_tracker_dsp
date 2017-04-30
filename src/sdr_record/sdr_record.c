@@ -320,7 +320,7 @@ void * queue_pop_thread(void* args){
 
 		gettimeofday(&tp, NULL);
 
-		fprintf(queue_perf, "%d\t%d\n", tp.tv_sec * 1e6 + tp.tv_usec, data_queue.length);
+		fprintf(queue_perf, "%.0f\t%d\n", tp.tv_sec * 1e6 + tp.tv_usec, data_queue.length);
 
 		if(!empty){
 			syslog(LOG_DEBUG, "wx: data frame exists");
