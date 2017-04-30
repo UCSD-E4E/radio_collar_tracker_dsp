@@ -148,5 +148,39 @@ void* queue_pop(queue_t* queue){
 }
 
 int queue_isEmpty(queue_t* queue){
-	return !(queue->length);
+	int retval;
+	int retval2 = pthread_mutex_lock(queue->queue_mutex);
+	if (retval2 != 0){
+		switch(retval2){
+			case EINVAL:
+			case EAGAIN:
+				fprintf(stderr, "queue.c: Failed to acquire queue mutex due to invalid mutex!\n");
+				break;
+			case EDEADLK:
+				fprintf(stderr, "queue.c: Failed to acquire queue mutex due to deadlock condition!\n");
+				break;
+			default:
+				fprintf(stderr, "queue.c: Failed to acquire queue mutex, unknown error!\n");
+				break;
+		}
+		return NULL;
+	}
+	retval = !(queue->length);
+	retval2 = pthread_mutex_unlock(queue->queue_mutex);
+	if(retval2 != 0){
+		switch(retval2){
+			case EINVAL:
+			case EAGAIN:
+				fprintf(stderr, "queue.c: Failed to acquire queue mutex due to invalid mutex!\n");
+				break;
+			case EPERM:
+				fprintf(stderr, "queue.c: Failed to acquire queue mutex because wrong ownership!\n");
+				break;
+			default:
+				fprintf(stderr, "queue.c: Failed to acquire queue mutex, unknown error!\n");
+				break;
+		}
+		return NULL;
+	}
+	return retval;
 }
