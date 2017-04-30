@@ -9,7 +9,7 @@ Installing the payload software
 1.	Install the required dependencies
 	1.	python
 	<!-- 2.	pymavlink
-		1.	`pip install  -->pymavlink`
+		1.	`pip install pymavlink` -->
 	2.	pynmea2
 		1.	`pip install pynmea2`
 	3.  pyserial
