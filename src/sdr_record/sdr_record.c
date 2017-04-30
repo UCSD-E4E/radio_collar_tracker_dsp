@@ -342,7 +342,7 @@ void * queue_pop_thread(void* args){
 			frame_num++;
 			num_samples += frame_len / 2;
 		}else{
-			syslog(LOG_DEBUG, "wx: no data, sleeping for %d us", FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
+			syslog(LOG_NOTICE, "wx: no data, sleeping for %d us", FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
 
 			usleep(FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
 		}
