@@ -59,16 +59,3 @@
 // int fifo_deinit( rct_fifo_t * fifo );
 // int fifo_init( rct_fifo_t* fifo, uint32_t size );
 
-/////////////////////////////////////////////////////////////////////////
-//RCT Header
-/////////////////////////////////////////////////////////////////////////
-
-#ifdef RCT_VERBOSE
-	#define vprintf(...)        fprintf(stderr, __VA_ARGS__)
-	#define eprintf(...)        fprintf(stderr, __VA_ARGS__)
-#else
-	FILE * fp_err;
-	#define vprintf(...)    
-	#define eprintf(...)        fprintf(fp_err, __VA_ARGS__)
-#endif
-

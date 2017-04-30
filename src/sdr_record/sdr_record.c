@@ -63,7 +63,7 @@
 // Function Declarations
 /////////////////////////////////////////////////////////
 void    radio_deinit        (void);
-void    radio_init          (void);
+int     radio_init          (void);
 void    print_help          (void);
 void    print_meta_data     (void);
 void    sig_handler         (int sig);
@@ -137,20 +137,20 @@ void print_help(void){
 			"    -o (output directory)\n"
 			"    -h (print this help message)\n");
 
-#ifndef RCT_VERBOSE
-	fclose(fp_err);
-#endif
-
 	exit(0);
 
 }
 
-void radio_init(void){
+int radio_init(void){
 	double temp_param;
 
 	/* Init USRP object */
 	syslog(LOG_DEBUG, "Creating USRP with args \"%s\"...\n", device_args);
 	uhd_usrp_make(&usrp, device_args);
+	if(!usrp){
+		syslog(LOG_ERR, "Unable to create device!");
+		return 1;
+	}
 
 	/* Create RX streamer */
 	uhd_rx_streamer_make(&rx_streamer);
@@ -207,6 +207,8 @@ void radio_init(void){
 	/*Set up buffer*/
 	uhd_rx_streamer_max_num_samps(rx_streamer, &samps_per_buff);
 	syslog(LOG_INFO, "Buffer size in samples: %zu\n", samps_per_buff);
+
+	return 0;
 }
 
 void print_meta_data(void){
@@ -230,16 +232,16 @@ void print_meta_data(void){
 
 void radio_deinit(void){
 
-	vprintf("Cleaning up RX streamer.\n");
+	fprintf(stderr, "Cleaning up RX streamer.\n");
 	uhd_rx_streamer_free(&rx_streamer);
 
-	vprintf("Cleaning up RX metadata.\n");
+	fprintf(stderr, "Cleaning up RX metadata.\n");
 	uhd_rx_metadata_free(&md);
 
-	vprintf("Cleaning up USRP.\n");
+	fprintf(stderr, "Cleaning up USRP.\n");
 	if(usrp != NULL){
 		uhd_usrp_last_error(usrp, error_string, 512);
-		vprintf("USRP reported the following error: %s\n", error_string);
+		fprintf(stderr, "USRP reported the following error: %s\n", error_string);
 	}
 	uhd_usrp_free(&usrp);
 
@@ -256,25 +258,25 @@ int is_rx_error(uhd_rx_metadata_error_code_t error_code){
 			return 0; 
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_TIMEOUT:  
-			eprintf("ERROR: UHD_RX_METADATA_ERROR_CODE_TIMEOUT\n");
+			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_TIMEOUT\n");
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_LATE_COMMAND:     
-			eprintf("ERROR: UHD_RX_METADATA_ERROR_CODE_LATE_COMMAND\n");
+			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_LATE_COMMAND\n");
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_BROKEN_CHAIN:     
-			eprintf("ERROR: UHD_RX_METADATA_ERROR_CODE_BROKEN_CHAIN\n");
+			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_BROKEN_CHAIN\n");
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_OVERFLOW:   
-			eprintf("ERROR: UHD_RX_METADATA_ERROR_CODE_OVERFLOW\n");
+			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_OVERFLOW\n");
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_ALIGNMENT:  
-			eprintf("ERROR: UHD_RX_METADATA_ERROR_CODE_ALIGNMENT\n");
+			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_ALIGNMENT\n");
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_BAD_PACKET:
-			eprintf("ERROR: UHD_RX_METADATA_ERROR_CODE_BAD_PACKET\n");
+			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_BAD_PACKET\n");
 			break;
 		default:
-			eprintf("Unidentified error occured: 0x%x\n", error_code);
+			fprintf(stderr, "Unidentified error occured: 0x%x\n", error_code);
 	}
 
 	return 1;
@@ -301,10 +303,14 @@ void * queue_pop_thread(void* args){
 
 	syslog(LOG_INFO, "wx: starting loop");
 	while(program_on || !empty){
+		syslog(LOG_DEBUG, "wx: checking for frame");
 		empty = queue_isEmpty(&data_queue);
+		syslog(LOG_DEBUG, "wx: queue has %d remaining", data_queue.length);
 
 		if(!empty){
+			syslog(LOG_DEBUG, "wx: data frame exists");
 			if(frame_num / FRAMES_PER_FILE + 1 != file_num){
+				syslog(LOG_NOTICE, "wx: needs new file");
 				if(data_stream){
 					fclose(data_stream);
 				}
@@ -312,18 +318,27 @@ void * queue_pop_thread(void* args){
 					frame_num / FRAMES_PER_FILE + 1);
 				file_num++;
 				data_stream = fopen(buf, "wb");
+				syslog(LOG_DEBUG, "wx: New file: %s", buf);
 			}
 			float* data_ptr = NULL;
+			syslog(LOG_DEBUG, "wx: popping frame");
 			data_ptr = (float*) queue_pop(&data_queue);
+			syslog(LOG_DEBUG, "wx: got data frame %x", data_ptr);
 
 			for(int i = 0; i < frame_len; i++){
 				data_buf[i] = (float) data_ptr[i];
 			}
-			num_bytes += fwrite(data_buf, sizeof(float), frame_len, data_stream) * sizeof(float);
+			syslog(LOG_DEBUG, "wx: buffered data");
+			int bytes_written = fwrite(data_buf, sizeof(float), frame_len, data_stream) * sizeof(float);
+			num_bytes += bytes_written;
+			syslog(LOG_DEBUG, "wx: Wrote %d bytes", bytes_written);
 			free(data_ptr);
+			syslog(LOG_DEBUG, "wx: Freed data pointer");
 			frame_num++;
 			num_samples += frame_len / 2;
 		}else{
+			syslog(LOG_DEBUG, "wx: no data, sleeping for %d us", FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
+
 			usleep(FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
 		}
 	}
@@ -380,8 +395,10 @@ void * stream_push_thread(void* args){
 	syslog(LOG_INFO, "rx: Starting loop");
 	while(program_on){
 		num_rx_samps = 0;
+		syslog(LOG_DEBUG, "rx: Receiving data...");
 		uhd_rx_streamer_recv(rx_streamer, buffs_ptr, samps_per_buff, &md, TIMEOUT_SEC, false, &num_rx_samps);
 		uhd_rx_metadata_error_code(md, &error_code);
+		syslog(LOG_DEBUG, "rx: Data received");
 		if(is_rx_error(error_code)){
 			syslog(LOG_WARNING, "rx: USRP issued warning");
 		}else{
@@ -389,7 +406,7 @@ void * stream_push_thread(void* args){
 		}
 
 		if(num_rx_samps > 0){
-			syslog(LOG_DEBUG, "rx: enqueing data nathan");
+			syslog(LOG_DEBUG, "rx: enqueing data");
 			syslog(LOG_DEBUG, "rx: allocating new frame of size %lu", samps_per_buff * 2 * sizeof(float));
 			sample_counter += num_rx_samps;
 
@@ -409,6 +426,7 @@ void * stream_push_thread(void* args){
 			syslog(LOG_DEBUG, "rx: pushing frame");
 			queue_push(&data_queue, (void*) newframe);
 		}
+		syslog(LOG_DEBUG, "rx: looping");
 	}
 
 	syslog(LOG_INFO, "rx: Recorded %lu samples, expect %lu bytes\n", sample_counter, sample_counter * sizeof(float) * 2);
@@ -532,7 +550,10 @@ int main(int argc, char* argv[]){
 
 	printf("\n\n========================= Initializing Radio... =========================\n");
 	syslog(LOG_INFO, "Initializing Radio");
-	radio_init();
+	if(radio_init()){
+		syslog(LOG_CRIT, "Failed to initialize radio! Exiting...");
+		exit(1);
+	}
 	syslog(LOG_DEBUG, "Printing metadata to file");
 	print_meta_data();
 
