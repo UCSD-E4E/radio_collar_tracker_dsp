@@ -47,16 +47,14 @@
 
 #define TIMEOUT_SEC		        3.0
 #define META_PREFIX             "META_"
-#define FIFO_SIZE               1024*1024*32
-#define SAMPLES_PER_FILE        1024*1024*8
 
 #define DEFAULT_RATE            -1
 #define DEFAULT_FREQ            -1
 #define DEFAULT_GAIN            -1
 #define DEFAULT_RUN             -1
 
-#define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS    50
-#define FRAMES_PER_FILE 80
+#define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	50
+#define FRAMES_PER_FILE 					1024
 
 
 /////////////////////////////////////////////////////////
@@ -232,16 +230,16 @@ void print_meta_data(void){
 
 void radio_deinit(void){
 
-	fprintf(stderr, "Cleaning up RX streamer.\n");
+	syslog(LOG_DEBUG, "Cleaning up RX streamer.\n");
 	uhd_rx_streamer_free(&rx_streamer);
 
-	fprintf(stderr, "Cleaning up RX metadata.\n");
+	syslog(LOG_DEBUG, "Cleaning up RX metadata.\n");
 	uhd_rx_metadata_free(&md);
 
-	fprintf(stderr, "Cleaning up USRP.\n");
+	syslog(LOG_DEBUG, "Cleaning up USRP.\n");
 	if(usrp != NULL){
 		uhd_usrp_last_error(usrp, error_string, 512);
-		fprintf(stderr, "USRP reported the following error: %s\n", error_string);
+		syslog(LOG_NOTICE, "USRP reported the following error(s): %s\n", error_string);
 	}
 	uhd_usrp_free(&usrp);
 
@@ -258,25 +256,25 @@ int is_rx_error(uhd_rx_metadata_error_code_t error_code){
 			return 0; 
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_TIMEOUT:  
-			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_TIMEOUT\n");
+			syslog(LOG_ERR, "ERROR: UHD_RX_METADATA_ERROR_CODE_TIMEOUT\n");
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_LATE_COMMAND:     
-			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_LATE_COMMAND\n");
+			syslog(LOG_ERR, "ERROR: UHD_RX_METADATA_ERROR_CODE_LATE_COMMAND\n");
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_BROKEN_CHAIN:     
-			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_BROKEN_CHAIN\n");
+			syslog(LOG_ERR, "ERROR: UHD_RX_METADATA_ERROR_CODE_BROKEN_CHAIN\n");
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_OVERFLOW:   
-			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_OVERFLOW\n");
+			syslog(LOG_ERR, "ERROR: UHD_RX_METADATA_ERROR_CODE_OVERFLOW\n");
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_ALIGNMENT:  
-			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_ALIGNMENT\n");
+			syslog(LOG_ERR, "ERROR: UHD_RX_METADATA_ERROR_CODE_ALIGNMENT\n");
 			break;
 		case UHD_RX_METADATA_ERROR_CODE_BAD_PACKET:
-			fprintf(stderr, "ERROR: UHD_RX_METADATA_ERROR_CODE_BAD_PACKET\n");
+			syslog(LOG_ERR, "ERROR: UHD_RX_METADATA_ERROR_CODE_BAD_PACKET\n");
 			break;
 		default:
-			fprintf(stderr, "Unidentified error occured: 0x%x\n", error_code);
+			syslog(LOG_ERR, "Unidentified error occured: 0x%x\n", error_code);
 	}
 
 	return 1;
@@ -286,7 +284,6 @@ int is_rx_error(uhd_rx_metadata_error_code_t error_code){
 
 void * queue_pop_thread(void* args){
 	syslog(LOG_INFO, "wx: starting thread");
-	int run_num = run_num;
 	int frame_len = 2044 * 2;
 	FILE* data_stream = NULL;
 	char buf[256];
@@ -310,7 +307,7 @@ void * queue_pop_thread(void* args){
 		if(!empty){
 			syslog(LOG_DEBUG, "wx: data frame exists");
 			if(frame_num / FRAMES_PER_FILE + 1 != file_num){
-				syslog(LOG_NOTICE, "wx: needs new file");
+				syslog(LOG_INFO, "wx: needs new file");
 				if(data_stream){
 					fclose(data_stream);
 				}
@@ -323,7 +320,7 @@ void * queue_pop_thread(void* args){
 			float* data_ptr = NULL;
 			syslog(LOG_DEBUG, "wx: popping frame");
 			data_ptr = (float*) queue_pop(&data_queue);
-			syslog(LOG_DEBUG, "wx: got data frame %x", data_ptr);
+			syslog(LOG_DEBUG, "wx: got data frame %p", data_ptr);
 
 			for(int i = 0; i < frame_len; i++){
 				data_buf[i] = (float) data_ptr[i];
@@ -373,9 +370,9 @@ void * queue_pop_thread(void* args){
 	}
 
 	fclose(data_stream);
-	syslog(LOG_INFO, "Recorded %f seconds of data to disk\n", num_samples / 2048000.0);
-	syslog(LOG_INFO, "Recorded %ld bytes of data to disk\n", num_bytes);
-	syslog(LOG_INFO, "Queue length at end: %d.\n", data_queue.length);
+	syslog(LOG_NOTICE, "wx: Recorded %f seconds of data to disk\n", num_samples / 2048000.0);
+	syslog(LOG_NOTICE, "wx: Recorded %ld bytes of data to disk\n", num_bytes);
+	syslog(LOG_INFO, "wx: Queue length at end: %d.\n", data_queue.length);
 	return NULL;
 }
 
@@ -429,7 +426,7 @@ void * stream_push_thread(void* args){
 		syslog(LOG_DEBUG, "rx: looping");
 	}
 
-	syslog(LOG_INFO, "rx: Recorded %lu samples, expect %lu bytes\n", sample_counter, sample_counter * sizeof(float) * 2);
+	syslog(LOG_NOTICE, "rx: Recorded %lu samples, expect %lu bytes\n", sample_counter, sample_counter * sizeof(float) * 2);
 
 	syslog(LOG_INFO, "rx: stopping USRP");
 	stream_cmd.stream_mode = UHD_STREAM_MODE_STOP_CONTINUOUS;
