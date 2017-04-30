@@ -55,6 +55,8 @@
 
 #define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	50
 #define FRAMES_PER_FILE 					1024
+#define QUEUE_WARNING_LENGTH				15
+#define QUEUE_CRITICAL_LENGTH				63
 
 
 /////////////////////////////////////////////////////////
@@ -303,6 +305,12 @@ void * queue_pop_thread(void* args){
 		syslog(LOG_DEBUG, "wx: checking for frame");
 		empty = queue_isEmpty(&data_queue);
 		syslog(LOG_DEBUG, "wx: queue has %d remaining", data_queue.length);
+		if(data_queue.length > QUEUE_WARNING_LENGTH){
+			syslog(LOG_NOTICE, "wx: queue has more than %d frames!", QUEUE_WARNING_LENGTH);
+		}
+		if(data_queue.length > QUEUE_CRITICAL_LENGTH){
+			syslog(LOG_WARNING, "wx: queue has more than %d frames!", QUEUE_CRITICAL_LENGTH);
+		}
 
 		if(!empty){
 			syslog(LOG_DEBUG, "wx: data frame exists");
