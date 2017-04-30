@@ -39,7 +39,6 @@
 #include "queue.h"
 #include <syslog.h>
 #include <time.h>
-#include <sys/time.h>
 
 /////////////////////////////////////////////////////////
 // Constants
@@ -289,7 +288,6 @@ void * queue_pop_thread(void* args){
 	syslog(LOG_INFO, "wx: starting thread");
 	int frame_len = 2044 * 2;
 	FILE* data_stream = NULL;
-	FILE* queue_perf = fopen("/var/log/rct_queue.log", "w");
 	char buf[256];
 	int frame_num = 0;
 	uint64_t num_samples = 0;
@@ -297,10 +295,6 @@ void * queue_pop_thread(void* args){
 	int file_num = 0;
 
 	float data_buf[frame_len];
-
-
-	struct timeval tp;
-
 
 	bool empty = true;
 	syslog(LOG_DEBUG, "wx: Initializing loop variables");
@@ -317,10 +311,6 @@ void * queue_pop_thread(void* args){
 		if(data_queue.length > QUEUE_CRITICAL_LENGTH){
 			syslog(LOG_WARNING, "wx: queue has more than %d frames!", QUEUE_CRITICAL_LENGTH);
 		}
-
-		gettimeofday(&tp, NULL);
-
-		fprintf(queue_perf, "%.0f\t%d\n", tp.tv_sec * 1e6 + tp.tv_usec, data_queue.length);
 
 		if(!empty){
 			syslog(LOG_DEBUG, "wx: data frame exists");
@@ -359,7 +349,6 @@ void * queue_pop_thread(void* args){
 	}
 	syslog(LOG_DEBUG, "wx: ended loop");
 
-	fclose(queue_perf);
 	pthread_mutex_lock(&thread_compete_mutex);
 	while(!push_complete){
 		pthread_cond_wait(&thread_complete, &thread_compete_mutex);
