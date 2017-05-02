@@ -39,6 +39,8 @@
 #include "queue.h"
 #include <syslog.h>
 #include <time.h>
+#include <stdint.h>
+#include <sys/time.h>
 
 /////////////////////////////////////////////////////////
 // Constants
@@ -111,7 +113,7 @@ uhd_tune_request_t tune_request = {
 };
 
 uhd_stream_args_t stream_args = {
-	.cpu_format = "fc32",
+	.cpu_format = "sc16",
 	.otw_format = "sc16",
 	.args = "",
 	.channel_list = &channel,
@@ -286,7 +288,7 @@ int is_rx_error(uhd_rx_metadata_error_code_t error_code){
 
 void * queue_pop_thread(void* args){
 	syslog(LOG_INFO, "wx: starting thread");
-	int frame_len = 2044 * 2;
+	int frame_len = 16384 * 2;
 	FILE* data_stream = NULL;
 	char buf[256];
 	int frame_num = 0;
@@ -294,7 +296,7 @@ void * queue_pop_thread(void* args){
 	uint64_t num_bytes = 0;
 	int file_num = 0;
 
-	float data_buf[frame_len];
+	int16_t data_buf[frame_len];
 
 	bool empty = true;
 	syslog(LOG_DEBUG, "wx: Initializing loop variables");
@@ -325,16 +327,16 @@ void * queue_pop_thread(void* args){
 				data_stream = fopen(buf, "wb");
 				syslog(LOG_DEBUG, "wx: New file: %s", buf);
 			}
-			float* data_ptr = NULL;
+			int16_t* data_ptr = NULL;
 			syslog(LOG_DEBUG, "wx: popping frame");
-			data_ptr = (float*) queue_pop(&data_queue);
+			data_ptr = (int16_t*) queue_pop(&data_queue);
 			syslog(LOG_DEBUG, "wx: got data frame %p", data_ptr);
 
 			for(int i = 0; i < frame_len; i++){
-				data_buf[i] = (float) data_ptr[i];
+				data_buf[i] = (int16_t) data_ptr[i];
 			}
 			syslog(LOG_DEBUG, "wx: buffered data");
-			int bytes_written = fwrite(data_buf, sizeof(float), frame_len, data_stream) * sizeof(float);
+			int bytes_written = fwrite(data_buf, sizeof(int16_t), frame_len, data_stream) * sizeof(int16_t);
 			num_bytes += bytes_written;
 			syslog(LOG_DEBUG, "wx: Wrote %d bytes", bytes_written);
 			free(data_ptr);
@@ -342,7 +344,7 @@ void * queue_pop_thread(void* args){
 			frame_num++;
 			num_samples += frame_len / 2;
 		}else{
-			syslog(LOG_NOTICE, "wx: no data, sleeping for %d us", FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
+			syslog(LOG_DEBUG, "wx: no data, sleeping for %d us", FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
 
 			usleep(FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
 		}
@@ -356,7 +358,10 @@ void * queue_pop_thread(void* args){
 	pthread_mutex_unlock(&thread_compete_mutex);
 
 	while(!queue_isEmpty(&data_queue)){
+		syslog(LOG_INFO, "wx: still data in queue!");
+		syslog(LOG_DEBUG, "wx: queue has %d remaining", data_queue.length);
 		if(frame_num / FRAMES_PER_FILE + 1 != file_num){
+			syslog(LOG_INFO, "wx: needs new file");
 			if(data_stream){
 				fclose(data_stream);
 			}
@@ -364,19 +369,25 @@ void * queue_pop_thread(void* args){
 				frame_num / FRAMES_PER_FILE + 1);
 			file_num++;
 			data_stream = fopen(buf, "wb");
+			syslog(LOG_DEBUG, "wx: New file: %s", buf);
 		}
-		float* data_ptr = NULL;
-		data_ptr = (float*) queue_pop(&data_queue);
+		int16_t* data_ptr = NULL;
+		syslog(LOG_DEBUG, "wx: popping frame");
+		data_ptr = (int16_t*) queue_pop(&data_queue);
+		syslog(LOG_DEBUG, "wx: got data frame %p", data_ptr);
 
 		for(int i = 0; i < frame_len; i++){
-			data_buf[i] = (float) data_ptr[i];
+			data_buf[i] = (int16_t) data_ptr[i];
 		}
-		num_bytes += fwrite(data_buf, sizeof(float), frame_len, data_stream) * sizeof(float);
+		syslog(LOG_DEBUG, "wx: buffered data");
+		int bytes_written = fwrite(data_buf, sizeof(int16_t), frame_len, data_stream) * sizeof(int16_t);
+		num_bytes += bytes_written;
+		syslog(LOG_DEBUG, "wx: Wrote %d bytes", bytes_written);
 		free(data_ptr);
+		syslog(LOG_DEBUG, "wx: Freed data pointer");
 		frame_num++;
 		num_samples += frame_len / 2;
 	}
-
 	fclose(data_stream);
 	syslog(LOG_NOTICE, "wx: Recorded %f seconds of data to disk\n", num_samples / 2048000.0);
 	syslog(LOG_NOTICE, "wx: Recorded %ld bytes of data to disk\n", num_bytes);
@@ -393,15 +404,22 @@ void * stream_push_thread(void* args){
 	uhd_rx_streamer_issue_stream_cmd(rx_streamer, &stream_cmd);
 
 	syslog(LOG_DEBUG, "rx: allocating buffers");
-	buff = malloc(samps_per_buff * 2 * sizeof(float));
+	samps_per_buff = 16384;
+	buff = malloc(samps_per_buff * 2 * sizeof(int16_t));
 	buffs_ptr = (void**)&buff;
 	uint64_t sample_counter = 0;
+
+	struct timeval starttime;
+	struct timeval stoptime;
+	struct timeval finishtime;
 
 	syslog(LOG_INFO, "rx: Starting loop");
 	while(program_on){
 		num_rx_samps = 0;
 		syslog(LOG_DEBUG, "rx: Receiving data...");
+		gettimeofday(&starttime, NULL);
 		uhd_rx_streamer_recv(rx_streamer, buffs_ptr, samps_per_buff, &md, TIMEOUT_SEC, false, &num_rx_samps);
+		gettimeofday(&stoptime, NULL);
 		uhd_rx_metadata_error_code(md, &error_code);
 		syslog(LOG_DEBUG, "rx: Data received");
 		if(is_rx_error(error_code)){
@@ -412,14 +430,14 @@ void * stream_push_thread(void* args){
 
 		if(num_rx_samps > 0){
 			syslog(LOG_DEBUG, "rx: enqueing data");
-			syslog(LOG_DEBUG, "rx: allocating new frame of size %lu", samps_per_buff * 2 * sizeof(float));
+			syslog(LOG_DEBUG, "rx: allocating new frame of size %lu", samps_per_buff * 2 * sizeof(int16_t));
 			sample_counter += num_rx_samps;
 
-			if(samps_per_buff != num_rx_samps){
+			if(samps_per_buff < num_rx_samps){
 				syslog(LOG_WARNING, "rx: incomplete buffer!");
 			}
 
-			float* newframe = malloc(samps_per_buff * 2 * sizeof(float));
+			int16_t* newframe = malloc(samps_per_buff * 2 * sizeof(int16_t));
 			if(newframe == NULL){
 				syslog(LOG_CRIT, "rx: Failed to allocate new frame!");
 				return NULL;
@@ -431,17 +449,28 @@ void * stream_push_thread(void* args){
 			syslog(LOG_DEBUG, "rx: pushing frame");
 			queue_push(&data_queue, (void*) newframe);
 		}
+		gettimeofday(&finishtime, NULL);
+
+		uint64_t starttimeus = starttime.tv_sec * 1e6 + starttime.tv_usec;
+		uint64_t stoptimeus = stoptime.tv_sec * 1e6 + stoptime.tv_usec;
+		uint64_t finishtimeus = finishtime.tv_sec * 1e6 + finishtime.tv_usec;
+
+		// printf("%lu us for record, %lu us for queue\n", stoptimeus - starttimeus, finishtimeus - stoptimeus);
+
+
 		syslog(LOG_DEBUG, "rx: looping");
 	}
 
-	syslog(LOG_NOTICE, "rx: Recorded %lu samples, expect %lu bytes\n", sample_counter, sample_counter * sizeof(float) * 2);
+	syslog(LOG_NOTICE, "rx: Recorded %lu samples, expect %lu bytes\n", sample_counter, sample_counter * sizeof(int16_t) * 2);
 
 	syslog(LOG_INFO, "rx: stopping USRP");
 	stream_cmd.stream_mode = UHD_STREAM_MODE_STOP_CONTINUOUS;
 	uhd_rx_streamer_issue_stream_cmd(rx_streamer, &stream_cmd);
 
 	syslog(LOG_INFO, "rx: cleaning resources");
-	free(buff);
+	if(buff){
+		free(buff);
+	}
 
 	pthread_mutex_lock(&thread_compete_mutex);
 	push_complete = 1;
