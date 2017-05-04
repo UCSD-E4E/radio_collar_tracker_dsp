@@ -36,7 +36,7 @@ Installing the payload software
 
 Running the payload software (standalone)
 =========================================
-`rct_sdr_starter`
+`rct_sdr_starter [-h] [-r run_num] [-f center_freq] [-s sample_rate] [-g gain] [-o output_dir]`
 
 # Running the payload software (hardware-based initialization)
 
