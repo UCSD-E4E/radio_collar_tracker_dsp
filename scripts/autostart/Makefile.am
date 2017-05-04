@@ -20,7 +20,6 @@ install-exec-hook: rctstart
 uninstall-hook:
 	update-rc.d rctstart remove
 	rm /etc/init.d/rctstart
-	service rct_mount_RAW_DATA stop
 
 maintainer-clean-local:
 	rm Makefile.in
