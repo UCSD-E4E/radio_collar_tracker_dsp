@@ -4,7 +4,7 @@
 \SetWatermarkScale{7}
 \title{Radio Collar Tracker Flight Operations Manual}
 \author{Eric Lo, Project Manager\\Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
-\date{\today\\v0.6}
+\date{\today\\v2.0}
 \usepackage{fullpage}
 \usepackage{hyperref}
 \usepackage{mdframed}
@@ -46,6 +46,7 @@
 \newacronym[see={[Glossary:]{sdr_gls}}]{SDR}{SDR}{\gls{sdr_gls}}
 \newacronym{rtl}{RTL}{Return To Launch}
 \newacronym{AO}{AO}{Autopilot Operator}
+\newacronym{VO}{VO}{Visual Observer}
 
 \begin{document}
 \maketitle
@@ -74,170 +75,38 @@
 			The post-landing phase of flight involves securing and safing the system, and safely shutting down all equipment.
 	\section{Aircraft}
 		\subsection{Aircraft Summary}
-			The airframe used in this \gls{uas} is a Tarot Ironman 650, which is a carbon-fiber \gls{quadcopter} airframe.  We have then integrated a commercial open-source autopilot, the 3DR PixHawk, to use as our primary flight controller.  To maximize flight time, we have settled on a battery pack consisting of 3 3S 5.1 Ah batteries connected in parallel.  As a result of this configuration, we can achieve a total flight time of 20-23 minutes at a maximum speed of 5 m/s.
+			The airframe used in this \gls{uas} is a 3DR Solo, which is a COTS \gls{quadcopter}.  We have then added an independent payload that does not interface with the aircraft control system.
 		\subsection{Aircraft Specifications}
-			\begin{itemize}
-				\item Length\hfill110 cm
-				\item Width\hfill89 cm
-				\item Height\hfill25 cm
-				\item Empty Weight\hfill1.5 kg
-				\item Maximum Takeoff Weight\hfill
-				\item Diagonal Boom Length\hfill65 cm
-				\item Powerplant\hfill 4 x Navigator Series T-Motor MN4010-11
-				\item Powerplant Rating\hfill475 rpm/V
-				\item Powerplant Voltage\hfill12.5 V
-				\item Maximum Speed\hfill 5 m/s
-				\item Maximum Range\hfill 6 km
-				\item Rotor Diameter\hfill 43 cm
-				\item Rotors\hfill4
-				\item Battery\hfill 3S 3P 24C \gls{LiPo} 15300 mAh
-				\item Battery Weight\hfill 1 kg
-				\item Autopilot\hfill3DR Pixhawk
-				\item RC Receiver\hfill FrSky X8R
-				\item Autopilot Datalink Radio\hfill 3DR 915 MHz Radio
-				\item Motor Controller\hfill 4 x HobbyKing Platinum Pro 30A
-				\item Base Airframe\hfill Tarot Ironman 650 TI65B01
-				\item RC Transmitter\hfill FrSky Taranis X9D
-			\end{itemize}
+			See Section 11.1 in the 3DR Solo User Manual.
 		\subsection{Transmitter Layout}
-			\begin{figure}[ht]
-				\centering
-				\caption{FrSky Taranis X9D Switch Assignments}
-				\includegraphics[width=\textwidth]{taranis_layout.png}
-				\label{fig:tx_layout}
-			\end{figure}
-			\subsubsection{Flight Modes}
-				This \gls{uas} has multiple flight modes that allow the \gls{pic} various amounts of control, and permit the \gls{uas} to perform a variety of tasks.  These flight modes are all to some extent controlled by the computer, and can be controlled from either the RC transmitter or the \gls{gcs}.  To change flight modes, simply adjust switches SF, SG, and SC as desired.  See Figure \ref{fig:tx_layout} for switch locations and settings.
-				% \paragraph{Stabilize}
-				% 	Stabilize (shown as STABILIZE) is the most basic mode available.  In this mode, the \gls{pic} has direct control over the attitude and throttle of the aircraft. See Figure \ref{fig:stabilize_sticks} for stick layout.
-
-				% 	\begin{figure}[ht]
-				% 		\centering
-				% 		\caption{Stabilize Stick Layout}
-				% 		\includegraphics[width=0.5\textwidth]{stabilize_stick_layout.png}
-				% 		\label{fig:stabilize_sticks}
-				% 	\end{figure}
-
-				% 	To set this mode, set switch SC to the topmost position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
-				\paragraph{Altitude Hold}
-					Altitude Hold (shown as ALT\_HOLD) is one step above STABILIZE in computer control.  In this mode, the \gls{pic} has direct control over the attitude of the aircraft, however, the autopilot is responsible for maintaining the altitude of the aircraft.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.  Altitude is held by placing the throttle stick to 50\%.  Pushing the throttle stick up moves the altitude setpoint up at a rate proportional to the stick value, and vice versa.  See Figure \ref{fig:alt_hold_sticks} for stick layout.
-
-					\begin{figure}[ht]
-						\centering
-						\caption{Altitude Hold Stick Layout}
-						\includegraphics[width=0.5\textwidth]{althold_stick_layout.png}
-						\label{fig:alt_hold_sticks}
-					\end{figure}
-
-					To set this mode, set switch SC to the topmost position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
-				\paragraph{Loiter}
-					Loiter (shown as LOITER) is one step below complete computer control.  In this mode, the \gls{pic} can only tell the aircraft to move.  The autopilot is responsible for maintaining the altitude, attitude, and responsiveness of the aircraft.  Essentially, the aircraft is simply loitering at a point in space, and the \gls{pic} is simply telling the aircraft that it should go loiter somewhere else.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.  Altitude is held by placing the throttle stick to 50\%.  Pushing the throttle stick up moves the altitude setpoint up at a rate proportional to the stick value, and vice versa.  See Figure \ref{fig:loiter_sticks} for stick layout.
-
-					\begin{figure}[ht]
-						\centering
-						\caption{Loiter Stick Layout}
-						\includegraphics[width=0.5\textwidth]{loiter_stick_layout.png}
-						\label{fig:loiter_sticks}
-					\end{figure}
-
-					To set this mode, set switch SC to the center position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
-				\paragraph{Auto}
-					Auto (shown as AUTO) is the autonomous mission mode.  In this mode, the autopilot has complete control authority over the aircraft.  The \gls{pic} can only command the \gls{uas} to enter or exit this mode.  The autopilot will execute the loaded mission, controlled from the \gls{gcs}.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.
-
-					To set this mode, set switch SC to the down position, and switches SF and SG to the down position.  See Figure \ref{fig:tx_layout} for switch locations.
-				\paragraph{Return-to-Launch}
-					\gls{rtl} is an emergency retrieval mode.  In this mode, the autopilot has complete control authority over the aircraft.  The \gls{pic} can only command the \gls{uas} to enter or exit this mode.  The autopilot will command the aircraft to fly directly to the launch GPS coordinates, then gently land.  Because the autopilot is actively controlling the aircraft, this is a GPS-controlled mode, and requires optimal GPS lock.  During the landing phase, the \gls{pic} can nudge the aircraft using the right stick to avoid any obstacles.  This is similar to loiter, however, the \gls{pic} cannot override the descent phase without exiting the \gls{rtl} mode.  See Figure \ref{fig:rtl_sticks} for stick layout.
-
-					\begin{figure}[ht]
-						\centering
-						\caption{RTL Stick Layout}
-						\includegraphics[width=0.5\textwidth]{rtl_stick_layout.png}
-						\label{fig:rtl_sticks}
-					\end{figure}
-
-					To set this mode, set switch SG to the up position.  This will override any other setting.  See Figure \ref{fig:tx_layout} for switch locations.
-			\subsection{Selecting Aircraft}
-				There may be multiple aircraft that are set up for the same transmitter.  However, you can only fly one aircraft at a time with a single transmitter.  Below is the procedure for configuring the transmitter for a particular aircraft.
-				\begin{enumerate}
-					\item Turn on the RC TRANSMITTER.
-					\item Press the ``MENU'' button.
-					\item Use the ``+'' and ``-'' buttons to move the cursor up and down to select the proper aircraft.
-					\item Press and hold the ``ENT'' button to bring up the context menu for that aircraft.
-					\item If the aircraft is already the active aircraft profile, the option ``Select Model'' will not be available.  Simply click the ``EXIT'' button twice to return to the main screen.
-					\item If the aircraft is not already the active aircraft profile, the option ``Select Model'' will be available.  use the ``+'' and ``-'' buttons to select that option and click the ``ENT'' button.
-					\item Click the ``EXIT'' button to return to the main screen.
-				\end{enumerate}
+			See Sections 1.3 and 5.6 in the 3DR Solo User Manual.
 		\subsection{Aircraft Layout}
-			See Figure \ref{fig:copter_layout}.
-			\begin{figure}[ht]
-				\centering
-				\caption{Aircraft Layout}
-				\includegraphics[width=\textwidth]{copter_layout.png}
-				\label{fig:copter_layout}
-			\end{figure}
+			See Section 1.2 in the 3DR Solo User Manual
 	\section{Payload}
 		\subsection{Payload Summary}
-			The payload for this \gls{uas} is basically a computerized radio recorder.  We have elected to use a software defined radio as our radio frontend, as this allows us to rapidly reconfigure the payload for any range of frequencies.  This is connected to a Raspberry PI 2, which handles all of the data collection, including collecting position data from the autopilot system.  Recorded data is organized into runs, which are stored on a removable USB drive.
+			The payload for this \gls{uas} is a computerized radio recorder.  We have elected to use a software defined radio as our radio frontend, as this allows us to rapidly reconfigure the payload for any range of frequencies.  This is connected to an Intel Joule, which handles all of the data collection, including collecting position data from the autopilot system.  Recorded data is organized into runs, which are stored on an SD card.
 		\subsection{Payload Specifications}
 			\begin{itemize}
-				\item Computer\hfill Raspberry Pi 2
+				\item Computer\hfill Intel Joule
 				\item Weight \hfill 125 g
 			\end{itemize}
-		\subsection{Payload Layout}
-			See Figure \ref{fig:payload_layout}.
-			\begin{figure}[ht]
-				\centering
-				\caption{Payload Layout}
-				\includegraphics[width=\textwidth]{payload_layout.png}
-				\label{fig:payload_layout}
-			\end{figure}
 	\section{Ground Control System}
-		The \gls{gcs} for this \gls{uas} consists of a laptop running a Windows OS and the open source flight management software, MissionPlanner.  This connects to the aircraft over a 3DR 900 MHz radio, permitting 2-way digital communications between the \gls{uas} and the \gls{gcs}.  From the \gls{gcs}, we are able to plan, upload, and control all missions, as well as provide the pilot with flight and diagnostic information.
+		The \gls{gcs} for this \gls{uas} consists of a laptop running a Windows OS and the open source flight management software, MissionPlanner.  This connects to the aircraft over the SoloLink WiFi network, permitting 2-way digital communications between the \gls{uas} and the \gls{gcs}.  From the \gls{gcs}, we are able to plan, upload, and control all missions, as well as provide the pilot with flight and diagnostic information.
 		\subsection{Ground Control System Layout}
+			Todo!!!
 	\section{Crew Roles}
 		\subsection{Pilot In Command}
 			The \gls{pic} is responsible for the safe operation of the aircraft.  He or she is responsible for takeoff, transition to mission, return, and landing, as well as for the general pacing of the mission.
 		\subsection{Autopilot Operator}
 			The \gls{AO} is responsible for monitoring the flight management software and mission progress.  He or she must plan and upload the mission plan to the aircraft, confirm clearance for switching to autonomous flight modes, and monitor the \gls{uas} as it completes the mission.
+		\subsection{Visual Observer}
+			The \gls{VO} is responsible for spotting the aircraft as it flies near flight operations area boundaries.  The \gls{VO} should have some form of communications link to the PIC, and should notify the PIC if the \gls{uas} violates any area boundaries or comes near an obstacle.  Additionally, the \gls{VO} is responsible for recovering a downed \gls{uas} to avoid disruption of any other activities in the area, and to maintain safety within the flight operations area boundaries.
 \chapter{Checklists and Flight Procedures}
 	The \gls{pic} must use the below checklists and procedures when operating the system to ensure safe and proper operation of the system.  Failure to complete all items in either checklists or procedures may result in system misconfiguration or system failure.  The PIC is responsible for the operation of the aircraft in accordance with all relevant rules and procedures, except that the PIC may deviate from these rules where such deviation is necessary in the interests of safety.
 	\section{Battery Cold Swap Procedure}
-		This procedure is to be completed between flights.
-		\begin{enumerate}
-			\item Disconnect BATTERY PARALLEL ADAPTER from AIRCRAFT POWER.
-			\item Disconnect BATTERY PARALLEL ADAPTER from PAYLOAD POWER.
-			\item Remove the old AIRCRAFT BATTERY.
-			\item Attach the new AIRCRAFT BATTERY to the BATTERY BOOMS.
-			\item Connect the BATTERY PARALLEL ADAPTER to the AIRCRAFT BATTERY.
-			\item Check the AIRCRAFT CENTER OF GRAVITY.
-		\end{enumerate}
+		See Section 2.3.2 in the 3DR Solo User Manual
 	\section{Before Aircraft and Payload Power On Check}
-		This check is to be completed during the pre-takeoff phase of flight, before any component of the aircraft receives power from the batteries.  All items within this checklist must pass to proceed to the Aircraft and Payload Power On Procedure.
-		\begin{enumerate}
-			\item AIRCRAFT POWER \hrulefill DISCONNECTED
-			\item AIRCRAFT BATTERIES \hrulefill 4.18 V $\pm$ 0.01 V PER CELL, MATCHED PACKS
-			\item AIRCRAFT CENTER OF GRAVITY \hrulefill CHECK
-			\item AIRCRAFT ROTOR ALIGNMENT \hrulefill CHECK
-			\item AIRCRAFT ROTOR INTEGRITY \hrulefill CHECK
-			\item AIRCRAFT BOOM INTEGRITY \hrulefill CHECK
-			\item AIRCRAFT BATTERY STRAPS \hrulefill SECURED
-			\item BATTERY PARALLEL ADAPTER \hrulefill ATTACHED TO BATTERIES
-			\item PAYLOAD POWER \hrulefill DISCONNECTED
-			\item PAYLOAD SWITCH \hrulefill OFF
-			\item PAYLOAD ANTENNA \hrulefill CHECK
-			\item MAVLINK \hrulefill DISCONNECTED
-			\item \gls{gcs} DATALINK \hrulefill ACTIVE AND CONFIGURED
-			\item RC TRANSMITTER \hrulefill ACTIVE
-			\item RC TRANSMITTER MODEL \hrulefill CONFIGURED
-			\begin{enumerate}
-				\item MODE SWITCH \hrulefill STABILIZE
-				\item LEFT STICK \hrulefill CENTERED/DOWN
-				\item RIGHT STICK \hrulefill CENTERED
-				\item TRIMS (ALL) \hrulefill CENTERED
-				\item AUTO SWITCH \hrulefill OFF
-				\item \gls{rtl} SWITCH \hrulefill OFF
-			\end{enumerate}
-		\end{enumerate}
+		See Section 5.1 in the 3DR Solo User Manual
 	\section{Aircraft and Payload Power On Procedure}
 		This procedure is to be completed as part of the pre-takeoff phase of flight, prior to the takeoff phase of flight.  The Before Aircraft and Payload Power On Check must be completed prior to executing this procedure.  At the end of this procedure, the aircraft and payload will have been powered up and in an idle and safe state.
 		\begin{enumerate}
