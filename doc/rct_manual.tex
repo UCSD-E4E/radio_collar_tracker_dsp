@@ -1,28 +1,24 @@
 \documentclass{report}
 \usepackage{draftwatermark}
-\SetWatermarkText{}
-\SetWatermarkScale{7}
+\SetWatermarkText{DRAFT}
+\SetWatermarkScale{1}
 \title{Radio Collar Tracker Flight Operations Manual}
 \author{Eric Lo, Project Manager\\Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
 \date{\today\\v2.0}
 \usepackage{fullpage}
-\usepackage{hyperref}
 \usepackage{mdframed}
 \usepackage{bookmark}
-\hypersetup{
-    colorlinks,
-    citecolor=black,
-    filecolor=black,
-    linkcolor=black,
-    urlcolor=blue
-}
+\usepackage{pdflscape}
+\usepackage{multicol}
+\usepackage{lmodern}
 
 % Glossaries Definition
 \usepackage[toc,nonumberlist]{glossaries}
 \makeglossaries
-\newacronym{uas}{UAS}{Unmanned Aerial System}
-\newacronym{gcs}{GCS}{Ground Control System}
-\newacronym{pic}{PIC}{Pilot In Command}
+\newacronym{COG}{COG}{Center Of Gravity}
+\newacronym{UAS}{UAS}{Unmanned Aerial System}
+\newacronym{GCS}{GCS}{Ground Control System}
+\newacronym{PIC}{PIC}{Pilot In Command}
 \newglossaryentry{multirotor}{
 	name=multirotor,
 	description={is an unmanned aircraft with multiple propellers for lift},
@@ -44,9 +40,22 @@
 	plural={software defined radios}
 }
 \newacronym[see={[Glossary:]{sdr_gls}}]{SDR}{SDR}{\gls{sdr_gls}}
-\newacronym{rtl}{RTL}{Return To Launch}
+\newacronym{RTL}{RTL}{Return To Launch}
 \newacronym{AO}{AO}{Autopilot Operator}
 \newacronym{VO}{VO}{Visual Observer}
+\newacronym{COTS}{COTS}{Commercial Off-The-Shelf}
+\newacronym{LOS}{LOS}{Line-Of-Sight}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=blue
+}
+
+\renewcommand*{\chapterautorefname}{Chapter}
 
 \begin{document}
 \maketitle
@@ -58,24 +67,26 @@
 		This system is designed to conduct aerial surveys for the purpose of tracking and localizing wildlife collars used for biological and ecological research.  We approach this problem by flying a radio across the search area, recording the signal strength for any pings from any collars we can detect.  We can then determine the location of a collar by correlating the signal strength and the locations where we detected that particular signal strength.
 
 		\subsection{Phases of Flight}
-			The overall flight can be broken up into multiple phases of flight: pre-takeoff, takeoff, climb, mission, approach, landing, and post-landing.
+			The overall flight can be broken up into multiple phases of flight: pre-takeoff, takeoff, climb, survey, approach, landing, and post-landing.
 
-			The pre-takeoff phase of flight involves configuring and setting up the system for the intended mission.  This includes completing all relevant checks, flight planning, and maintenance.
+			The pre-takeoff phase of flight involves configuring and setting up the system for the intended survey.  This includes completing all relevant checks, flight planning, and maintenance.
 
-			The takeoff phase of flight involves getting the system into the air in a safe and controlled manner.  This includes the initial climb to clear any obstacles in the takeoff zone.
+			The takeoff phase of flight involves getting the system into the air in a safe and controlled manner.  This includes the initial climb to clear any obstacles in the takeoff zone.  This may be conducted manually or via automated mission command.
 
-			The climb phase of flight involves getting the system to the mission objective area.  This can be done manually or through a mission waypoint.
+			The climb phase of flight involves getting the system to the survey objective area.  This may be conducted manually or via automated mission command.
 
-			The mission phase of flight is the largest chunk of the flight time, and is usually conducted under complete autopilot control.  This is the phase of flight where the system is actively looking for collars.
+			The survey phase of flight is the largest chunk of the flight time, and is usually conducted under complete autopilot control.  This is the phase of flight where the system is actively looking for collars.
 
-			The approach phase of flight involves getting the system from mission altitude to the landing altitude.  This can be done manually or through a mission waypoint.
+			The approach phase of flight involves getting the system from survey altitude to the landing altitude.  This may be conducted manually or via automated mission command.
 
-			The landing phase of flight involves getting the system out of the air and on the ground in a safe and controlled manner.  This includes the final descent to clear any obstacles in the landing zone.
+			The landing phase of flight involves getting the system out of the air and on the ground in a safe and controlled manner.  This includes the final descent to clear any obstacles in the landing zone.  This may be conducted manually or via automated mission command.
 
-			The post-landing phase of flight involves securing and safing the system, and safely shutting down all equipment.
+			The post-landing phase of flight involves securing the system, and safely shutting down all equipment.
+
+			Many, if not all, of these phases of flight may be programmed as part of the automated mission.  This system can be automated to the point where the autopilot is responsible for takeoff, climb, survey, approach, and landing.
 	\section{Aircraft}
 		\subsection{Aircraft Summary}
-			The airframe used in this \gls{uas} is a 3DR Solo, which is a COTS \gls{quadcopter}.  We have then added an independent payload that does not interface with the aircraft control system.
+			The airframe used in this \gls{UAS} is a 3DR Solo, which is a \gls{COTS} \gls{quadcopter}.  We have then added an independent payload that does not interface with the aircraft control system.
 		\subsection{Aircraft Specifications}
 			See Section 11.1 in the 3DR Solo User Manual.
 		\subsection{Transmitter Layout}
@@ -84,175 +95,140 @@
 			See Section 1.2 in the 3DR Solo User Manual
 	\section{Payload}
 		\subsection{Payload Summary}
-			The payload for this \gls{uas} is a computerized radio recorder.  We have elected to use a software defined radio as our radio frontend, as this allows us to rapidly reconfigure the payload for any range of frequencies.  This is connected to an Intel Joule, which handles all of the data collection, including collecting position data from the autopilot system.  Recorded data is organized into runs, which are stored on an SD card.
+			The payload for this \gls{UAS} is a computerized radio recorder.  We have elected to use a software defined radio as our radio front end, as this allows us to rapidly reconfigure the payload for any range of frequencies.  This is connected to an Intel Joule, which handles all of the data collection, including collecting position data from the autopilot system.  Recorded data is organized into runs, which are stored on an SD card.
 		\subsection{Payload Specifications}
 			\begin{itemize}
 				\item Computer\hfill Intel Joule
+				\item Radio \hfill USRP B200-mini(-i)
 				\item Weight \hfill 125 g
 			\end{itemize}
 	\section{Ground Control System}
-		The \gls{gcs} for this \gls{uas} consists of a laptop running a Windows OS and the open source flight management software, MissionPlanner.  This connects to the aircraft over the SoloLink WiFi network, permitting 2-way digital communications between the \gls{uas} and the \gls{gcs}.  From the \gls{gcs}, we are able to plan, upload, and control all missions, as well as provide the pilot with flight and diagnostic information.
-		\subsection{Ground Control System Layout}
-			Todo!!!
+		The \gls{GCS} for this \gls{UAS} consists of a laptop running a Windows OS and the open source flight management software, MissionPlanner.  This connects to the aircraft over the SoloLink WiFi network, permitting 2-way digital communications between the \gls{UAS} and the \gls{GCS}.  From the \gls{GCS}, we are able to plan, upload, and control all missions, as well as provide the pilot with flight and diagnostic information.
+		
+		See \autoref{chap:FMS}.
 	\section{Crew Roles}
 		\subsection{Pilot In Command}
-			The \gls{pic} is responsible for the safe operation of the aircraft.  He or she is responsible for takeoff, transition to mission, return, and landing, as well as for the general pacing of the mission.
+			The \gls{PIC} is responsible for the safe operation of the aircraft.  He or she is responsible for takeoff, transition to survey, return, and landing, as well as for the general pacing of the mission.
 		\subsection{Autopilot Operator}
-			The \gls{AO} is responsible for monitoring the flight management software and mission progress.  He or she must plan and upload the mission plan to the aircraft, confirm clearance for switching to autonomous flight modes, and monitor the \gls{uas} as it completes the mission.
+			The \gls{AO} is responsible for monitoring the flight management software and survey progress.  He or she must plan and upload the mission plan to the aircraft, confirm clearance for switching to autonomous flight modes, and monitor the \gls{UAS} as it completes the mission.  The \gls{PIC} may also take on these duties so long as doing so does not jeopardize the safety of bystanders or the aircraft.
 		\subsection{Visual Observer}
-			The \gls{VO} is responsible for spotting the aircraft as it flies near flight operations area boundaries.  The \gls{VO} should have some form of communications link to the PIC, and should notify the PIC if the \gls{uas} violates any area boundaries or comes near an obstacle.  Additionally, the \gls{VO} is responsible for recovering a downed \gls{uas} to avoid disruption of any other activities in the area, and to maintain safety within the flight operations area boundaries.
+			The \gls{VO} is responsible for spotting the aircraft as it flies near flight operations area boundaries.  The \gls{VO} should have some form of communications link to the PIC, and should notify the PIC if the \gls{UAS} violates any area boundaries or comes near an obstacle.  Additionally, the \gls{VO} is responsible for recovering a downed \gls{UAS} to avoid disruption of any other activities in the area, and to maintain safety within the flight operations area boundaries.
+
+			Having a \gls{VO} does not relieve the \gls{PIC} of the responsibility of maintaining \gls{LOS} to the \gls{UAS}.
 \chapter{Checklists and Flight Procedures}
-	The \gls{pic} must use the below checklists and procedures when operating the system to ensure safe and proper operation of the system.  Failure to complete all items in either checklists or procedures may result in system misconfiguration or system failure.  The PIC is responsible for the operation of the aircraft in accordance with all relevant rules and procedures, except that the PIC may deviate from these rules where such deviation is necessary in the interests of safety.
+	The \gls{PIC} must use the below checklists and procedures when operating the system to ensure safe and proper operation of the system.  Failure to complete all items in either checklists or procedures may result in system misconfiguration or system failure.  The \gls{PIC} is responsible for the operation of the aircraft in accordance with all relevant rules and procedures, except that the \gls{PIC} may deviate from these rules where such deviation is necessary in the interests of safety.
 	\section{Battery Cold Swap Procedure}
 		See Section 2.3.2 in the 3DR Solo User Manual
-	\section{Before Aircraft and Payload Power On Check}
-		See Section 5.1 in the 3DR Solo User Manual
-	\section{Aircraft and Payload Power On Procedure}
-		This procedure is to be completed as part of the pre-takeoff phase of flight, prior to the takeoff phase of flight.  The Before Aircraft and Payload Power On Check must be completed prior to executing this procedure.  At the end of this procedure, the aircraft and payload will have been powered up and in an idle and safe state.
+	\section{Preflight Inspection}
+		The \gls{PIC} must complete this checklist prior to each flight, to ensure that the aircraft is safe to operate and configured correctly.  This is referenced as ``Preflight Aircraft'' on the Reference Card.
 		\begin{enumerate}
-			\item Connect PAYLOAD POWER.
-			\item Connect AUTOPILOT POWER.
-			\item Do not rock the aircraft.
-			\item Verify PAYLOAD STATUS LIGHT is flashing slowly within 15 seconds.
-			\item Verify AUTOPILOT STATUS LIGHT is flashing slowly within 30 seconds.
-			\item Connect the \gls{gcs} MAVLINK.
+			\item Aircraft Docs \hrulefill Check present.
+			\item Balance \hrulefill Check that \gls{COG} is centered.
+			\item SOLO BATTERY POWER SWITCH \hrulefill Set to OFF position.
+			\item SOLO CONTROLLER POWER SWITCH \hrulefill Set to OFF position.
+			\item SOLO BATTERY LEVEL \hrulefill Check $>$ 90\%
+			\item SOLO CONTROLLER BATTERY LEVEL \hrulefill Check $>$ 25\%
+			\item SDR MOUNT \hrulefill Secure in place.
+			\item SDR USB CONNECTOR \hrulefill Secure in place.
+			\item SDR SMA CONNECTOR \hrulefill Secure in place.
+			\item SDR ANTENNA \hrulefill Secure in place.
+			\item GPS \hrulefill Secure in place.
+			\item GPS USB CONNECTOR \hrulefill Secure in place.
+			\item PAYLOAD POWER CONNECTOR \hrulefill Secure in place.
+			\item PAYLOAD USB CONNECTOR A \hrulefill Secure in place.
+			\item PAYLOAD USB CONNECTOR B \hrulefill Secure in place.
+			\item PAYLOAD MOUNT \hrulefill Secure in place.
+			\item PAYLOAD WIFI ANTENNA \hrulefill Secure in place.
+			\item Propellers \hrulefill Check that propellers are tightened.
+			\item Landing Gear \hrulefill Check that landing gear are securely attached.
+		\end{enumerate}
+	\section{Pre Power On Check}
+		\begin{enumerate}
+			\item Preflight Inspection Checklist \hrulefill Complete
+			\item PAYLOAD SWITCH \hrulefill Set to OFF position.
+		\end{enumerate}
+	\section{Power On Procedure}
+		This procedure is to be completed as part of the pre-takeoff phase of flight, prior to the takeoff phase of flight.  At the end of this procedure, the aircraft and payload will have been powered up and in an idle and safe state.
+		\begin{enumerate}
+			\item SOLO BATTERY POWER \hrulefill Hold for 5 seconds.
+			\item SOLO LEDs \hrulefill Check White in front, Red in rear.
+			\item PAYLOAD STATUS LIGHT \hrulefill Check
+			\item SOLO CONTROLLER POWER \hrulefill Hold for 5 seconds.
+			\item SOLO CONTROLLER SCREEN \hrulefill Check for ``Hold FLY to start motors'' screen.
+			\item GCS WIFI \hrulefill Check connected.
+			\item GCS SOFTWARE \hrulefill Start MissionPlanner.
+			\item MP LINK PORT \hrulefill Set to ``UDP''.
+			\item MP LINK \hrulefill Connect.
+			\item MP Local Port \hrulefill Set the local UDP port to 14550.
 		\end{enumerate}
 	\section{Pre-Takeoff Check}
-		This check is to be completed just prior to entering the takeoff phase of flight.  The Aircraft and Payload Power On Procedure must be completed prior to executing this check.  At the end of this check, the aircraft will be in a state that is ready to fly.  All items within this checklist must pass to proceed to the Takeoff Procedure.
+		This check is to be completed just prior to entering the takeoff phase of flight.  At the end of this check, the aircraft will be in a state that is ready to fly.  All items within this checklist must pass to proceed to the Takeoff Procedure.
 		\begin{enumerate}
-			\item GPS STATUS \hrulefill AT LEAST 6 SATELLITES
-			\item GPS LOCATION \hrulefill STABLE, REASONABLE
-			\item ORIENTATION \hrulefill HORIZONTAL
-			\item AIRSPACE \hrulefill CLEAR
-			\item TAKEOFF CLEARANCE \hrulefill CLEAR
-			\item AUTOPILOT OPERATOR \hrulefill NOTIFIED
+			\item MP HUD \hrulefill Check that all warnings are cleared.
+			\item MP PreFlight \hrulefill Check that all items are green.
+			\item GPS STATUS \hrulefill Check that the GPS fix is a 3D fix.
+			\item GPS SATS \hrulefill Check that at least 6 GPS satellites reported.
+			\item GPS LOCATION \hrulefill Check that the GPS location is stable and reasonable.
+			\item AIRCRAFT ORIENTATION \hrulefill Check that the aircraft reports a horizontal orientation.
+			\item AIRSPACE \hrulefill Check that the local airspace is clear.
+			\item TAKEOFF CLEARANCE \hrulefill Contact local ATC for takeoff clearance.
 		\end{enumerate}
 	\section{Payload Start Procedure}
 		This procedure is to be completed during the pre-takeoff phase of flight, prior to the takeoff phase of flight.  The Aircraft and Payload Power On Procedure must be completed prior to executing this procedure.  At the end of this procedure, the payload will have been initiated and will be actively recording data.
 		\begin{enumerate}
-			\item Set the PAYLOAD SWITCH to the ON position.
-			\item Verify PAYLOAD STATUS LIGHT is solid within 5 seconds.
+			\item PAYLOAD SWITCH \hrulefill Set to the ON position.
+			\item PAYLOAD STATUS LIGHT \hrulefill Check for solid.
 		\end{enumerate}
 	\section{Takeoff Procedure}
 		This procedure is to be completed during the takeoff phase of flight, prior to the climb phase of flight.  The Pre-Takeoff Check must be completed prior to executing this procedure.  At the end of this procedure, the aircraft will be in a stable hover above the takeoff zone.
 		\begin{enumerate}
-			\item Set the RC TRANSMITTER MODE to LOITER.
-			\item Set THROTTLE to 0\%.
-			\item Disengage aircraft safeties by pressing and holding the AIRCRAFT SAFETY SWITCH.
-			\item Confirm that the AIRCRAFT SAFETY SWITCH is solid red.
-			\item Arm the THROTTLE ARM by holding the left stick down and to the right.
-			\item Advance THROTTLE to 50\%.
-			\item Add takeoff power.
-			\item Reduce THROTTLE when approaching hover altitude.
-		\end{enumerate}
-	\section{Sub-optimal Takeoff Procedure}
-		This procedure is to be completed during the takeoff phase of flight, prior to the climb phase of flight.  The Pre-Takeoff Check must be completed prior to executing this procedure.  This procedure must only be executed by an advanced user with significant experience flying in STABILIZE mode and in tighter clearances.  At the end of this procedure, the aircraft will be in a stable hover above the takeoff zone.
-		\begin{enumerate}
-			\item Set the RC TRANSMITTER MODE to STABILIZE.
-			\item Set THROTTLE to 0\%.
-			\item Disengage aircraft safeties by pressing and holding the AIRCRAFT SAFETY SWITCH.
-			\item Confirm that the AIRCRAFT SAFETY SWITCH is solid red.
-			\item Arm the THROTTLE ARM by holding the left stick down and to the right.
-			\item Advance THROTTLE to 15\%.
-			\item Check for control authority.
-			\item Add takeoff power.
-			\item Maneuver to clear obstacles, until adequate clearance and/or GPS stability.
-			\item Reduce THROTTLE when approaching hover altitude.
-		\end{enumerate}
-	\section{Climb to Hover in LOITER Procedure}
-		This procedure is to be completed during the climb phase of flight, prior to the mission phase of flight.  The Pre-Takeoff Check must be completed prior to executing this procedure.  At the end of this procedure, the aircraft will be in a stable hover.
-		\begin{enumerate}
-			\item Add power to climb.
-			\item Reduce THROTTLE to 50\% when approaching hover altitude.
-			\item Check with \gls{gcs} for status.
-		\end{enumerate}
-	\section{Climb to Hover in ALT\_HOLD Procedure}
-		This procedure is to be completed during the climb phase of flight, prior to the mission phase of flight.  The Pre-Takeoff Check must be completed prior to executing this procedure.  This procedure must only be executed by an advanced user with significant experience flying in STABILIZE mode.  At the end of this procedure, the aircraft will be in a stable hover.
-		\begin{enumerate}
-			\item Add power to climb.
-			\item Reduce THROTTLE to 50\% when approaching hover altitude.  Adjust roll and pitch to maintain position.
-			\item Check with \gls{gcs} for status.
-		\end{enumerate}
-	\section{Climb to Hover in STABILIZE Procedure}
-		This procedure is to be completed during the climb phase of flight, prior to the mission phase of flight.  The Pre-Takeoff Check must be completed prior to executing this procedure.  This procedure must only be executed by an advanced user with significant experience flying in STABILIZE mode.  At the end of this procedure, the aircraft will be in a stable hover.
-		\begin{enumerate}
-			\item Add power to climb.
-			\item Reduce THROTTLE when approaching hover altitude.  Adjust THROTTLE to maintain altitude.  Adjust roll and pitch to maintain position.
-			\item Check with \gls{gcs} for status.
+			\item SOLO CONTROLLER FLY \hrulefill Hold until motor start.
+			\item THROTTLE \hrulefill Set to 75\%.
 		\end{enumerate}
 	\section{Pre-Mission Start Check}
-		This check is to be completed just prior to entering the mission phase of flight.  The aircraft must be in the air and stable prior to conducting this check.  At the end of this check, the aircraft will be in a state that is ready to start the mission.  All items within this checklist must pass to proceed to the Mission Start Procedure.
+		This check is to be completed just prior to starting any automated mission irregardless of current phase of flight.  The aircraft must be on and stable prior to conducting this check.  At the end of this check, the aircraft will be in a state that is ready to start the mission.  All items within this checklist must pass to proceed to the Mission Start Procedure.
 		\begin{enumerate}
-			\item LOITER CLEARANCE\hrulefill CHECK
-			\item MISSION\hrulefill UPLOADED AND VERIFIED
-			\item WINDS\hrulefill LESS THAN 3 M/S
+			\item Power On \hrulefill Completed
+			\item MISSION \hrulefill Uploaded and verified.
+			\item WINDS \hrulefill Check $<$ 10 m/s.
 		\end{enumerate}
 	\section{Mission Start Procedure}
 		This procedure is to be completed at the beginning of the mission phase of flight.  The Pre-Mission Start Check must be completed prior to executing this procedure.  At the end of this procedure, the aircraft will start the planned mission.
 		\begin{enumerate}
-			\item Set the RC TRANSMITTER MODE to LOITER.
-			\item Confirm with \gls{gcs} that LOITER mode is set and stable.
-			\item Notify \gls{gcs} of intent to enter AUTO mode.
-			\item Set the RC TRANSMITTER MODE to AUTO.
-			\item Confirm switch to WAYPOINT with \gls{gcs}.
+			\item Pre-Mission Start \hrulefill Completed.
+			\item LOCAL AIRSPACE \hrulefill Check that local airspace is clear.
+			\item FLIGHT MODE \hrulefill Set to AUTO.
 		\end{enumerate}
 	\section{Mission End Procedure}
-		This procedure may be completed at the end of the mission phase of flight.  This procedure may be completed at any point to regain control of the aircraft during a mission.  At the end of this procedure, the aircraft will be under the \gls{pic}'s control.
+		This procedure may be completed at the end of the mission phase of flight.  This procedure may be completed at any point to regain control of the aircraft during a mission.  At the end of this procedure, the aircraft will be under the \gls{PIC}'s control.
 		\begin{enumerate}
-			\item Check that the RC TRANSMITTER is on and active.
-			\item Check that the aircraft is within visual range.
-			\item Check that there is enough battery to land safely.
-			\item Notify \gls{gcs} of intent to take control of the aircraft.
-			\item Set the RC TRANSMITTER MODE to LOITER.
-			\item Confirm with \gls{gcs} that the pilot has control of the aircraft.
+			\item FLIGHT MODE \hrulefill Set to LOITER.
 		\end{enumerate}
-	\section{Failed Mission End Procedure}
-		This procedure should be executed only if the Mission End Procedure has failed.  At the end of this procedure, the aircraft will either be under the \gls{pic}'s control, or the \gls{pic} will execute the proper emergency procedures.
-		\begin{enumerate}
-			\item Set the RC TRANSMITTER MODE to RTL.
-			\item Notify \gls{gcs} of failure to take control of the aircraft.
-			\item Have \gls{gcs} set the RETURN TO HOME mode.
-			\item Continuously retry the MISSION END PROCEDURE until control is regained.
-			\item If control cannot be regained, but the aircraft is in RETURN TO HOME mode, allow the aircraft to autonomously land.
-			\item If control cannot be regained, and the aircraft is not in RETURN TO HOME mode, execute the LOSS OF AUTOPILOT DATALINK procedure.
-		\end{enumerate}
-	\section{Pre-Approach Checks}
+	\section{Pre-Landing Checks}
 		This check is to be complete prior to entering the approach phase of flight.  At the end of this check, the aircraft is cleared to begin the approach to the landing zone.
 		\begin{enumerate}
-			\item APPROACH \hrulefill CLEAR
-			\item TRAFFIC \hrulefill CLEAR
-			\item RC TRANSMITTER MODE \hrulefill LOITER
+			\item APPROACH \hrulefill Check that the APPROACH is clear of obstacles.
+			\item TRAFFIC \hrulefill Check that no air traffic will interfere.
+			\item FLIGHT MODE \hrulefill Set to LOITER.
 		\end{enumerate}
 	\section{Approach Procedure}
 		This procedure is to be executed during the approach phase of flight.  At the end of this procedure, the aircraft will be ready to begin the landing procedure.
 		\begin{enumerate}
-			\item Reduce THROTTLE to begin descent.
-			\item Fly the approach at a non-vertical angle, with a descent rate no greater than 2 m/s
-			\item Enter a hover at 2-5 meters AGL above the landing area.
+			\item THROTTLE \hrulefill Reduce as needed.
+			\item Descent Rate \hrulefill $<$ 2 m/s
 		\end{enumerate}
 	\section{Landing Procedure}
 		This procedure is to be executed during the landing phase of flight.  At the end of this procedure, the aircraft will be on the ground and safed.
 		\begin{enumerate}
-			\item Reduce THROTTLE to enter a controlled vertical descent, with a descent rate no greater than 2 m/s.
-			\item When the aircraft makes contact with the ground. set the RC TRANSMITTER MODE to STABILIZE.
-			\item Set THROTTLE to 0\%.
-			\item Disarm the THROTTLE ARM by holding the left stick down and to the left.
-			\item Engage aircraft safeties by holding the AIRCRAFT SAFETY SWITCH down.
-			\item Confirm aircraft safeties by checking that the AIRCRAFT SAFETY SWITCH is blinking red.
+			\item THROTTLE \hrulefill Reduce as needed.
+			\item Descent Rate \hrulefill $<$ 2 m/s.
+			\item THROTTLE \hrulefill 0\% upon ground contact.
 		\end{enumerate}
 	\section{Payload Stop Procedure}
 		This procedure is to be executed during the post-landing phase of flight.  At the end of this procedure, the payload will be in an idle state, with the completed run saved.
 		\begin{enumerate}
-			\item Set the PAYLOAD SWITCH to OFF.
-			\item Confirm that the PAYLOAD STATUS LIGHT begins to blink slowly within 15 seconds.
-		\end{enumerate}
-	\section{Post-Landing Procedure}
-		This procedure is to be executed at the end of the post-landing phase of flight.  At the end of this procedure, the aircraft and associated equipment will be powered down and inactive.
-		\begin{enumerate}
-			\item Disconnect the BATTERY PARALLEL ADAPTER from AIRCRAFT POWER.
-			\item Disconnect the BATTERY PARALLEL ADAPTER from PAYLOAD POWER.
-			\item Disconnect the GCS MAVLINK.
-			\item Turn off the RC TRANSMITTER.
+			\item PAYLOAD SWITCH \hrulefill Set to OFF position.
+			\item PAYLOAD STATUS LIGHT \hrulefill begins to blink slowly within 15 seconds.
 		\end{enumerate}
 \chapter{Emergency Procedures}
 	\section{Battery Fire on Ground}
@@ -270,307 +246,40 @@
 			Even if the primary fire is out, if the pack is warm, additional cells may catch fire due to thermal loading.  The battery pack is not safe until the entire pack is cooled to room temperature.
 		\end{enumerate}
 	\section{Loss of Autopilot Datalink}
-		If the autopilot operator reports loss of link to the \gls{uas} (characterized by no data packets received for about 5 seconds), then the \gls{pic} should immediately place the \gls{uas} into \gls{rtl} by setting the \gls{rtl} switch on the RC transmitter.  Visually verify that \gls{uas} is in \gls{rtl}.  If the \gls{uas} is not in \gls{rtl}, go to the Loss of Control procedure.
-	\section{Loss of RC Link}
-		If the RC transmitter reports loss of link to the \gls{uas}, the the \gls{AO} should immediately place the \gls{uas} into \gls{rtl} by manually ordering \gls{rtl} through the \gls{gcs}.  Visually verify that the \gls{uas} is in \gls{rtl}.  If the \gls{uas} is not in \gls{rtl}, go to the Loss of Control procedure.
-	\section{Loss of Control}
-		Set the \gls{rtl} switch on the RC transmitter.  If the \gls{uas} was in on a mission, move the RC transmitter towards the mission area to regain connection.  If the \gls{uas} was in a loiter mode, move the RC transmitter towards the last known position to regain connection.  Because the radio failsafes are configured to automatically return the \gls{uas} in the event that the \gls{uas} notices a loss of connection, connection should be reestablished fairly quickly.
+		If the autopilot operator reports loss of link to the \gls{UAS} (characterized by no data packets received for about 5 seconds), then the \gls{UAS} will automatically initiate an \gls{RTL}.  This will continue even if the aircraft datalink is recovered.  To recover, set the flight mode to LOITER.
 \chapter{Maintenance}
-	This section contains checklists and procedures to facilitate the maintenance and repair of the \gls{uas}.  The \gls{uas} must pass all items within the Delivery Check before being placed into service.  Failure of any one of these checks may result in system failure.
-	\section{Delivery Check}
-		\begin{enumerate}
-			\item Boom Integrity\hrulefill CHECK
-				\begin{itemize}
-					\item Check for cracks, nicks, flexing, and other defects
-				\end{itemize}
-			\item Boom Body Attachment\hrulefill CHECK
-				\begin{enumerate}
-					\item Boom Plastic Keeper\hrulefill CHECK
-						\begin{itemize}
-							\item 4 screws to the body plate
-							\item No Cracks
-							\item Engaged
-						\end{itemize}
-					\item Boom Hinge\hrulefill CHECK
-						\begin{itemize}
-							\item 2x screws to the body plate
-							\item 1x screw to boom
-						\end{itemize}
-				\end{enumerate}
-			\item Boom Motor Attachment\hrulefill CHECK
-				\begin{enumerate}
-					\item 2x Boom Clamps\hrulefill CHECK
-						\begin{itemize}
-							\item 2x screws
-							\item Tightened
-							\item Blue in front, orange in rear
-						\end{itemize}
-					\item Baseplate\hrulefill CHECK
-					\item 4x Motor Mounting Screws\hrulefill CHECK
-				\end{enumerate}
-			\item Motor Integrity\hrulefill CHECK
-				\begin{itemize}
-					\item Check that motors spin freely, without noticeable cogging
-				\end{itemize}
-			\item Rotor Mount\hrulefill CHECK
-				\begin{itemize}
-					\item 2x screws, tightened
-					\item FL and RR CW, FR and RL CCW
-				\end{itemize}
-			\item Rotor Integrity\hrulefill CHECK
-				\begin{itemize}
-					\item Check for cracks, nicks, excessive flexing, and other defects
-				\end{itemize}
-			\item Rotor Alignment\hrulefill CHECK
+	This section contains checklists and procedures to facilitate the maintenance and repair of the \gls{UAS}.  The \gls{UAS} must pass all items within the Delivery Check before being placed into service.  Failure of any one of these checks may result in system failure.
+	\section{Charging Batteries}
+		See Section 2.3.1 in the 3DR Solo User Manual.
+	\section{Propellers}
+		\subsection{Inspection}
+		Nylon propellers should be replaced if they are damaged.  Visually inspect the propeller for abnormal tears or warping.
 
-				See the Rotor Alignment Procedure.
-			\item Aircraft Body\hrulefill CHECK
-				\begin{enumerate}
-					\item 12x Standoffs\hrulefill CHECK
-						\begin{itemize}
-							\item 2x screws, tightened
-							% add image showing locations
-						\end{itemize}
-					\item Plate Integrity\hrulefill CHECK
-						\begin{itemize}
-							\item Check for cracks, nicks, excess flexing, and other defects
-						\end{itemize}
-					\item Battery Mount\hrulefill CHECK
-						\begin{enumerate}
-							\item 4x Battery Boom Clamps\hrulefill CHECK
-								\begin{itemize}
-									\item 2x screws, tightened
-									\item Rubber grommet
-									\item Black in front, orange in back
-									\item Check for cracks, excess abrasion
-								\end{itemize}
-							\item 2x Battery Boom\hrulefill CHECK
-								\begin{itemize}
-									\item Check for proper interfacing with 2x grommets on clamps
-									\item Check for cracks, nicks, flexing, and other defects
-								\end{itemize}
-							\item 2x Battery Straps\hrulefill CHECK
-								\begin{itemize}
-									\item Check for presence
-									\item Check for 40 cm length
-								\end{itemize}
-						\end{enumerate}
-				\end{enumerate}
-			\item Autopilot\hrulefill CHECK
-				\begin{itemize}
-					\item Check for 4x adhesive foam support blocks
-					\item Check that maximum deflection of the autopilot in any direction does not impact any other device.
-					\item Check that the arrow on the Pixhawk points the front of the copter
-				\end{itemize}
-			\item GPS Antenna\hrulefill CHECK
-				\begin{itemize}
-					\item Check for 2 screws in mount.
-					\item Check that the arrow on the antenna is pointed exactly forward.
-					\item Check that there is not significant deflection in the boom.
-				\end{itemize}
-			\item Autopilot Radio\hrulefill CHECK
-				\begin{itemize}
-					\item Check for security
-					\item Ensure that the antenna is attached and oriented vertically, out of the rotor disk.
-				\end{itemize}
-			\item RC Receiver\hrulefill CHECK
-				\begin{itemize}
-					\item Check for security
-					\item Ensure that the antennae (2) are secured to the airframe so that they cannot be blown into the rotor disk, and that they are not within the body.
-				\end{itemize}
-			\item Arming Switch\hrulefill CHECK
-				\begin{itemize}
-					\item Check for security in mount
-					\item Check that the switch is easily accessible and visible, and not being pressed by another device
-				\end{itemize}
-			\item Buzzer\hrulefill CHECK
-				\begin{itemize}
-					\item Check for security in mount
-					\item Check that there is nothing obstructing the buzzer.
-				\end{itemize}
-			\item Avionics\hrulefill CHECK
-				\begin{enumerate}
-					\item AUTOPILOT WIRING\hrulefill CHECK
-						\begin{enumerate}
-							\item RC IN \dotfill RC Receiver SUBS
-							\item RCOP 4 \dotfill Rear Right ESC
-							\item RCOP 3 \dotfill Front Left ESC
-							\item RCOP 2 \dotfill Rear Left ESC
-							\item RCOP 1 \dotfill Front Right ESC
-							\item BUZZER \dotfill Buzzer
-							\item SWITCH \dotfill ARMING SWITCH
-							\item TELEM 1 \dotfill AUTOPILOT RADIO
-							\item TELEM 2 \dotfill PAYLOAD
-							\item GPS \dotfill GPS ANTENNA GPS PORT
-							\item I2C \dotfill GPS ANTENNA MAG PORT
-							\item POWER \dotfill Power Cable Autopilot Port
-						\end{enumerate}
-					\item AUTOPILOT SD CARD\hrulefill CHECK
-				\end{enumerate}
-			\item Power Wiring\hrulefill CHECK
-				\begin{itemize}
-					\item Check that all wiring is intact and not shorting
-					\item Check against Figure \ref{fig:power_wiring_diag}.
-						\begin{figure}[ht]
-							\centering
-							\caption{Power Wiring Diagram}
-							\includegraphics[width=\textwidth]{power_wiring.png}
-							\label{fig:power_wiring_diag}
-						\end{figure}
-				\end{itemize}
-			\item Payload Mount \hrulefill CHECK
-				\begin{itemize}
-					\item Check that the 2 screws are fully threaded and tightened.
-					\item Check that the mount is not cracked, twisted, or otherwise damaged.
-				\end{itemize}
-			\item Payload Wiring\hrulefill CHECK
-				\begin{enumerate}
-					\item RF IN \dotfill PAYLOAD ANTENNA
-					\item DATA STORAGE \dotfill USB PORT
-				\end{enumerate}
-			\item Payload Antenna\hrulefill CHECK
-				\begin{itemize}
-					\item Check that the antenna is straight and not touching anything other than where it is mounted on the aircraft.
-					\item Check that the antenna is mounted on the insulated part of the boom.
-				\end{itemize}
-			\item Flight Checks\hrulefill CHECK
-				\begin{enumerate}
-					\item Power On Check
-						\begin{enumerate}
-							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
-							\item Connect the AIRCRAFT BATTERY PACK to the BATTERY PARALLEL ADAPTER.
-							\item Connect the BATTERY PARALLEL ADAPTER to AIRCRAFT POWER.
-							\item Check that the AUTOPILOT comes online and initializes.
-							\item Check that the AUTOPILOT STATUS LIGHT begins to slowly flash within 30 seconds.
-							\item Check that the SAFETY SWITCH is blinking red.
-							\item Connect the BATTERY PARALLEL ADAPTER to PAYLOAD POWER.
-							\item Check that the PAYLOAD STATUS LIGHT immediately begins to quickly flash green.
-							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
-						\end{enumerate}
-					\item Avionics Check
-						\begin{enumerate}
-							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
-							\item Connect the AIRCRAFT BATTERY PACK to the BATTERY PARALLEL ADAPTER.
-							\item Connect the BATTERY PARALLEL ADAPTER to AIRCRAFT POWER.
-							\item Check that the AUTOPILOT comes online and initializes.
-							\item Check that the AUTOPILOT STATUS LIGHT begins to slowly flash within 30 seconds.
-							\item Check that the SAFETY SWITCH is blinking red.
-							\item Connect the \gls{gcs} MAVLINK to the AUTOPILOT.
-							\item In the \gls{gcs}, check that the GPS satellite count is climbing to at least 6, and that the GPS location is stable and sane.
-							\item In the \gls{gcs}, check that the attitude and orientation indicated by the artificial horizon is sane and reacting properly to inputs to the airframe.
-							\item In the \gls{gcs}, check that the heading indicated by the compass is sane and reacting properly to inputs to the airframe.
-							\item In the \gls{gcs}, check that the AUTOPILOT is receiving commands from the RC TRANSMITTER.
-							\item In the \gls{gcs}, check that the battery voltage is sane and agrees with the current battery state.
-							\item Connect the BATTERY PARALLEL ADAPTER to PAYLOAD POWER.
-							\item Check that the PAYLOAD STATUS LIGHT begins to slowly flash green within 15 seconds.
-							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
-						\end{enumerate}
-					\item Spin Up Check
-						\begin{enumerate}
-							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
-							\item Connect the AIRCRAFT BATTERY PACK to the BATTERY PARALLEL ADAPTER.
-							\item Connect the BATTERY PARALLEL ADAPTER to AIRCRAFT POWER.
-							\item Check that the AUTOPILOT comes online and initializes.
-							\item Check that the AUTOPILOT STATUS LIGHT begins to slowly flash within 30 seconds.
-							\item Check that the SAFETY SWITCH is blinking red.
-							\item Check that the RC TRANSMITTER is on and active.
-							\item Set the THROTTLE to 0\%.
-							\item Set the RC TRANSMITTER MODE SWITCH to STABILIZE.
-							\item Disable aircraft safeties by pressing and holding the AIRCRAFT SAFETY SWITCH.
-							\item Arm the THROTTLE ARM by holding the left stick down and to the right.
-							\item Confirm that the rotors begin spinning in the proper directions.
-							\item Advance THROTTLE to 10\%.
-							\item Confirm that the right stick inputs are properly executed by the aircraft.
-							\item Reduce THROTTLE to 0\%.
-							\item Disarm the THROTTLE ARM by holding the left stick down and to the left.
-							\item Enable aircraft safeties by pressing and holding the AIRCRAFT SAFETY SWITCH.
-							\item Confirm that aircraft safeties are enabled (AIRCRAFT SAFETY SWITCH should be blinking red).
-							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
-						\end{enumerate}
-					\item Flight Check
-						\begin{enumerate}
-							\item Plan a mission with the following parameters:
-								\begin{itemize}
-									\item Takeoff waypoint immediately above the takeoff area, altitude at least 10 meters AGL.
-									\item Waypoint 2 at least 100 meters away, at least 20 meters above takeoff waypoint.
-									\item Waypoint 3 at least 100 meters away from previous waypoints, within VLOS, same altitude as Waypoint 2.
-									\item Waypoint 4 is a RETURN TO HOME command.
-									\item Total flight time is at lest 5 minutes.
-								\end{itemize}
-							\item Disconnect the BATTERY PARALLEL ADAPTER from all connections.
-							\item Connect the AIRCRAFT BATTERY PACK to the BATTERY PARALLEL ADAPTER.
-							\item Connect the BATTERY PARALLEL ADAPTER to AIRCRAFT POWER.
-							\item Check that the AUTOPILOT comes online and initializes.
-							\item Check that the AUTOPILOT STATUS LIGHT begins to slowly flash within 30 seconds.
-							\item Check that the SAFETY SWITCH is blinking red.
-							\item Check that the RC TRANSMITTER is on and active.
-							\item Connect the \gls{gcs} MAVLINK to the AUTOPILOT.
-							\item Upload the planned mission.
-							\item Conduct the mission with a takeoff in LOITER.  Check for abnormal wobbling, uncertain tracking, etc.  All waypoint transitions should be smooth.
-							\item Allow aircraft to autoland and manually disarm and safe.
-						\end{enumerate}
-					\item Failsafe Check
-						\begin{enumerate}
-							\item Plan a mission with the following parameters:
-								\begin{itemize}
-									\item Takeoff waypoint at least 50 meters AGL.
-									\item Waypoint 2 at 100-200 meters distance, 100 meters AGL.
-									\item Waypoint 3 at no more than 50 meters distance, at least 20 meters AGL.
-									\item Waypoint 4 is a RETURN TO HOME command.
-								\end{itemize}
-							\item Execute the mission.  When the copter is heading away, turn off the RC TRANSMITTER.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
-							\item Restart the mission.  When the copter is heading away, turn off the \gls{gcs} MAVLINK by turning off the \gls{gcs} AUTOPILOT RADIO.  Confirm that the aircraft immediately enters a RETURN TO HOME mode.  Retake control.
-							\item Land and safe the aircraft.
-						\end{enumerate}
-					\item Payload Check
-						\begin{enumerate}
-							\item Activate and deploy a known collar at a known location.
-							\item Plan a mission starting at least 50 meters away from the known collar that overflies the known collar location.
-							\item Run the above mission at an altitude of no more than 30 meters AGL.
-							\item Process the data, and confirm that the collar was detected.
-						\end{enumerate}
-				\end{enumerate}
-		\end{enumerate}
-	\section{Replacing Propellers}
-		Carbon fiber propellers should be replaced if they show signs of cracking or damage.  This manifests as cracks or delamination of the propeller, usually near the tip, but occasionally near the root of the propeller.  To check for cracks or delamination of the propeller, feel along all surfaces of the propeller for any sharp edges or nicks - this is usually the starting point of delamination.  Additionally, flex the propellers to check for any cracking - this will manifest as cracking sounds and the feeling that the propeller is abnormally easier to flex.
+		\subsection{Removal}
+		To remove the propeller, unscrew the propeller from the motor housing.  Silver-top propellers unscrew counterclockwise; black-top propellers unscrew clockwise.  Check the unlock icons on each propeller to see the correct directions for removing.
 
-		To remove the propeller, remove the two screws and plate holding the propeller to the motor.  Remove the propeller.
+		\subsection{Installation}
+		To install the propeller, screw the propeller onto the motor housing.  Silver-top propellers tighten clockwise; black-top propellers tighten counterclockwise.  Check the lock icons on each propeller to see the correct directions for tightening.
+	
+	\section{Payload Antenna}
+		\subsection{Inspection}
+			Ensure that the antenna is not bent or warped in any way.
 
-		To install the propeller, place the propeller on the rotor shaft, and align the propeller to the screw holes.  Install the top plate and the screws.  Tighten.
-	\section{Replacing Arms}
-		To remove the arms, first pop the arm to be replaced towards the mid-line of the copter.  Once the arm is disengaged from plastic keeper, remove the screws holding the boom to the body of the aircraft.  The screw on the top of the body is hidden underneath the autopilot.  Simply push the autopilot gently out of the way to access the screw.  Pull the arm out of the body.  Disconnect the motor power cables.
+		\subsection{Removal}
+		To remove the payload antenna, first disconnect the payload antenna from the payload by unscrewing the SMA connector on the antenna.  Next, remove the antenna by removing the velcro straps holding the antenna to the copter.
 
-		To install the arms, first route the motor power cable to the proper side of the arm so that the cables do not get pinched between the arm and the plastic keeper.  Next, insert the arm into the body of the aircraft, and line up the screw holes.  The screw on the top of the body is hidden underneath the autopilot.  Simply push the autopilot gently out of the way to access the screw hole.  Install the screws.  Push the arm towards the plastic keeper until the keeper engages.  Connect the motor power wires.  Conduct the Spin Up Check to ensure that the motor is wired correctly.  If the motor spins backwards, flip any two motor power wires.  Conduct the Propeller Alignment Procedure to properly align the propellers.
-	\section{Replacing the Payload Antenna}
-		To replace the payload antenna, first disconnect the payload antenna from the payload by unscrewing the SMA connector on the antenna.  Next, uninstall the antenna by removing the zip ties holding the antenna to the copter.
+		\subsection{Installation}
+		To install the payload antenna, attach the antenna to the copter's left side using the provided velcro straps.  Ensure that the antenna is nestled in the corner made by the copter's arms and landing gear.  Next, connect the SMA connectors on the antenna and the payload.
+	\section{Payload Hardware}
+		\subsection{Inspection}
 
-		To install the payload antenna, first check that the insulating tape on the copter booms is intact.  Next, attach the antenna to the copter using zip ties.  Ensure that the antenna is only contacting the insulating tape, and not the carbon fiber booms.  Next, connect the SMA connectors on the antenna and the payload.
-	\section{Replacing the Payload}
+		\subsection{Removal}
 		To remove the payload, first disconnect the payload power, autopilot telemetry cable, and payload antenna from the payload.  Next, remove the two screws holding the payload to the aircraft.
 
+		\subsection{Installation}
 		To install the payload, align the payload with the existing screw holes on the aircraft so that the user interface devices face the outside of the aircraft.  Install the two screws to secure the payload to the aircraft.  Connect the payload power, autopilot telemetry cable, and payload antenna to the payload.
-	\section{Charging Batteries}
-		When charging batteries, it is important to ensure that the batteries assigned to a flight pack are charged and discharged together.  This ensures that all the cells are balanced and taking the same amount of wear and tear, reducing the risk of a single cell being depleted and destroying the rest of the cells.
-
-		The first time the batteries are charged, charge all of the batteries individually, then split them into their flight packs.
-
-		For the remaining time that batteries are charged, charge all batteries in their flight packs.
-
-		To charge a single battery, connect the battery's main plug into the charging adapter and insert the battery's balance plug into the charger.  Configure the charger for a maximum current of 5.3 amps, 3 cell LiPo, and a maximum charge of 5500 mAh.
-
-		To charge a complete pack (3 matched batteries), connect each battery's main plug into to the charging adapter and each battery's balance plug into the parallel adapter.  Configure the charger for a maximum current of 16 amps, 3 cell LiPo, and a maximum charge of 16000 mAh.
-
-		To initiate the charging process, press and hold the ``Start'' button until the charger beeps and initiates the ``Battery Check'' sequence.  The charger will then begin the charging process.
-
-		To end the charging process, press the ``Stop'' button.  Verify that the charger has stopped charging, and disconnect the battery's main plug and balance plug.
-	\section{Rotor Alignment Procedure}
-		\begin{enumerate}
-			\item Rotate two adjacent rotors so that the tips are pointed towards each other.
-			\item Adjust the BOOM MOTOR ATTACHMENT so that the rotors are parallel with each other.
-			\item Continue around the aircraft until all rotors are parallel with each other.
-			\item Tighten all BOOM MOTOR ATTACHMENT points.
-		\end{enumerate}
 \chapter{Flight Management Software}
+	\label{chap:FMS}
 	\section{Requirements}
 		\begin{itemize}
 			\item Minimum Operating System: Windows 7
@@ -591,7 +300,7 @@
 			\label{fig:mp_flight_plan}
 		\end{figure}
 		\subsection{Setting the Home Position}
-			The HOME position represents the takeoff/landing location for the copter.  Generally, if the \gls{gcs} is connected to the \gls{uas}, then Mission Planner can automatically update the HOME position upon \gls{uas} arm.  However, there are occasions when this is not possible.  There are two ways to set the HOME position.
+			The HOME position represents the takeoff/landing location for the copter.  Generally, if the \gls{GCS} is connected to the \gls{UAS}, then Mission Planner can automatically update the HOME position upon \gls{UAS} arm.  However, there are occasions when this is not possible.  There are two ways to set the HOME position.
 
 			Option 1:
 			\begin{enumerate}
@@ -633,7 +342,7 @@
 				\item Under ``Auto WP'', select ``Survey (Grid)''.
 				\item Check the ``Advanced Options'' checkbox under ``Display'' on the right-hand sidebar.
 				\item Set the desired altitude and flight speed.
-				\item Check the ``Add Takeoff and Land WP's'' and ``Use \gls{rtl}'' checkboxes.
+				\item Check the ``Add Takeoff and Land WP's'' and ``Use \gls{RTL}'' checkboxes.
 				\item Open the ``Grid Options'' tab.
 				\item Set the ``Distance between lines [m]'' to 30 meters.
 				\item Check that the ``Flight Time (est)'' field on the bottom bar is less than 20 minutes.
@@ -654,7 +363,7 @@
 	\section{Uploading a Mission}
 		\begin{enumerate}
 			\item Load a mission into Mission Planner.
-			\item Connect to the \gls{uas} with MAVLINK.
+			\item Connect to the \gls{UAS} with MAVLINK.
 			\item Click the ``Write WPs'' button on the right-hand sidebar.
 			\item Click the ``Read WPs'' button on the right-hand sidebar.
 			\item Click ``OK'' to the dialog prompting you to reset the HOME location.
@@ -667,11 +376,10 @@
 			\includegraphics[width=\textwidth]{mp_hud_full.jpg}
 			\label{fig:mp_flt_data}
 		\end{figure}
-		The primary responsibility of the \gls{AO} is to monitor the \gls{uas} as it progresses through its programmed mission using the Flight Data Screen (Figure \ref{fig:mp_flt_data}).  During this time, the autopilot operator should be monitoring the vital signs from the \gls{uas}, including ground speed, mission progress, altitude, attitude, stability, battery voltage, battery consumption, power draw, and navigation stability, among other things.  In most cases, monitoring the artificial horizon and flight map will suffice - check that the \gls{uas} is tracking properly to the waypoints, and that the aircraft has a reasonable attitude for its current speed and heading.  In addition, the \gls{AO} can use the wireless telemetry connection readout as a gauge of the quality of the autopilot datalink.  Occasionally, check the battery voltage and consumption to ensure that the \gls{uas} has enough power to complete the mission and return.
+		The primary responsibility of the \gls{AO} is to monitor the \gls{UAS} as it progresses through its programmed mission using the Flight Data Screen (\autoref{fig:mp_flt_data}).  During this time, the autopilot operator should be monitoring the vital signs from the \gls{UAS}, including ground speed, mission progress, altitude, attitude, stability, battery voltage, battery consumption, power draw, and navigation stability, among other things.  In most cases, monitoring the artificial horizon and flight map will suffice - check that the \gls{UAS} is tracking properly to the waypoints, and that the aircraft has a reasonable attitude for its current speed and heading.  In addition, the \gls{AO} can use the wireless telemetry connection readout as a gauge of the quality of the autopilot datalink.  Occasionally, check the battery voltage and consumption to ensure that the \gls{UAS} has enough power to complete the mission and return.
 	\section{Connecting GCS MAVLINK}
 		\begin{enumerate}
-			\item Select the proper COM port.  See Figure~\ref{fig:MP_Connect}.
-			\item Set the baud rate to 57600, as shown in Figure~\ref{fig:MP_Connect}.
+			\item Select UDP.  See \autoref{fig:MP_Connect}.
 				\begin{figure}[ht]
 					\centering
 					\caption{Connection Settings for Mission Planner}
@@ -679,6 +387,112 @@
 					\label{fig:MP_Connect}
 				\end{figure}
 			\item Click the ``CONNECT'' button.
+			\item Set the local port to 14550 (default).
 		\end{enumerate}
+\appendix
+\chapter{Reference Card}
+\begin{landscape}
+		\begin{multicols}{3}
+		\section*{Preflight Aircraft}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				Aircraft Docs & Check\\
+				Balance & Check\\
+				BATT PWR SWITCH & OFF\\
+				RC/TX PWR SWITCH& OFF\\
+				BATT LEVEL & Check\\
+				RC/TX BATT LEVEL & Check\\
+				SDR MOUNT & Secure\\
+				SDR USB CONN & Secure\\
+				SDR SMA CONN & Secure\\
+				SDR ANT & Secure\\
+				GPS & Secure\\
+				GPS USB CONN & Secure\\
+				PAYLOAD PWR CONN & Secure\\
+				PAYLOAD USB CONN A & Secure\\
+				PAYLOAD USB CONN B & Secure\\
+				PAYLOAD MOUNT & Secure\\
+				PAYLOAD WIFI ANT & Secure\\
+				Propellers & Check\\
+				Landing Gear & Check\\
+			\end{tabular*}
+		\section*{Pre Power On}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				Preflight Inspection & Complete\\
+				PAYLOAD SW & OFF
+			\end{tabular*}
+		\section*{Power On}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				BATT PWR SW & Start\\
+				SOLO LEDs & Check\\
+				PAYLOAD STATUS & Check TODO\\
+				RC/TX PWR SW & Start\\
+				RC/TX SCREEN & Check\\
+				GCS WIFI & Check\\
+				GCS SOFTWARE & Start\\
+				MP LINK PORT & UDP\\
+				MP LINK & Connect\\
+				MP Local Port & 14550\\
+			\end{tabular*}
+		\section*{Pre Takeoff}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				MP HUD & Check\\
+				MP PreFlight & Check\\
+				GPS STATUS & Check\\
+				GPS SATS & Check\\
+				GPS LOCATION & Check\\
+				ACFT ORIENTATION & Check\\
+				AIRSPACE & CLEAR\\
+				TAKEOFF Clrnce & Contact\\
+			\end{tabular*}
+		\section*{Payload Start Procedure}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				PAYLOAD SW & ON\\
+				PAYLOAD STATUS & Check
+			\end{tabular*}
+		\section*{Takeoff}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				RC/TX FLY & Start\\
+				TROTTLE & 75\%
+			\end{tabular*}
+		\section*{Pre Mission Start}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				Power On & Completed\\
+				MISSION & Check\\
+				Wind & Check
+			\end{tabular*}
+		\section*{Mission Start}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				Pre Mission Start & Completed\\
+				LOCAL AIRSPACE & Clear\\
+				FLIGHT MODE & AUTO
+			\end{tabular*}
+		\section*{Mission Stop}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				FLIGHT MODE & AUTO
+			\end{tabular*}
+		\section*{Pre Landing}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				APPROACH & CLEAR\\
+				TRAFFIC & CLEAR\\
+				FLIGHT MODE & LOITER
+			\end{tabular*}
+		\section*{Approach}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				THROTTLE & Reduce as needed\\
+				Descent Rate & $<$ 2 m/s
+			\end{tabular*}
+		\section*{Landing}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				THROTTLE & Reduce as needed\\
+				Descent Rate & $<$ 2 m/s\\
+				THROTTLE & 0\%
+			\end{tabular*}
+		\section*{Payload Stop}
+			\begin{tabular*}{\columnwidth}{l @{\extracolsep{\fill}} r}
+				PAYLOAD SW & OFF\\
+				PAYLOAD STATUS & Check
+			\end{tabular*}
+		\end{multicols}
+\end{landscape}
 \printglossaries
 \end{document}
