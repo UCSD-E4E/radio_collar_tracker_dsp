@@ -14,6 +14,9 @@ AC_PATH_PROGS(BASH, bash sh)
 
 # Checks for programs.
 AC_PROG_SED
+AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
+AC_CHECK_PROG(MAKEGLOSSARIES, makeglossaries, makeglossaries)
+
 
 # Checks for libraries.
 PKG_CHECK_MODULES([uhd], [uhd])

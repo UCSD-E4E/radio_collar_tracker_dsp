@@ -1,0 +1,53 @@
+\documentclass{report}
+\usepackage{draftwatermark}
+\title{Radio Collar Tracker Technical Reference Manual}
+\author{Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
+\date{\today\\v0.1}
+\usepackage{fullpage}
+\usepackage{bookmark}
+\usepackage[toc,nonumberlist]{glossaries}
+\makeglossaries
+\usepackage{hyperref}
+\usepackage{lmodern}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=blue
+}
+\renewcommand*{\chapterautorefname}{Chapter}
+\usepackage{listings}
+\lstset{
+	basicstyle=\ttfamily,
+	breaklines=true
+}
+\begin{document}
+	\maketitle
+	\tableofcontents
+	\listoffigures
+	\listoftables
+	\chapter{Payload}
+		\section{Payload Configuration}
+			All configuration options are set in the file \lstinline[language=sh]{/usr/local/etc/rct_config}.  This file is owned by \lstinline[language=sh]{root}, and should have permissions set to \lstinline{644}.
+			\subsection{Center Frequency}
+				The center frequency for the SDR is set to CENTER\_FREQ by the line \lstinline[language=sh]{freq=CENTER_FREQ}.  This is the center frequency the SDR is recording at, in Hz.  Due to physical limitations of the SDR, set this to be at least 1 kHz away from the nearest frequency that needs to be measured.
+			\subsection{Sampling Frequency}
+				The sampling frequency for the SDR is set to SAMPLING\_FREQ by the line \lstinline[language=sh]{sampling_freq=SAMPLING_FREQ}.  This is the sampling frequency that the SDR is recording at, in samples per second.  Due to physical limitations of the SDR, this value can be only be set to between 200 kHz and 56 MHz in steps of 1 Hz.  Ensure that all frequencies to be recorded are within half the sampling frequency away from the center frequency.
+			\subsection{RF Gain}
+				The RF gain for the SDR receive chan is set to RF\_GAIN by the line \lstinline[language=sh]{gain="RF_GAIN"}.  This is the gain that is applied to the RF signal in the LNA stage in the SDR, in dB.  Due to physical limitations of the SDR, this value can only be set to between 0 dB and 76 dB, in steps of 1 dB.  Ensure that all recorded signals are not clipping with any new gain setting.  Ideally, the loudest signal should result in an amplitude no greater than 80\% of the dyanmic range of the SDR.
+			\subsection{Initializing the USRP B200-mini(-i)}
+				The USRP B200-mini and USRP B200-mini-i are not capable of retaining an FPGA image between boots.  This image needs to be flashed every boot.  This can be accomplished via command line.
+
+				\begin{lstlisting}[language=bash]
+sudo uhd_usrp_probe --args="type=b200" --init-only
+				\end{lstlisting}
+
+				Images can be downloaded on Linux systems via command line.  This requires at least 200 MB of disk space.
+
+				\begin{lstlisting}[language=bash]
+sudo uhd_images_downloader
+				\end{lstlisting}
+	\appendix
+	\printglossaries
+\end{document}
