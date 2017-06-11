@@ -89,7 +89,7 @@ char DATA_DIR[100];
 size_t samps_per_buff;
 size_t channel = 0;
 
-float *buff = NULL;
+int16_t *buff = NULL;
 char *device_args = "";
 void **buffs_ptr = NULL;
 FILE *fp = NULL;
