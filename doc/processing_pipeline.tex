@@ -1,0 +1,13 @@
+\documentclass[tikz, convert={outfile=\jobname.svg}]{standalone}
+\usetikzlibrary{graphs, graphdrawing, quotes}
+\usegdlibrary{layered}
+\begin{document}
+	\tikz [every node/.style={draw}]\graph[layered layout]{
+		IQ/"Raw IQ" -> ping/"Ping Detection";
+		ping -> Coregistration;
+		GPS -> Coregistration;
+		Coregistration -> modfit/"Model Fitting";
+		% modparams/"Model Parameters" -> modfit;
+		modfit -> Estimate;
+	};
+\end{document}

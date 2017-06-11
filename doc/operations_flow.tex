@@ -1,0 +1,14 @@
+\documentclass[tikz, convert={outfile=\jobname.svg}]{standalone}
+\usetikzlibrary{graphs, graphdrawing, quotes}
+\usegdlibrary{layered}
+\begin{document}
+	\tikz [every node/.style={draw}]\graph[layered layout]{
+		AOI/"Select AOI" -> plan/"Plan Flight";
+		plan -> preflight/"Preflight Aircraft";
+		preflight -> startrec/"Start Recording";
+		startrec -> Flight;
+		Flight -> stoprec/"Stop Recording";
+		stoprec -> dataret/"Data Retrieval";
+		dataret -> Processing;
+	};
+\end{document}

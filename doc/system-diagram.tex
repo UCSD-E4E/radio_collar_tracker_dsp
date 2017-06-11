@@ -1,0 +1,14 @@
+\documentclass[tikz, convert={outfile=\jobname.svg}]{standalone}
+\usetikzlibrary{graphs, graphdrawing, quotes}
+\usegdlibrary{layered}
+\begin{document}
+	\tikz [every node/.style={draw}] \graph[layered layout]{
+		GCS/"Ground Control Station" <-> Platform/"Flight Platform";
+		Antenna -> RF;
+		SDR <- RF/"RF Frontend";
+		Sensors -> Joule;
+		Joule <- SDR;
+		UI <-> Joule;
+		Storage/"Data Storage" <- Joule/"On Board Computer";
+	};
+\end{document}
