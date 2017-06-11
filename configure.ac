@@ -15,6 +15,10 @@ AC_PATH_PROGS(BASH, bash sh)
 # Checks for programs.
 AC_PROG_SED
 AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
+if test -z "$PDFLATEX"; then
+	AC_MSG_WARN([Unable to create user manuals!])
+fi
+AM_CONDITIONAL([HAVE_PDFLATEX], test -n "$PDFLATEX")
 AC_CHECK_PROG(MAKEGLOSSARIES, makeglossaries, makeglossaries)
 
 
