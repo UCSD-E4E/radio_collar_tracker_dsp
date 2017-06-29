@@ -169,7 +169,7 @@ int radio_init(void){
 	uhd_usrp_get_rx_rate(usrp, channel, &rate);
 	syslog(LOG_INFO, "Actual RX Rate: %f...\n", rate);
 
-	if (temp_param != rate){
+	if (temp_param / (float)rate > 0.01){
 		syslog(LOG_WARNING, "WARNING: RX rate not correctly set\n");
 	}
 
