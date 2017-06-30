@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -* python *-
 # Usage: api start ./gps_logger.py [-d <destination>] [-p <prefix>]
 #        [-r <runNum>] [-s <suffix>]
@@ -86,6 +87,9 @@ while runstate:
             logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (local_timestamp,
                 lat*1e7, lon*1e7, global_timestamp, alt, rel_alt, vx, vy, vz, hdg))
         if msg.sentence_type == 'ZDA':
+            if msg.day == None:
+                offset = 0
+                continue
             ref_time = time.time()
             gps_time = time.mktime(time.strptime(msg.datetime.ctime())) - time.timezone
             offset = gps_time - ref_time
