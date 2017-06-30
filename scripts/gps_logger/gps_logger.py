@@ -83,8 +83,8 @@ while runstate:
             vy = -1
             vz = -1
             hdg = 999
-            logfile.write("%.3f, %f, %f, %.3f, %d, %d, %d, %d, %d, %d\n" % (local_timestamp,
-                lat, lon, global_timestamp, alt, rel_alt, vx, vy, vz, hdg))
+            logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (local_timestamp,
+                lat*1e7, lon*1e7, global_timestamp, alt, rel_alt, vx, vy, vz, hdg))
         if msg.sentence_type == 'ZDA':
             ref_time = time.time()
             gps_time = time.mktime(time.strptime(msg.datetime.ctime())) - time.timezone
