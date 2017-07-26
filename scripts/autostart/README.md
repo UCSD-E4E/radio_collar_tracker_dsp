@@ -1,20 +1,30 @@
 # Operation
 
 The autostart module should accomplish the following:
-* When the switch is moved to the "on" position, execute the `~/xcode/run` script.
-* Monitor the output of the `~/xcode/run` script to ensure that the collarTracker program is running correctly.
-* When the switch is moved to the "off" position, send `SIGTERM` to the `~/xcode/run` script.
+* When the switch is moved to the "on" position, execute `rct_sdr_starter`.
+* Monitor the state of `rct_sdr_starter` to ensure correct operation.
+* When the switch is moved to the "off" position, send `SIGTERM` to `rct_sdr_starter`.
 * Enable multiple runs without rebooting the system.
 
-# Configuring the autostart code
+# Configuring autostart
 
-To configure the autostart code, place the file `rctstart.sh` in the `/etc/init.d/` directory.  In the directory `/home/debian`, make the file `autostart`.
+If the file `/usr/local/etc/rct_autostart` exists, autostart will be enabled.
 
 # Pinout:
-PWR -> 3.3V
+5V0 -> 
 
-LED ->
+1V8 ->
 
-SW1	->
+GND ->
 
-GND	->
+GPIO1 ->
+
+GPIO2 ->
+
+GPIO3 ->
+
+GPIO4 ->
+
+GPIO5 ->
+
+SW1 ->
