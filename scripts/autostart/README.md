@@ -28,3 +28,6 @@ GPIO4 ->
 GPIO5 ->
 
 SW1 ->
+
+# Structure
+`rctstart.sh` 
