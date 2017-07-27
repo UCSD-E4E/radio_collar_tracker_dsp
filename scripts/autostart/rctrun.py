@@ -5,6 +5,8 @@ from enum import Enum
 import threading
 import os
 import signal
+import serial
+import pynmea2
 
 class SDR_INIT_STATES(Enum):
 	find_devices = 0
@@ -66,7 +68,62 @@ def init_output_dir():
 			time.sleep(1)
 			init_output_dir_state == OUTPUT_DIR_STATES.check_output_dir
 	return 1
-	
+
+class GPS_STATES(Enum):
+	get_tty = 0
+	get_msg = 1
+	wait_recycle = 2
+
+def accept_gps(msg):
+	if msg.gps_qual == 0:
+		return False
+	if msg.gps_qual == 7:
+		return False
+	if msg.gps_qual == 8:
+		return False
+	if msg.num_sats < 6:
+		return False
+	return True
+
+def init_gps():
+	global thread_op
+	init_gps_state = GPS_STATES.get_tty
+	while thread_op:
+		if init_gps_state == GPS_STATES.get_tty:
+			tty_device = os.environ['gps_port']
+			tty_baud = os.environ['gps_baud']
+			try:
+				tty_stream = serial.Serial(tty_device, tty_baud, timeout = 5)
+			except serial.SerialException, e:
+				return 1
+			init_gps_state = GPS_STATES.get_msg
+		elif init_gps_state == GPS_STATES.get_msg:
+			try:
+				line = tty_stream.readline()
+			except serial.serialutil.SerialException, e:
+				init_gps_state = GPS_STATES.get_msg
+				continue
+			if line is not None:
+				msg = None
+				try:
+					msg = pynmea2.parse(line)
+				except pynmea2.ParseError, e:
+					init_gps_state = GPS_STATES.get_msg
+					continue
+				if msg.sentence_type == 'GGA':
+					if accept_gps(msg):
+						# good GPS
+						return 0
+					else:
+						init_gps_state = GPS_STATES.wait_recycle
+				else:
+					init_gps_state = GPS_STATES.get_msg
+			else:
+				init_gps_state = GPS_STATES.get_msg
+		elif init_gps_state == GPS_STATES.wait_recycle:
+			time.sleep(1)
+			init_gps_state = GPS_STATES.get_msg
+
 def sigint_handler(signal, frame):
 	print("REceived sig")
 	global thread_op
