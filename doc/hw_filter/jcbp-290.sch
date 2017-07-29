@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.2.0">
+<eagle version="8.0.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.05" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
+<layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
+<layer number="3" name="Route3" color="4" fill="3" visible="no" active="no"/>
+<layer number="4" name="Route4" color="1" fill="4" visible="no" active="no"/>
+<layer number="5" name="Route5" color="4" fill="4" visible="no" active="no"/>
+<layer number="6" name="Route6" color="1" fill="8" visible="no" active="no"/>
+<layer number="7" name="Route7" color="4" fill="8" visible="no" active="no"/>
+<layer number="8" name="Route8" color="1" fill="2" visible="no" active="no"/>
+<layer number="9" name="Route9" color="4" fill="2" visible="no" active="no"/>
+<layer number="10" name="Route10" color="1" fill="7" visible="no" active="no"/>
+<layer number="11" name="Route11" color="4" fill="7" visible="no" active="no"/>
+<layer number="12" name="Route12" color="1" fill="5" visible="no" active="no"/>
+<layer number="13" name="Route13" color="4" fill="5" visible="no" active="no"/>
+<layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
+<layer number="15" name="Route15" color="4" fill="6" visible="no" active="no"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="no" active="no"/>
 <layer number="17" name="Pads" color="2" fill="1" visible="no" active="no"/>
 <layer number="18" name="Vias" color="2" fill="1" visible="no" active="no"/>
@@ -120,18 +134,6 @@
 <text x="0" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
 <text x="0" y="10.16" size="1.778" layer="96">&gt;VALUE</text>
 </symbol>
-<symbol name="JCBP-290+">
-<wire x1="-12.7" y1="0" x2="-12.7" y2="7.62" width="0.254" layer="94"/>
-<wire x1="-12.7" y1="7.62" x2="12.7" y2="7.62" width="0.254" layer="94"/>
-<wire x1="12.7" y1="7.62" x2="12.7" y2="0" width="0.254" layer="94"/>
-<wire x1="12.7" y1="0" x2="-12.7" y2="0" width="0.254" layer="94"/>
-<pin name="RF_IN" x="-17.78" y="5.08" length="middle"/>
-<pin name="GND_IN" x="-17.78" y="2.54" length="middle"/>
-<pin name="RF_OUT" x="17.78" y="5.08" length="middle" rot="R180"/>
-<pin name="GND_OUT" x="17.78" y="2.54" length="middle" rot="R180"/>
-<text x="-12.7" y="7.62" size="1.778" layer="95">&gt;NAME</text>
-<text x="-12.7" y="-2.54" size="1.778" layer="96">&gt;VALUE</text>
-</symbol>
 <symbol name="CONSMA013.062">
 <wire x1="0" y1="0" x2="10.16" y2="0" width="0.254" layer="94"/>
 <wire x1="10.16" y1="0" x2="20.32" y2="0" width="0.254" layer="94"/>
@@ -149,6 +151,25 @@
 <text x="-5.08" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
 <text x="-5.08" y="10.16" size="1.778" layer="96">&gt;VALUE</text>
 </symbol>
+<symbol name="JCBP-290+">
+<pin name="RF_IN" x="-7.62" y="2.54" visible="pad" length="short" direction="in"/>
+<pin name="GND" x="-7.62" y="-2.54" visible="pad" length="short"/>
+<pin name="RF_OUT" x="7.62" y="2.54" visible="pad" length="short" direction="out" rot="R180"/>
+<wire x1="-5.08" y1="5.08" x2="5.08" y2="5.08" width="0.254" layer="94"/>
+<wire x1="5.08" y1="5.08" x2="5.08" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="5.08" y1="-5.08" x2="-5.08" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-5.08" y1="-5.08" x2="-5.08" y2="5.08" width="0.254" layer="94"/>
+<wire x1="-3.81" y1="-1.778" x2="-3.556" y2="-1.778" width="0.1524" layer="94"/>
+<wire x1="-3.556" y1="-1.778" x2="-1.778" y2="-0.508" width="0.1524" layer="94" curve="71.075356"/>
+<wire x1="-1.778" y1="-0.508" x2="-1.27" y2="1.27" width="0.1524" layer="94" curve="5.958497"/>
+<wire x1="-1.27" y1="1.27" x2="-0.762" y2="2.286" width="0.1524" layer="94" curve="-27.197759"/>
+<wire x1="-0.762" y1="2.286" x2="0.508" y2="2.286" width="0.1524" layer="94" curve="-99.675484"/>
+<wire x1="0.508" y1="2.286" x2="1.016" y2="1.27" width="0.1524" layer="94" curve="-27.194019"/>
+<wire x1="1.016" y1="1.27" x2="1.524" y2="-0.508" width="0.1524" layer="94" curve="5.957035"/>
+<wire x1="1.524" y1="-0.508" x2="3.556" y2="-1.778" width="0.1524" layer="94" curve="78.141167"/>
+<text x="-5.08" y="6.35" size="1.778" layer="95">&gt;NAME</text>
+<text x="-5.08" y="-7.62" size="1.778" layer="96">&gt;VALUE</text>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="CONSMA013.062_JACK">
@@ -160,24 +181,6 @@
 <connects>
 <connect gate="G$1" pin="GND" pad="GND1 GND2 GND3 GND4"/>
 <connect gate="G$1" pin="SIG" pad="SIG"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="JCBP-290+">
-<gates>
-<gate name="G$1" symbol="JCBP-290+" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="BG291">
-<connects>
-<connect gate="G$1" pin="GND_IN" pad="GND1 GND3 GND4 GND5 GND6 GND7"/>
-<connect gate="G$1" pin="GND_OUT" pad="GND8 GND10 GND11 GND12 GND13 GND14"/>
-<connect gate="G$1" pin="RF_IN" pad="RF_IN"/>
-<connect gate="G$1" pin="RF_OUT" pad="RF_OUT"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -201,6 +204,23 @@
 </device>
 </devices>
 </deviceset>
+<deviceset name="JCBP-290+">
+<gates>
+<gate name="G$1" symbol="JCBP-290+" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="BG291">
+<connects>
+<connect gate="G$1" pin="GND" pad="GND1 GND3 GND4 GND5 GND6 GND7 GND8 GND10 GND11 GND12 GND13 GND14"/>
+<connect gate="G$1" pin="RF_IN" pad="RF_IN"/>
+<connect gate="G$1" pin="RF_OUT" pad="RF_OUT"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
 </devicesets>
 </library>
 </libraries>
@@ -210,12 +230,13 @@
 </variantdefs>
 <classes>
 <class number="0" name="default" width="0" drill="0">
+<clearance class="0" value="0.205"/>
 </class>
 </classes>
 <parts>
 <part name="INPUT" library="balun" deviceset="CONSMA013.062_JACK" device="END_MNT"/>
-<part name="FILTER" library="balun" deviceset="JCBP-290+" device=""/>
 <part name="OUTPUT" library="balun" deviceset="CONSMA013.062" device="END_MNT"/>
+<part name="FILTER" library="balun" deviceset="JCBP-290+" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -223,45 +244,38 @@
 </plain>
 <instances>
 <instance part="INPUT" gate="G$1" x="0" y="0"/>
-<instance part="FILTER" gate="G$1" x="57.15" y="1.27"/>
 <instance part="OUTPUT" gate="G$1" x="88.9" y="0"/>
+<instance part="FILTER" gate="G$1" x="53.34" y="5.08"/>
 </instances>
 <busses>
 </busses>
 <nets>
-<net name="GND_IN" class="0">
-<segment>
-<pinref part="INPUT" gate="G$1" pin="GND"/>
-<pinref part="FILTER" gate="G$1" pin="GND_IN"/>
-<wire x1="25.4" y1="0" x2="39.37" y2="0" width="0.1524" layer="91"/>
-<wire x1="39.37" y1="0" x2="39.37" y2="3.81" width="0.1524" layer="91"/>
-<label x="30.48" y="-5.08" size="1.778" layer="95"/>
-<pinref part="FILTER" gate="G$1" pin="GND_OUT"/>
-<pinref part="OUTPUT" gate="G$1" pin="GND"/>
-<wire x1="74.93" y1="3.81" x2="83.82" y2="3.81" width="0.1524" layer="91"/>
-<wire x1="83.82" y1="3.81" x2="83.82" y2="0" width="0.1524" layer="91"/>
-<label x="76.2" y="-5.08" size="1.778" layer="95"/>
-<wire x1="39.37" y1="3.81" x2="74.93" y2="3.81" width="0.1524" layer="91"/>
-<junction x="39.37" y="3.81"/>
-<junction x="74.93" y="3.81"/>
-</segment>
-</net>
 <net name="RF_IN" class="0">
 <segment>
 <pinref part="INPUT" gate="G$1" pin="SIG"/>
-<pinref part="FILTER" gate="G$1" pin="RF_IN"/>
-<wire x1="25.4" y1="7.62" x2="39.37" y2="7.62" width="0.1524" layer="91"/>
-<wire x1="39.37" y1="7.62" x2="39.37" y2="6.35" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="7.62" x2="45.72" y2="7.62" width="0.1524" layer="91"/>
 <label x="34.29" y="15.24" size="1.778" layer="95"/>
+<pinref part="FILTER" gate="G$1" pin="RF_IN"/>
 </segment>
 </net>
-<net name="RF_OUT" class="0">
+<net name="GND" class="0">
 <segment>
-<pinref part="FILTER" gate="G$1" pin="RF_OUT"/>
+<pinref part="INPUT" gate="G$1" pin="GND"/>
+<pinref part="FILTER" gate="G$1" pin="GND"/>
+<wire x1="25.4" y1="0" x2="45.72" y2="0" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="0" x2="45.72" y2="2.54" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="2.54" x2="45.72" y2="-2.54" width="0.1524" layer="91"/>
+<junction x="45.72" y="2.54"/>
+<pinref part="OUTPUT" gate="G$1" pin="GND"/>
+<wire x1="45.72" y1="-2.54" x2="83.82" y2="-2.54" width="0.1524" layer="91"/>
+<wire x1="83.82" y1="-2.54" x2="83.82" y2="0" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$2" class="0">
+<segment>
 <pinref part="OUTPUT" gate="G$1" pin="SIG"/>
-<wire x1="74.93" y1="6.35" x2="83.82" y2="6.35" width="0.1524" layer="91"/>
-<wire x1="83.82" y1="6.35" x2="83.82" y2="7.62" width="0.1524" layer="91"/>
-<label x="80.01" y="16.51" size="1.778" layer="95"/>
+<pinref part="FILTER" gate="G$1" pin="RF_OUT"/>
+<wire x1="83.82" y1="7.62" x2="60.96" y2="7.62" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>

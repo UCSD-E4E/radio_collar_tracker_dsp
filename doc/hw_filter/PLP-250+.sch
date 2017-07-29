@@ -290,7 +290,7 @@
 <part name="SMA_OUT" library="balun" deviceset="CONSMA013.062" device="END_MNT"/>
 <part name="SMA_IN" library="balun" deviceset="CONSMA013.062_JACK" device="END_MNT"/>
 <part name="LPF" library="rct_lpf_brd" deviceset="PLP-250+" device=""/>
-<part name="FRAME1" library="frames" deviceset="FRAME_A_L" device=""/>
+<part name="FRAME1" library="frames" deviceset="FRAME_A_L" device="" value="1"/>
 </parts>
 <sheets>
 <sheet>

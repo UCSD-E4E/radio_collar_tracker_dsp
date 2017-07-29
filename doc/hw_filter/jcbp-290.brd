@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.2.0">
+<eagle version="8.0.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -9,7 +9,21 @@
 <grid distance="0.0125" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.001" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
+<layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
+<layer number="3" name="Route3" color="4" fill="3" visible="no" active="no"/>
+<layer number="4" name="Route4" color="1" fill="4" visible="no" active="no"/>
+<layer number="5" name="Route5" color="4" fill="4" visible="no" active="no"/>
+<layer number="6" name="Route6" color="1" fill="8" visible="no" active="no"/>
+<layer number="7" name="Route7" color="4" fill="8" visible="no" active="no"/>
+<layer number="8" name="Route8" color="1" fill="2" visible="no" active="no"/>
+<layer number="9" name="Route9" color="4" fill="2" visible="no" active="no"/>
+<layer number="10" name="Route10" color="1" fill="7" visible="no" active="no"/>
+<layer number="11" name="Route11" color="4" fill="7" visible="no" active="no"/>
+<layer number="12" name="Route12" color="1" fill="5" visible="no" active="no"/>
+<layer number="13" name="Route13" color="4" fill="5" visible="no" active="no"/>
+<layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
+<layer number="15" name="Route15" color="4" fill="6" visible="no" active="no"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="yes"/>
 <layer number="17" name="Pads" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="yes"/>
@@ -65,6 +79,25 @@
 <libraries>
 <library name="balun">
 <packages>
+<package name="SMA_EDGE_MNT">
+<smd name="GND1" x="-2.54" y="0" dx="1.524" dy="5.08" layer="16"/>
+<smd name="SIG" x="0" y="0" dx="1.524" dy="5.08" layer="1"/>
+<smd name="GND2" x="2.54" y="0" dx="1.524" dy="5.08" layer="16"/>
+<wire x1="-3.175" y1="2.54" x2="-3.175" y2="-2.2098" width="0.127" layer="51"/>
+<wire x1="-3.175" y1="-2.2098" x2="3.175" y2="-2.2098" width="0.127" layer="51"/>
+<wire x1="3.175" y1="-2.2098" x2="3.175" y2="2.54" width="0.127" layer="51"/>
+<wire x1="3.175" y1="2.54" x2="2.54" y2="2.54" width="0.127" layer="51"/>
+<wire x1="2.54" y1="2.54" x2="-2.54" y2="2.54" width="0.127" layer="51"/>
+<wire x1="-2.54" y1="2.54" x2="-3.175" y2="2.54" width="0.127" layer="51"/>
+<wire x1="-3.81" y1="2.54" x2="-3.81" y2="-3.81" width="0.127" layer="21"/>
+<wire x1="3.81" y1="-3.81" x2="3.81" y2="2.54" width="0.127" layer="21"/>
+<smd name="GND3" x="-2.54" y="0" dx="1.524" dy="5.08" layer="1"/>
+<smd name="GND4" x="2.54" y="0" dx="1.524" dy="5.08" layer="1"/>
+<wire x1="-2.54" y1="2.54" x2="-2.54" y2="5.08" width="0.127" layer="51"/>
+<wire x1="-2.54" y1="5.08" x2="2.54" y2="5.08" width="0.127" layer="51"/>
+<wire x1="2.54" y1="5.08" x2="2.54" y2="2.54" width="0.127" layer="51"/>
+<text x="5.08" y="2.54" size="1.27" layer="25" rot="SR270">&gt;NAME</text>
+</package>
 <package name="BG291">
 <wire x1="10.16" y1="11.049" x2="10.16" y2="-11.049" width="0.127" layer="21"/>
 <wire x1="-10.16" y1="-11.049" x2="-10.16" y2="11.049" width="0.127" layer="21"/>
@@ -88,25 +121,6 @@
 <wire x1="10.16" y1="11.049" x2="8.89" y2="11.049" width="0.127" layer="21"/>
 <text x="-11.43" y="-10.16" size="1.27" layer="25" rot="R90">&gt;NAME</text>
 </package>
-<package name="SMA_EDGE_MNT">
-<smd name="GND1" x="-2.54" y="0" dx="1.524" dy="5.08" layer="16"/>
-<smd name="SIG" x="0" y="0" dx="1.524" dy="5.08" layer="1"/>
-<smd name="GND2" x="2.54" y="0" dx="1.524" dy="5.08" layer="16"/>
-<wire x1="-3.175" y1="2.54" x2="-3.175" y2="-2.2098" width="0.127" layer="51"/>
-<wire x1="-3.175" y1="-2.2098" x2="3.175" y2="-2.2098" width="0.127" layer="51"/>
-<wire x1="3.175" y1="-2.2098" x2="3.175" y2="2.54" width="0.127" layer="51"/>
-<wire x1="3.175" y1="2.54" x2="2.54" y2="2.54" width="0.127" layer="51"/>
-<wire x1="2.54" y1="2.54" x2="-2.54" y2="2.54" width="0.127" layer="51"/>
-<wire x1="-2.54" y1="2.54" x2="-3.175" y2="2.54" width="0.127" layer="51"/>
-<wire x1="-3.81" y1="2.54" x2="-3.81" y2="-3.81" width="0.127" layer="21"/>
-<wire x1="3.81" y1="-3.81" x2="3.81" y2="2.54" width="0.127" layer="21"/>
-<smd name="GND3" x="-2.54" y="0" dx="1.524" dy="5.08" layer="1"/>
-<smd name="GND4" x="2.54" y="0" dx="1.524" dy="5.08" layer="1"/>
-<wire x1="-2.54" y1="2.54" x2="-2.54" y2="5.08" width="0.127" layer="51"/>
-<wire x1="-2.54" y1="5.08" x2="2.54" y2="5.08" width="0.127" layer="51"/>
-<wire x1="2.54" y1="5.08" x2="2.54" y2="2.54" width="0.127" layer="51"/>
-<text x="5.08" y="2.54" size="1.27" layer="25" rot="SR270">&gt;NAME</text>
-</package>
 </packages>
 </library>
 </libraries>
@@ -116,6 +130,7 @@
 </variantdefs>
 <classes>
 <class number="0" name="default" width="0" drill="0">
+<clearance class="0" value="0.205"/>
 </class>
 </classes>
 <designrules name="LaenPCBOrder">
@@ -294,47 +309,52 @@ Please make sure your boards conform to these design rules.</description>
 </pass>
 </autorouter>
 <elements>
-<element name="FILTER" library="balun" package="BG291" value="JCBP-290+" x="13.97" y="22.86"/>
 <element name="INPUT" library="balun" package="SMA_EDGE_MNT" value="CONSMA013.062_JACKEND_MNT" x="13.97" y="2.921" rot="R180"/>
 <element name="OUTPUT" library="balun" package="SMA_EDGE_MNT" value="CONSMA013.062END_MNT" x="13.97" y="42.799"/>
+<element name="FILTER" library="balun" package="BG291" value="JCBP-290+" x="13.97" y="22.86"/>
 </elements>
 <signals>
-<signal name="GND_IN">
-<contactref element="INPUT" pad="GND1"/>
-<contactref element="INPUT" pad="GND2"/>
+<signal name="RF_IN">
+<contactref element="INPUT" pad="SIG"/>
+<wire x1="13.97" y1="2.921" x2="13.97" y2="6.35" width="1.6764" layer="1"/>
+<wire x1="13.97" y1="6.35" x2="8.89" y2="11.43" width="1.6764" layer="1"/>
+<contactref element="FILTER" pad="RF_IN"/>
+<wire x1="8.89" y1="11.43" x2="8.89" y2="12.827" width="0" layer="19" extent="1-1"/>
+</signal>
+<signal name="GND">
 <contactref element="INPUT" pad="GND3"/>
 <contactref element="INPUT" pad="GND4"/>
-<contactref element="FILTER" pad="GND1"/>
-<contactref element="FILTER" pad="GND3"/>
-<contactref element="FILTER" pad="GND4"/>
-<contactref element="FILTER" pad="GND5"/>
-<contactref element="FILTER" pad="GND6"/>
-<contactref element="FILTER" pad="GND7"/>
-<contactref element="OUTPUT" pad="GND1"/>
-<contactref element="OUTPUT" pad="GND2"/>
-<contactref element="OUTPUT" pad="GND4"/>
-<contactref element="OUTPUT" pad="GND3"/>
-<contactref element="FILTER" pad="GND13"/>
-<contactref element="FILTER" pad="GND14"/>
-<contactref element="FILTER" pad="GND8"/>
-<contactref element="FILTER" pad="GND10"/>
-<contactref element="FILTER" pad="GND12"/>
+<contactref element="INPUT" pad="GND2"/>
+<contactref element="INPUT" pad="GND1"/>
 <contactref element="FILTER" pad="GND11"/>
-<wire x1="11.43" y1="2.921" x2="11.43" y2="7.62" width="1.6764" layer="16"/>
-<wire x1="16.51" y1="2.921" x2="16.51" y2="7.62" width="1.6764" layer="16"/>
-<wire x1="11.43" y1="42.799" x2="11.43" y2="38.1" width="1.6764" layer="16"/>
-<wire x1="16.51" y1="42.799" x2="16.51" y2="38.1" width="1.6764" layer="16"/>
-<polygon width="0.254" layer="16">
+<contactref element="FILTER" pad="GND4"/>
+<contactref element="FILTER" pad="GND14"/>
+<contactref element="FILTER" pad="GND6"/>
+<contactref element="FILTER" pad="GND10"/>
+<contactref element="FILTER" pad="GND13"/>
+<contactref element="FILTER" pad="GND3"/>
+<contactref element="FILTER" pad="GND5"/>
+<contactref element="FILTER" pad="GND1"/>
+<contactref element="FILTER" pad="GND8"/>
+<contactref element="FILTER" pad="GND12"/>
+<contactref element="FILTER" pad="GND7"/>
+<contactref element="OUTPUT" pad="GND3"/>
+<contactref element="OUTPUT" pad="GND4"/>
+<contactref element="OUTPUT" pad="GND2"/>
+<contactref element="OUTPUT" pad="GND1"/>
+<polygon width="0.3048" layer="1" isolate="0.254">
+<vertex x="1.27" y="44.45"/>
+<vertex x="26.67" y="44.45"/>
+<vertex x="26.67" y="1.27"/>
+<vertex x="1.27" y="1.27"/>
+</polygon>
+<polygon width="0.254" layer="16" isolate="6.4516">
 <vertex x="1.27" y="1.27"/>
 <vertex x="8.89" y="1.27"/>
-<vertex x="8.89" y="6.35"/>
-<vertex x="19.05" y="6.35"/>
 <vertex x="19.05" y="1.27"/>
 <vertex x="26.67" y="1.27"/>
 <vertex x="26.67" y="44.45"/>
 <vertex x="19.05" y="44.45"/>
-<vertex x="19.05" y="39.37"/>
-<vertex x="8.89" y="39.37"/>
 <vertex x="8.89" y="44.45"/>
 <vertex x="1.27" y="44.45"/>
 </polygon>
@@ -347,7 +367,6 @@ Please make sure your boards conform to these design rules.</description>
 <via x="7.62" y="43.18" extent="1-16" drill="0.6"/>
 <via x="7.62" y="40.64" extent="1-16" drill="0.6"/>
 <via x="7.62" y="38.1" extent="1-16" drill="0.6"/>
-<via x="11.43" y="36.83" extent="1-16" drill="0.6"/>
 <via x="2.54" y="7.62" extent="1-16" drill="0.6"/>
 <via x="2.54" y="5.08" extent="1-16" drill="0.6"/>
 <via x="2.54" y="2.54" extent="1-16" drill="0.6"/>
@@ -355,9 +374,7 @@ Please make sure your boards conform to these design rules.</description>
 <via x="5.08" y="5.08" extent="1-16" drill="0.6"/>
 <via x="5.08" y="7.62" extent="1-16" drill="0.6"/>
 <via x="7.62" y="7.62" extent="1-16" drill="0.6"/>
-<via x="7.62" y="5.08" extent="1-16" drill="0.6"/>
 <via x="7.62" y="2.54" extent="1-16" drill="0.6"/>
-<via x="16.51" y="8.89" extent="1-16" drill="0.6"/>
 <via x="20.32" y="7.62" extent="1-16" drill="0.6"/>
 <via x="20.32" y="5.08" extent="1-16" drill="0.6"/>
 <via x="20.32" y="2.54" extent="1-16" drill="0.6"/>
@@ -368,7 +385,6 @@ Please make sure your boards conform to these design rules.</description>
 <via x="25.4" y="5.08" extent="1-16" drill="0.6"/>
 <via x="25.4" y="2.54" extent="1-16" drill="0.6"/>
 <via x="20.32" y="38.1" extent="1-16" drill="0.6"/>
-<via x="20.32" y="40.64" extent="1-16" drill="0.6"/>
 <via x="20.32" y="43.18" extent="1-16" drill="0.6"/>
 <via x="22.86" y="43.18" extent="1-16" drill="0.6"/>
 <via x="22.86" y="40.64" extent="1-16" drill="0.6"/>
@@ -376,38 +392,6 @@ Please make sure your boards conform to these design rules.</description>
 <via x="25.4" y="43.18" extent="1-16" drill="0.6"/>
 <via x="25.4" y="40.64" extent="1-16" drill="0.6"/>
 <via x="25.4" y="38.1" extent="1-16" drill="0.6"/>
-<polygon width="0.254" layer="1">
-<vertex x="1.27" y="1.27"/>
-<vertex x="8.89" y="1.27"/>
-<vertex x="8.89" y="6.35"/>
-<vertex x="11.43" y="6.35"/>
-<vertex x="7.62" y="10.16"/>
-<vertex x="1.27" y="10.16"/>
-</polygon>
-<polygon width="0.254" layer="1">
-<vertex x="16.51" y="6.35"/>
-<vertex x="12.7" y="10.16"/>
-<vertex x="26.67" y="10.16"/>
-<vertex x="26.67" y="1.27"/>
-<vertex x="19.05" y="1.27"/>
-<vertex x="19.05" y="6.35"/>
-</polygon>
-<polygon width="0.254" layer="1">
-<vertex x="1.27" y="44.45"/>
-<vertex x="8.89" y="44.45"/>
-<vertex x="8.89" y="39.37"/>
-<vertex x="11.43" y="39.37"/>
-<vertex x="15.24" y="35.56"/>
-<vertex x="1.27" y="35.56"/>
-</polygon>
-<polygon width="0.254" layer="1">
-<vertex x="19.05" y="44.45"/>
-<vertex x="26.67" y="44.45"/>
-<vertex x="26.67" y="35.56"/>
-<vertex x="20.32" y="35.56"/>
-<vertex x="16.51" y="39.37"/>
-<vertex x="19.05" y="39.37"/>
-</polygon>
 <polygon width="0.254" layer="1">
 <vertex x="4.445" y="11.557"/>
 <vertex x="4.445" y="16.51"/>
@@ -448,23 +432,10 @@ Please make sure your boards conform to these design rules.</description>
 <via x="4.7625" y="13.6525" extent="1-16" drill="0.6"/>
 <via x="23.1775" y="12.065" extent="1-16" drill="0.6"/>
 <via x="23.1775" y="13.6525" extent="1-16" drill="0.6"/>
-<wire x1="11.43" y1="42.799" x2="11.43" y2="36.83" width="1.6764" layer="1"/>
-<wire x1="16.51" y1="42.799" x2="16.51" y2="40.64" width="1.6764" layer="1"/>
-<wire x1="16.51" y1="40.64" x2="20.32" y2="40.64" width="1.6764" layer="1"/>
-<wire x1="11.43" y1="2.921" x2="11.43" y2="5.08" width="1.6764" layer="1"/>
-<wire x1="11.43" y1="5.08" x2="7.62" y2="5.08" width="1.6764" layer="1"/>
-<wire x1="16.51" y1="2.921" x2="16.51" y2="8.89" width="1.6764" layer="1"/>
 </signal>
-<signal name="RF_IN">
-<contactref element="INPUT" pad="SIG"/>
-<contactref element="FILTER" pad="RF_IN"/>
-<wire x1="13.97" y1="2.921" x2="13.97" y2="6.35" width="1.6764" layer="1"/>
-<wire x1="13.97" y1="6.35" x2="8.89" y2="11.43" width="1.6764" layer="1"/>
-<wire x1="8.89" y1="11.43" x2="8.89" y2="12.827" width="1.6764" layer="1"/>
-</signal>
-<signal name="RF_OUT">
-<contactref element="FILTER" pad="RF_OUT"/>
+<signal name="N$2">
 <contactref element="OUTPUT" pad="SIG"/>
+<contactref element="FILTER" pad="RF_OUT"/>
 <wire x1="13.97" y1="42.799" x2="13.97" y2="39.37" width="1.6764" layer="1"/>
 <wire x1="13.97" y1="39.37" x2="19.05" y2="34.29" width="1.6764" layer="1"/>
 <wire x1="19.05" y1="34.29" x2="19.05" y2="32.893" width="1.6764" layer="1"/>

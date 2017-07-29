@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.2.0">
+<eagle version="8.0.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -9,6 +9,20 @@
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
+<layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
+<layer number="3" name="Route3" color="4" fill="3" visible="no" active="no"/>
+<layer number="4" name="Route4" color="1" fill="4" visible="no" active="no"/>
+<layer number="5" name="Route5" color="4" fill="4" visible="no" active="no"/>
+<layer number="6" name="Route6" color="1" fill="8" visible="no" active="no"/>
+<layer number="7" name="Route7" color="4" fill="8" visible="no" active="no"/>
+<layer number="8" name="Route8" color="1" fill="2" visible="no" active="no"/>
+<layer number="9" name="Route9" color="4" fill="2" visible="no" active="no"/>
+<layer number="10" name="Route10" color="1" fill="7" visible="no" active="no"/>
+<layer number="11" name="Route11" color="4" fill="7" visible="no" active="no"/>
+<layer number="12" name="Route12" color="1" fill="5" visible="no" active="no"/>
+<layer number="13" name="Route13" color="4" fill="5" visible="no" active="no"/>
+<layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
+<layer number="15" name="Route15" color="4" fill="6" visible="no" active="no"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="no" active="no"/>
 <layer number="17" name="Pads" color="2" fill="1" visible="no" active="no"/>
 <layer number="18" name="Vias" color="2" fill="1" visible="no" active="no"/>
@@ -134,16 +148,23 @@
 <text x="-5.08" y="10.16" size="1.778" layer="96">&gt;VALUE</text>
 </symbol>
 <symbol name="SXBP-169+">
-<wire x1="0" y1="0" x2="0" y2="7.62" width="0.254" layer="94"/>
-<wire x1="0" y1="7.62" x2="22.86" y2="7.62" width="0.254" layer="94"/>
-<wire x1="22.86" y1="7.62" x2="22.86" y2="0" width="0.254" layer="94"/>
-<wire x1="22.86" y1="0" x2="0" y2="0" width="0.254" layer="94"/>
-<pin name="RF_IN" x="-5.08" y="5.08" length="middle"/>
-<pin name="GND_IN" x="-5.08" y="2.54" length="middle"/>
-<pin name="RF_OUT" x="27.94" y="5.08" length="middle" rot="R180"/>
-<text x="0" y="-2.54" size="1.27" layer="95">&gt;NAME</text>
-<text x="0" y="8.89" size="1.27" layer="95">&gt;VALUE</text>
-<pin name="GND_OUT" x="27.94" y="2.54" length="middle" rot="R180"/>
+<pin name="RF_IN" x="-7.62" y="2.54" visible="pad" length="short" direction="in"/>
+<pin name="GND_IN" x="-7.62" y="-2.54" visible="pad" length="short"/>
+<pin name="RF_OUT" x="7.62" y="2.54" visible="pad" length="short" direction="out" rot="R180"/>
+<wire x1="-5.08" y1="5.08" x2="5.08" y2="5.08" width="0.254" layer="94"/>
+<wire x1="5.08" y1="5.08" x2="5.08" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="5.08" y1="-5.08" x2="-5.08" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-5.08" y1="-5.08" x2="-5.08" y2="5.08" width="0.254" layer="94"/>
+<wire x1="-3.81" y1="-1.778" x2="-3.556" y2="-1.778" width="0.1524" layer="94"/>
+<wire x1="-3.556" y1="-1.778" x2="-1.778" y2="-0.508" width="0.1524" layer="94" curve="71.075356"/>
+<wire x1="-1.778" y1="-0.508" x2="-1.27" y2="1.27" width="0.1524" layer="94" curve="5.958497"/>
+<wire x1="-1.27" y1="1.27" x2="-0.762" y2="2.286" width="0.1524" layer="94" curve="-27.197759"/>
+<wire x1="-0.762" y1="2.286" x2="0.508" y2="2.286" width="0.1524" layer="94" curve="-99.675484"/>
+<wire x1="0.508" y1="2.286" x2="1.016" y2="1.27" width="0.1524" layer="94" curve="-27.194019"/>
+<wire x1="1.016" y1="1.27" x2="1.524" y2="-0.508" width="0.1524" layer="94" curve="5.957035"/>
+<wire x1="1.524" y1="-0.508" x2="3.556" y2="-1.778" width="0.1524" layer="94" curve="78.141167"/>
+<text x="-5.08" y="6.35" size="1.778" layer="95">&gt;NAME</text>
+<text x="-5.08" y="-7.62" size="1.778" layer="96">&gt;VALUE</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -186,8 +207,7 @@
 <devices>
 <device name="SXBP-169+" package="HF1139">
 <connects>
-<connect gate="SXBP-169+" pin="GND_IN" pad="GND3 GND5 GND7"/>
-<connect gate="SXBP-169+" pin="GND_OUT" pad="GND2 GND4 GND6"/>
+<connect gate="SXBP-169+" pin="GND_IN" pad="GND2 GND3 GND4 GND5 GND6 GND7"/>
 <connect gate="SXBP-169+" pin="RF_IN" pad="RF_IN"/>
 <connect gate="SXBP-169+" pin="RF_OUT" pad="RF_OUT"/>
 </connects>
@@ -220,44 +240,36 @@
 <instances>
 <instance part="INPUT" gate="G$1" x="-12.7" y="53.34"/>
 <instance part="OUTPUT" gate="G$1" x="106.68" y="53.34"/>
-<instance part="FILTER" gate="SXBP-169+" x="40.64" y="53.34"/>
+<instance part="FILTER" gate="SXBP-169+" x="53.34" y="58.42"/>
 </instances>
 <busses>
 </busses>
 <nets>
+<net name="N$1" class="0">
+<segment>
+<pinref part="INPUT" gate="G$1" pin="SIG"/>
+<pinref part="FILTER" gate="SXBP-169+" pin="RF_IN"/>
+<wire x1="12.7" y1="60.96" x2="45.72" y2="60.96" width="0.1524" layer="91"/>
+</segment>
+</net>
 <net name="GND" class="0">
 <segment>
 <pinref part="INPUT" gate="G$1" pin="GND"/>
-<wire x1="12.7" y1="53.34" x2="35.56" y2="53.34" width="0.1524" layer="91"/>
-<wire x1="35.56" y1="53.34" x2="35.56" y2="55.88" width="0.1524" layer="91"/>
 <pinref part="FILTER" gate="SXBP-169+" pin="GND_IN"/>
-<label x="17.78" y="48.26" size="1.778" layer="95"/>
+<wire x1="12.7" y1="53.34" x2="45.72" y2="53.34" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="53.34" x2="45.72" y2="55.88" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="55.88" x2="45.72" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="48.26" x2="101.6" y2="48.26" width="0.1524" layer="91"/>
+<junction x="45.72" y="55.88"/>
 <pinref part="OUTPUT" gate="G$1" pin="GND"/>
-<pinref part="FILTER" gate="SXBP-169+" pin="GND_OUT"/>
-<wire x1="68.58" y1="55.88" x2="101.6" y2="55.88" width="0.1524" layer="91"/>
-<wire x1="101.6" y1="55.88" x2="101.6" y2="53.34" width="0.1524" layer="91"/>
-<label x="86.36" y="50.8" size="1.778" layer="95"/>
-<wire x1="35.56" y1="55.88" x2="68.58" y2="55.88" width="0.1524" layer="91"/>
-<junction x="35.56" y="55.88"/>
-<junction x="68.58" y="55.88"/>
+<wire x1="101.6" y1="48.26" x2="101.6" y2="53.34" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="RF_IN" class="0">
-<segment>
-<pinref part="INPUT" gate="G$1" pin="SIG"/>
-<wire x1="12.7" y1="60.96" x2="35.56" y2="60.96" width="0.1524" layer="91"/>
-<wire x1="35.56" y1="60.96" x2="35.56" y2="58.42" width="0.1524" layer="91"/>
-<pinref part="FILTER" gate="SXBP-169+" pin="RF_IN"/>
-<label x="33.02" y="63.5" size="1.778" layer="95"/>
-</segment>
-</net>
-<net name="RF_OUT" class="0">
+<net name="N$3" class="0">
 <segment>
 <pinref part="OUTPUT" gate="G$1" pin="SIG"/>
-<wire x1="68.58" y1="58.42" x2="101.6" y2="58.42" width="0.1524" layer="91"/>
-<wire x1="101.6" y1="58.42" x2="101.6" y2="60.96" width="0.1524" layer="91"/>
 <pinref part="FILTER" gate="SXBP-169+" pin="RF_OUT"/>
-<label x="86.36" y="60.96" size="1.778" layer="95"/>
+<wire x1="101.6" y1="60.96" x2="60.96" y2="60.96" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>

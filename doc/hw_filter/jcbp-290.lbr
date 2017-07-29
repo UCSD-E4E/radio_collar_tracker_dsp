@@ -70,9 +70,32 @@
 <layer number="98" name="Guide" color="6" fill="1" visible="yes" active="yes"/>
 </layers>
 <library>
-<description>Generated from &lt;b&gt;PLP-250+.brd&lt;/b&gt;&lt;p&gt;
+<description>Generated from &lt;b&gt;jcbp-290.sch&lt;/b&gt;&lt;p&gt;
 by exp-lbrs.ulp</description>
 <packages>
+<package name="BG291">
+<wire x1="10.16" y1="11.049" x2="10.16" y2="-11.049" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="-11.049" x2="-10.16" y2="11.049" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="11.049" x2="-8.89" y2="11.049" width="0.127" layer="21"/>
+<wire x1="-10.16" y1="-11.049" x2="-8.89" y2="-11.049" width="0.127" layer="21"/>
+<wire x1="10.16" y1="-11.049" x2="8.89" y2="-11.049" width="0.127" layer="21"/>
+<wire x1="10.16" y1="11.049" x2="8.89" y2="11.049" width="0.127" layer="21"/>
+<smd name="GND1" x="-7.62" y="-10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND3" x="-2.54" y="-10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND4" x="0" y="-10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND5" x="2.54" y="-10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND6" x="5.08" y="-10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND7" x="7.62" y="-10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND8" x="7.62" y="10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND10" x="2.54" y="10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND11" x="0" y="10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND12" x="-2.54" y="10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND13" x="-5.08" y="10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="GND14" x="-7.62" y="10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="RF_IN" x="-5.08" y="-10.033" dx="1.651" dy="2.54" layer="1"/>
+<smd name="RF_OUT" x="5.08" y="10.033" dx="1.651" dy="2.54" layer="1"/>
+<text x="-11.43" y="-10.16" size="1.27" layer="25" rot="R90">&gt;NAME</text>
+</package>
 <package name="SMA_EDGE_MNT">
 <wire x1="-3.175" y1="2.54" x2="-3.175" y2="-2.2098" width="0.127" layer="51"/>
 <wire x1="-3.175" y1="-2.2098" x2="3.175" y2="-2.2098" width="0.127" layer="51"/>
@@ -92,26 +115,112 @@ by exp-lbrs.ulp</description>
 <smd name="SIG" x="0" y="0" dx="1.524" dy="5.08" layer="1"/>
 <text x="5.08" y="2.54" size="1.27" layer="25" rot="SR270">&gt;NAME</text>
 </package>
-<package name="A01">
-<wire x1="-10" y1="5" x2="-10" y2="-5" width="0.127" layer="21"/>
-<wire x1="-10" y1="-5" x2="10" y2="-5" width="0.127" layer="21"/>
-<wire x1="10" y1="-5" x2="10" y2="5" width="0.127" layer="21"/>
-<wire x1="10" y1="5" x2="-10" y2="5" width="0.127" layer="21"/>
-<pad name="P1" x="-7.62" y="2.54" drill="0.8"/>
-<pad name="P2" x="-7.62" y="-2.54" drill="0.8"/>
-<pad name="P3" x="-2.54" y="2.54" drill="0.8"/>
-<pad name="P4" x="-2.54" y="-2.54" drill="0.8"/>
-<pad name="P5" x="2.54" y="2.54" drill="0.8"/>
-<pad name="P6" x="2.54" y="-2.54" drill="0.8"/>
-<pad name="P7" x="7.62" y="2.54" drill="0.8"/>
-<pad name="P8" x="7.62" y="-2.54" drill="0.8"/>
-<text x="-10" y="-6.75" size="1.27" layer="25">&gt;NAME</text>
-<text x="-10" y="5.5" size="1.27" layer="27">&gt;VALUE</text>
-</package>
 </packages>
 <symbols>
+<symbol name="CONSMA013.062">
+<circle x="10.16" y="7.62" radius="2.54" width="0.254" layer="94"/>
+<wire x1="0" y1="0" x2="10.16" y2="0" width="0.254" layer="94"/>
+<wire x1="10.16" y1="0" x2="20.32" y2="0" width="0.254" layer="94"/>
+<wire x1="10.16" y1="0" x2="10.16" y2="5.08" width="0.254" layer="94"/>
+<wire x1="10.16" y1="5.08" x2="7.62" y2="5.08" width="0.254" layer="94"/>
+<wire x1="10.16" y1="5.08" x2="12.7" y2="5.08" width="0.254" layer="94"/>
+<wire x1="0" y1="7.62" x2="20.32" y2="7.62" width="0.254" layer="94"/>
+<wire x1="20.32" y1="7.62" x2="17.78" y2="10.16" width="0.254" layer="94"/>
+<wire x1="20.32" y1="7.62" x2="17.78" y2="5.08" width="0.254" layer="94"/>
+<wire x1="20.32" y1="0" x2="17.78" y2="2.54" width="0.254" layer="94"/>
+<wire x1="20.32" y1="0" x2="17.78" y2="-2.54" width="0.254" layer="94"/>
+<pin name="GND" x="-5.08" y="0" length="middle"/>
+<pin name="SIG" x="-5.08" y="7.62" length="middle"/>
+<text x="-5.08" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
+<text x="-5.08" y="10.16" size="1.778" layer="96">&gt;VALUE</text>
+</symbol>
+<symbol name="CONSMA013.062_JACK">
+<circle x="10.16" y="7.62" radius="2.54" width="0.254" layer="94"/>
+<wire x1="-2.54" y1="-2.54" x2="0" y2="0" width="0.254" layer="94"/>
+<wire x1="-2.54" y1="2.54" x2="0" y2="0" width="0.254" layer="94"/>
+<wire x1="0" y1="0" x2="10.16" y2="0" width="0.254" layer="94"/>
+<wire x1="-2.54" y1="5.08" x2="0" y2="7.62" width="0.254" layer="94"/>
+<wire x1="-2.54" y1="10.16" x2="0" y2="7.62" width="0.254" layer="94"/>
+<wire x1="10.16" y1="0" x2="10.16" y2="5.08" width="0.254" layer="94"/>
+<wire x1="10.16" y1="5.08" x2="12.7" y2="5.08" width="0.254" layer="94"/>
+<wire x1="10.16" y1="5.08" x2="7.62" y2="5.08" width="0.254" layer="94"/>
+<wire x1="0" y1="7.62" x2="20.32" y2="7.62" width="0.254" layer="94"/>
+<wire x1="10.16" y1="0" x2="20.32" y2="0" width="0.254" layer="94"/>
+<pin name="GND" x="25.4" y="0" length="middle" rot="R180"/>
+<pin name="SIG" x="25.4" y="7.62" length="middle" rot="R180"/>
+<text x="0" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
+<text x="0" y="10.16" size="1.778" layer="96">&gt;VALUE</text>
+</symbol>
+<symbol name="JCBP-290+">
+<wire x1="-5.08" y1="5.08" x2="5.08" y2="5.08" width="0.254" layer="94"/>
+<wire x1="5.08" y1="5.08" x2="5.08" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="5.08" y1="-5.08" x2="-5.08" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-5.08" y1="-5.08" x2="-5.08" y2="5.08" width="0.254" layer="94"/>
+<wire x1="-3.81" y1="-1.778" x2="-3.556" y2="-1.778" width="0.1524" layer="94"/>
+<wire x1="-3.556" y1="-1.778" x2="-1.778" y2="-0.508" width="0.1524" layer="94" curve="71.075356"/>
+<wire x1="-1.778" y1="-0.508" x2="-1.27" y2="1.27" width="0.1524" layer="94" curve="5.958497"/>
+<wire x1="-1.27" y1="1.27" x2="-0.762" y2="2.286" width="0.1524" layer="94" curve="-27.197759"/>
+<wire x1="-0.762" y1="2.286" x2="0.508" y2="2.286" width="0.1524" layer="94" curve="-99.675484"/>
+<wire x1="0.508" y1="2.286" x2="1.016" y2="1.27" width="0.1524" layer="94" curve="-27.194019"/>
+<wire x1="1.016" y1="1.27" x2="1.524" y2="-0.508" width="0.1524" layer="94" curve="5.957035"/>
+<wire x1="1.524" y1="-0.508" x2="3.556" y2="-1.778" width="0.1524" layer="94" curve="78.141167"/>
+<pin name="GND" x="-7.62" y="-2.54" visible="pad" length="short"/>
+<pin name="RF_IN" x="-7.62" y="2.54" visible="pad" length="short" direction="in"/>
+<pin name="RF_OUT" x="7.62" y="2.54" visible="pad" length="short" direction="out" rot="R180"/>
+<text x="-5.08" y="6.35" size="1.778" layer="95">&gt;NAME</text>
+<text x="-5.08" y="-7.62" size="1.778" layer="96">&gt;VALUE</text>
+</symbol>
 </symbols>
 <devicesets>
+<deviceset name="CONSMA013.062">
+<gates>
+<gate name="G$1" symbol="CONSMA013.062" x="-10.16" y="0"/>
+</gates>
+<devices>
+<device name="END_MNT" package="SMA_EDGE_MNT">
+<connects>
+<connect gate="G$1" pin="GND" pad="GND1 GND2 GND3 GND4"/>
+<connect gate="G$1" pin="SIG" pad="SIG"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="CONSMA013.062_JACK">
+<gates>
+<gate name="G$1" symbol="CONSMA013.062_JACK" x="-10.16" y="0"/>
+</gates>
+<devices>
+<device name="END_MNT" package="SMA_EDGE_MNT">
+<connects>
+<connect gate="G$1" pin="GND" pad="GND1 GND2 GND3 GND4"/>
+<connect gate="G$1" pin="SIG" pad="SIG"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="JCBP-290+">
+<gates>
+<gate name="G$1" symbol="JCBP-290+" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="BG291">
+<connects>
+<connect gate="G$1" pin="GND" pad="GND1 GND3 GND4 GND5 GND6 GND7 GND8 GND10 GND11 GND12 GND13 GND14"/>
+<connect gate="G$1" pin="RF_IN" pad="RF_IN"/>
+<connect gate="G$1" pin="RF_OUT" pad="RF_OUT"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
 </devicesets>
 </library>
 </drawing>
