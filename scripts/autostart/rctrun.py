@@ -75,7 +75,7 @@ def init_output_dir():
 			if os.path.isdir(output_dir) and os.path.isfile(os.path.join(output_dir, 'fileCount')):
 				init_output_dir_state = OUTPUT_DIR_STATES.check_space
 			else:
-				init_output_dir_state = OUTPUT_DIR_STATES.wait_recycle
+				init_output_dir_state = OUTPUT_DIR_STATES.fail
 		elif init_output_dir_state == OUTPUT_DIR_STATES.check_space:
 			df = subprocess.Popen(['df', output_dir], stdout=subprocess.PIPE)
 			output = df.communicate()[0]
