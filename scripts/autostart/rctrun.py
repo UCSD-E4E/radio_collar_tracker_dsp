@@ -42,7 +42,7 @@ def init_SDR():
 			if uhd_find_dev_retval == 0:
 				init_sdr_state = SDR_INIT_STATES.usrp_probe
 			else:
-				init_sdr_state = SDR_INIT_STATES.wait_recycle
+				init_sdr_state = SDR_INIT_STATES.fail
 		elif init_sdr_state == SDR_INIT_STATES.wait_recycle:
 			time.sleep(1)
 			init_sdr_state = SDR_INIT_STATES.find_devices
