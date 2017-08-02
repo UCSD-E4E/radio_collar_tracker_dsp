@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# import mraa
+import mraa
 import os
 import mmap
 import threading
@@ -35,9 +35,9 @@ class OUTPUT_DIR_STATES(Enum):
 def blink_SDR():
 	global thread_op
 	pin_state = False
-	# pin_handle = mraa.Gpio(53)
-	# pin_handle.dir(mraa.DIR_OUT)
-	# pin_handle.write(pin_state)
+	pin_handle = mraa.Gpio(53)
+	pin_handle.dir(mraa.DIR_OUT)
+	pin_handle.write(pin_state)
 	while thread_op:
 		sdr_state = SDR_INIT_STATES(ord(shared_states[0]))
 		if sdr_state == SDR_INIT_STATES.find_devices:
@@ -50,16 +50,17 @@ def blink_SDR():
 			pin_state = True
 		else:
 			pin_state = False
-		# pin_handle.write(pin_state)
+		pin_handle.write(pin_state)
 		time.sleep(1)
 		pass
+		pin_handle.write(False)
 
 def blink_GPS():
 	global thread_op
 	pin_state = False
-	# pin_handle = mraa.Gpio(55)
-	# pin_handle.dir(mraa.DIR_OUT)
-	# pin_handle.write(pin_state)
+	pin_handle = mraa.Gpio(55)
+	pin_handle.dir(mraa.DIR_OUT)
+	pin_handle.write(pin_state)
 	while thread_op:
 		gps_state = GPS_STATES(ord(shared_states[2]))
 		if gps_state == GPS_STATES.get_tty:
@@ -72,16 +73,17 @@ def blink_GPS():
 			pin_state = True
 		else:
 			pin_state = False
-		# pin_handle.write(pin_state)
+		pin_handle.write(pin_state)
 		time.sleep(1)
 		pass
+		pin_handle.write(False)
 
 def blink_DIR():
 	global thread_op
 	pin_state = False
-	# pin_handle = mraa.Gpio(57)
-	# pin_handle.dir(mraa.DIR_OUT)
-	# pin_handle.write(pin_state)
+	pin_handle = mraa.Gpio(57)
+	pin_handle.dir(mraa.DIR_OUT)
+	pin_handle.write(pin_state)
 	while thread_op:
 		dir_state = OUTPUT_DIR_STATES(ord(shared_states[1]))
 		if dir_state == OUTPUT_DIR_STATES.get_output_dir:
@@ -96,9 +98,10 @@ def blink_DIR():
 			pin_state = True
 		else:
 			pin_state = False
-		# pin_handle.write(pin_state)
+		pin_handle.write(pin_state)
 		time.sleep(1)
 		pass
+		pin_handle.write(False)
 
 def sigint_handler(signal, frame):
 	print("Received sig")
@@ -115,9 +118,15 @@ def main():
 	signal.signal(signal.SIGINT, sigint_handler)
 	signal.signal(signal.SIGTERM, sigint_handler)
 	blink_SDR_thread = threading.Thread(target=blink_SDR)
+	blink_GPS_thread = threading.Thread(target=blink_GPS)
+	blink_DIR_thread = threading.Thread(target=blink_DIR)
 	blink_SDR_thread.start()
+	blink_GPS_thread.start()
+	blink_DIR_thread.start()
 	signal.pause()
 	blink_SDR_thread.join()
+	blink_GPS_thread.join()
+	blink_DIR_thread.join()
 	shared_states.close()
 	mmap_file.close()
 	
