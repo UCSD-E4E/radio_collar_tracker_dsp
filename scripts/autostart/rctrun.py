@@ -72,7 +72,7 @@ def init_output_dir():
 			output_dir = get_var('output_dir')
 			init_output_dir_state = OUTPUT_DIR_STATES.check_output_dir
 		elif init_output_dir_state == OUTPUT_DIR_STATES.check_output_dir:
-			if os.path.isdir(output_dir):
+			if os.path.isdir(output_dir) and os.path.isfile(os.path.join(output_dir, 'fileCount')):
 				init_output_dir_state = OUTPUT_DIR_STATES.check_space
 			else:
 				init_output_dir_state = OUTPUT_DIR_STATES.wait_recycle
