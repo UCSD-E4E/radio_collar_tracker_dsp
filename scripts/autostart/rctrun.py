@@ -8,6 +8,7 @@ import signal
 import serial
 import pynmea2
 import mmap
+# import mraa
 
 WAIT_COUNT = 60
 
@@ -115,6 +116,7 @@ def init_gps():
 	global thread_op
 	init_gps_state = GPS_STATES.get_tty
 	counter = 0
+	msg_counter = 0
 	while thread_op:
 		shared_states[2] = str(unichr(init_gps_state.value))
 		if init_gps_state == GPS_STATES.get_tty:
@@ -145,7 +147,11 @@ def init_gps():
 					else:
 						init_gps_state = GPS_STATES.wait_recycle
 				else:
-					init_gps_state = GPS_STATES.get_msg
+					msg_counter = msg_counter + 1
+					if msg_counter > 20:
+						init_gps_state = GPS_STATES.fail
+					else:
+						init_gps_state = GPS_STATES.get_msg
 			else:
 				init_gps_state = GPS_STATES.get_msg
 		elif init_gps_state == GPS_STATES.wait_recycle:
