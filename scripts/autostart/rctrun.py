@@ -123,29 +123,30 @@ def init_gps():
 			tty_device = get_var('gps_port')
 			tty_baud = get_var('gps_baud')
 			try:
-				tty_stream = serial.Serial(tty_device, tty_baud, timeout = 5)
+				tty_stream = serial.Serial(tty_device, tty_baud, timeout = 1)
 			except serial.SerialException, e:
-				return 1
+				init_gps_state = GPS_STATES.fail
 			init_gps_state = GPS_STATES.get_msg
+
 		elif init_gps_state == GPS_STATES.get_msg:
 			try:
 				line = tty_stream.readline()
 			except serial.serialutil.SerialException, e:
-				init_gps_state = GPS_STATES.get_msg
+				init_gps_state = GPS_STATES.fail
 				continue
 			if line is not None:
 				msg = None
 				try:
 					msg = pynmea2.parse(line)
 				except pynmea2.ParseError, e:
-					init_gps_state = GPS_STATES.get_msg
+					init_gps_state = GPS_STATES.fail
 					continue
 				if msg.sentence_type == 'GGA':
 					if accept_gps(msg):
 						# good GPS
 						init_gps_state = GPS_STATES.rdy
 					else:
-						init_gps_state = GPS_STATES.wait_recycle
+						init_gps_state = GPS_STATES.get_msg
 				else:
 					msg_counter = msg_counter + 1
 					if msg_counter > 20:
@@ -154,9 +155,10 @@ def init_gps():
 						init_gps_state = GPS_STATES.get_msg
 			else:
 				init_gps_state = GPS_STATES.get_msg
+
 		elif init_gps_state == GPS_STATES.wait_recycle:
 			time.sleep(1)
-			if counter > WAIT_COUNT:
+			if counter > WAIT_COUNT / 2:
 				init_gps_state = GPS_STATES.fail
 			else:
 				init_gps_state = GPS_STATES.get_msg
