@@ -38,6 +38,47 @@ class OUTPUT_DIR_STATES(Enum):
 	rdy = 4
 	fail = 5
 
+class RCT_STATES(Enum):
+	init		=	0
+	wait_init	=	1
+	wait_start	=	2
+	start		=	3
+	wait_end	=	4
+	finish		=	5
+	fail		=	6
+
+def blink_RCT():
+	global thread_op
+	rdy_pin_state = False
+	sta_pin_state = False
+	rdy_pin_handle = mraa.Gpio(RDY_PIN)
+	sta_pin_handle = mraa.Gpio(STA_PIN)
+	rdy_pin_handle.write(rdy_pin_state)
+	sta_pin_handle.write(sta_pin_state)
+	while thread_op:
+		rct_state = RCT_STATES(ord(shared_states[3]))
+		if rct_state == RCT_STATES(init):
+			rdy_pin_state = False
+			sta_pin_state = False
+		elif rct_state == RCT_STATES(wait_init):
+			rdy_pin_state = False
+			sta_pin_state = False
+		elif rct_state == RCT_STATES(wait_start):
+			rdy_pin_state = False
+			sta_pin_state = True
+		elif rct_state == RCT_STATES(start):
+			rdy_pin_state = False
+			sta_pin_state = False
+		elif rct_state == RCT_STATES(wait_end):
+			rdy_pin_state = False
+			sta_pin_state = not sta_pin_state
+		elif rct_state == RCT_STATES(finish):
+			rdy_pin_state = False
+			sta_pin_state = True
+		else:
+			rdy_pin_state = False
+			sta_pin_state = True
+
 def blink_SDR():
 	global thread_op
 	pin_state = False
@@ -120,7 +161,7 @@ def main():
 		return 1
 	mmap_file = open('/var/local/rct/status.dat', 'rb')
 	global shared_states
-	shared_states = mmap.mmap(mmap_file.fileno(), 3, mmap.MAP_SHARED, mmap.PROT_READ)
+	shared_states = mmap.mmap(mmap_file.fileno(), 4, mmap.MAP_SHARED, mmap.PROT_READ)
 	signal.signal(signal.SIGINT, sigint_handler)
 	signal.signal(signal.SIGTERM, sigint_handler)
 	blink_SDR_thread = threading.Thread(target=blink_SDR)

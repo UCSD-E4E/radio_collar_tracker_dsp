@@ -274,6 +274,7 @@ def main():
 	mmap_file.write('\0' * 4)
 	mmap_file.flush()
 	shared_states = mmap.mmap(mmap_file.fileno(), 4)
+	rct_blink = subprocess.Popen(['&INSTALL_PREFIX/bin/rct_blink'])
 
 	devnull = open(os.devnull, 'w')
 
@@ -286,7 +287,8 @@ def main():
 	signal.pause()
 
 	init_RCT_thread.join()
-	
+	rct_blink.terminate()
+	rct_blink.wait()
 
 	shared_states.close()
 	mmap_file.close()
