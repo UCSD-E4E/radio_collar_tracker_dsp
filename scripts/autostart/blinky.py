@@ -10,6 +10,12 @@ import time
 thread_op = True
 shared_states = None
 
+STA_PIN = 53
+SDR_PIN = 55
+DIR_PIN = 57
+GPS_PIN = 59
+RDY_PIN = 61
+
 class SDR_INIT_STATES(Enum):
 	find_devices = 0
 	wait_recycle = 1
@@ -35,7 +41,7 @@ class OUTPUT_DIR_STATES(Enum):
 def blink_SDR():
 	global thread_op
 	pin_state = False
-	pin_handle = mraa.Gpio(53)
+	pin_handle = mraa.Gpio(SDR_PIN)
 	pin_handle.dir(mraa.DIR_OUT)
 	pin_handle.write(pin_state)
 	while thread_op:
@@ -58,7 +64,7 @@ def blink_SDR():
 def blink_GPS():
 	global thread_op
 	pin_state = False
-	pin_handle = mraa.Gpio(55)
+	pin_handle = mraa.Gpio(GPS_PIN)
 	pin_handle.dir(mraa.DIR_OUT)
 	pin_handle.write(pin_state)
 	while thread_op:
@@ -81,7 +87,7 @@ def blink_GPS():
 def blink_DIR():
 	global thread_op
 	pin_state = False
-	pin_handle = mraa.Gpio(57)
+	pin_handle = mraa.Gpio(DIR_PIN)
 	pin_handle.dir(mraa.DIR_OUT)
 	pin_handle.write(pin_state)
 	while thread_op:
