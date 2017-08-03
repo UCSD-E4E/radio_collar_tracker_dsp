@@ -80,6 +80,8 @@ def init_SDR():
 				init_sdr_state = SDR_INIT_STATES.rdy
 			else:
 				init_sdr_state = SDR_INIT_STATES.fail
+		else:
+			time.sleep(1)
 	return 0
 
 def init_output_dir():
@@ -113,6 +115,8 @@ def init_output_dir():
 				init_output_dir_state = OUTPUT_DIR_STATES.fail
 			else:
 				init_output_dir_state = OUTPUT_DIR_STATES.check_output_dir
+		else:
+			time.sleep(1)
 	return 0
 
 def accept_gps(msg):
@@ -182,6 +186,8 @@ def init_gps():
 				init_gps_state = GPS_STATES.fail
 			else:
 				init_gps_state = GPS_STATES.get_msg
+		else:
+			time.sleep(1)
 	return 0
 
 def init_state_complete():
