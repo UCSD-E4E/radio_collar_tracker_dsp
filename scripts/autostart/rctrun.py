@@ -52,7 +52,7 @@ class RCT_STATES(Enum):
 	fail		=	6
 
 def get_var(var):
-	var_file = open('/usr/local/etc/rct_config')
+	var_file = open('&INSTALL_PREFIX/etc/rct_config')
 	for line in var_file:
 		if line.split('=')[0] == var:
 			value = line.split('=')[1]
@@ -275,6 +275,12 @@ def sigint_handler(signal, frame):
 	master_thread_op = False
 
 def main():
+	# Check for autostart
+	autostart_flag = get_var('autostart')
+	if autostart_flag == 'true':
+		continue
+	else:
+		return
 	# Set up mmap files
 	global shared_states
 	if not os.path.isdir('/var/local/rct'):
