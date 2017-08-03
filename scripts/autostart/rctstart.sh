@@ -18,7 +18,7 @@ INSTALL_DIR=&INSTALL_PREFIX
 
 case "$1" in
 	stop)
-		killall rctrun &
+		kill -s SIGTERM `pgrep rctrun`&
 		echo "Service stopped!"
 		rm -f /var/lock/rctstart
 		exit
@@ -33,7 +33,7 @@ case "$1" in
 		exit
 		;;
 	restart|reload|condrestart)
-		killall rctrun &
+		kill -s SIGTERM `pgrep rctrun` &
 		echo "Service started!"
 		$INSTALL_DIR/bin/rctrun &
 		exit
