@@ -53,6 +53,8 @@ def blink_RCT():
 	sta_pin_state = False
 	rdy_pin_handle = mraa.Gpio(RDY_PIN)
 	sta_pin_handle = mraa.Gpio(STA_PIN)
+	rdy_pin_handle.dir(mraa.DIR_OUT)
+	sta_pin_handle.dir(mraa.DIR_OUT)
 	rdy_pin_handle.write(rdy_pin_state)
 	sta_pin_handle.write(sta_pin_state)
 	while thread_op:
