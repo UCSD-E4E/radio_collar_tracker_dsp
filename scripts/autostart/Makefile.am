@@ -1,4 +1,4 @@
-bin_SCRIPTS = rct_parser rctstart rctrun rct_mount_sd rct_umount_sd
+bin_SCRIPTS = rct_parser rctstart rctrun rct_mount_sd rct_umount_sd rct_blink
 CLEANFILES = $(bin_SCRIPTS)
 
 rct_parser: $(srcdir)/parser.sh
@@ -41,5 +41,11 @@ rct_mount_sd: $(srcdir)/mount_sd.sh
 rct_umount_sd: $(srcdir)/umount_sd.sh
 	rm -rf $@
 	echo "#!" $(BASH) > $@
+	$(SED) -e "s|&INSTALL_PREFIX|\'$(prefix)\'|g" $^ >> $@
+	chmod +x $@
+
+rct_blink: $(srcdir)/blinky.py
+	rm -rf $@
+	echo "#!" $(PYTHON) > $@
 	$(SED) -e "s|&INSTALL_PREFIX|\'$(prefix)\'|g" $^ >> $@
 	chmod +x $@
