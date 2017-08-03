@@ -78,6 +78,13 @@ def blink_RCT():
 		else:
 			rdy_pin_state = False
 			sta_pin_state = True
+		rdy_pin_handle.write(rdy_pin_state)
+		sta_pin_handle.write(sta_pin_state)
+		time.sleep(1)
+		pass
+	rdy_pin_handle.write(False)
+	sta_pin_handle.write(False)
+
 
 def blink_SDR():
 	global thread_op
@@ -100,7 +107,7 @@ def blink_SDR():
 		pin_handle.write(pin_state)
 		time.sleep(1)
 		pass
-		pin_handle.write(False)
+	pin_handle.write(False)
 
 def blink_GPS():
 	global thread_op
@@ -123,7 +130,7 @@ def blink_GPS():
 		pin_handle.write(pin_state)
 		time.sleep(1)
 		pass
-		pin_handle.write(False)
+	pin_handle.write(False)
 
 def blink_DIR():
 	global thread_op
@@ -148,7 +155,7 @@ def blink_DIR():
 		pin_handle.write(pin_state)
 		time.sleep(1)
 		pass
-		pin_handle.write(False)
+	pin_handle.write(False)
 
 def sigint_handler(signal, frame):
 	print("Received sig")
