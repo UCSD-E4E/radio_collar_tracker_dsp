@@ -18,7 +18,7 @@ INSTALL_DIR=&INSTALL_PREFIX
 
 case "$1" in
 	stop)
-		kill -s SIGTERM `pgrep rctrun`&
+		kill -s SIGTERM `cat /var/run/rct.pid`
 		echo "Service stopped!"
 		rm -f /var/lock/rctstart
 		exit
@@ -27,13 +27,14 @@ case "$1" in
 		# start
 		if [ ! -f /var/lock/rctstart ]; then
 			$INSTALL_DIR/bin/rctrun &
+			echo $! > /var/run/rct.pid
 			echo "Service started!"
 			touch /var/lock/rctstart
 		fi
 		exit
 		;;
 	restart|reload|condrestart)
-		kill -s SIGTERM `pgrep rctrun` &
+		kill -s SIGTERM `cat /var/run/rct.pid`
 		echo "Service started!"
 		$INSTALL_DIR/bin/rctrun &
 		exit
