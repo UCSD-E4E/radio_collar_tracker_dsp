@@ -29,7 +29,7 @@ maintainer-clean-local:
 rctrun: $(srcdir)/rctrun.py
 	rm -f $@
 	echo "#!" $(PYTHON) > $@
-	$(SED) -e "s|&INSTALL_PREFIX|\'$(prefix)\'|g" $^ >> $@
+	$(SED) -e "s|&INSTALL_PREFIX|$(prefix)|g" $^ >> $@
 	chmod +x $@
 
 rct_mount_sd: $(srcdir)/mount_sd.sh
