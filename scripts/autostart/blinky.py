@@ -66,8 +66,8 @@ def blink_RCT():
 			rdy_pin_state = False
 			sta_pin_state = False
 		elif rct_state == RCT_STATES.wait_start:
-			rdy_pin_state = False
-			sta_pin_state = True
+			rdy_pin_state = True
+			sta_pin_state = False
 		elif rct_state == RCT_STATES.start:
 			rdy_pin_state = False
 			sta_pin_state = False
@@ -106,6 +106,9 @@ def blink_SDR():
 			pin_state = True
 		else:
 			pin_state = False
+		rct_state = RCT_STATES(ord(shared_states[3]))
+		if rct_state != RCT_STATES.init:
+			pin_state = False
 		pin_handle.write(pin_state)
 		time.sleep(1)
 		pass
@@ -128,6 +131,9 @@ def blink_GPS():
 		elif gps_state == GPS_STATES.rdy:
 			pin_state = True
 		else:
+			pin_state = False
+		rct_state = RCT_STATES(ord(shared_states[3]))
+		if rct_state != RCT_STATES.init:
 			pin_state = False
 		pin_handle.write(pin_state)
 		time.sleep(1)
@@ -153,6 +159,9 @@ def blink_DIR():
 		elif dir_state == OUTPUT_DIR_STATES.rdy:
 			pin_state = True
 		else:
+			pin_state = False
+		rct_state = RCT_STATES(ord(shared_states[3]))
+		if rct_state != RCT_STATES.init:
 			pin_state = False
 		pin_handle.write(pin_state)
 		time.sleep(1)
