@@ -47,6 +47,10 @@ class RCT_STATES(Enum):
 	finish		=	5
 	fail		=	6
 
+def isWaitingForStart(shared_states):
+	rct_state = RCT_STATES(ord(shared_states[3]))
+	return rct_state != RCT_STATES.init and rct_state != RCT_STATES.wait_init and rct_state != RCT_STATES.wait_start
+
 def blink_RCT():
 	global thread_op
 	rdy_pin_state = False
@@ -106,8 +110,7 @@ def blink_SDR():
 			pin_state = True
 		else:
 			pin_state = False
-		rct_state = RCT_STATES(ord(shared_states[3]))
-		if rct_state != RCT_STATES.init:
+		if isWaitingForStart(shared_states):
 			pin_state = False
 		pin_handle.write(pin_state)
 		time.sleep(1)
@@ -132,8 +135,7 @@ def blink_GPS():
 			pin_state = True
 		else:
 			pin_state = False
-		rct_state = RCT_STATES(ord(shared_states[3]))
-		if rct_state != RCT_STATES.init:
+		if isWaitingForStart(shared_states):
 			pin_state = False
 		pin_handle.write(pin_state)
 		time.sleep(1)
@@ -160,8 +162,7 @@ def blink_DIR():
 			pin_state = True
 		else:
 			pin_state = False
-		rct_state = RCT_STATES(ord(shared_states[3]))
-		if rct_state != RCT_STATES.init:
+		if isWaitingForStart(shared_states):
 			pin_state = False
 		pin_handle.write(pin_state)
 		time.sleep(1)
