@@ -212,12 +212,14 @@ def init_RCT():
 			init_RCT_state = RCT_STATES.wait_init
 		elif init_RCT_state == RCT_STATES.wait_init:
 			# wait for init state machines to complete
+			time.sleep(1)
 			init_state = init_state_complete()
 			if init_state:
 				init_RCT_state = RCT_STATES.wait_start
 			else:
 				init_RCT_state = RCT_STATES.wait_init
 		elif init_RCT_state == RCT_STATES.wait_start:
+			time.sleep(1)
 			if 'mraa' in sys.modules:
 				switch_state = switch_handle.read()
 			else:
@@ -235,6 +237,7 @@ def init_RCT():
 			sdr_starter = subprocess.Popen(['&INSTALL_PREFIX/bin/rct_sdr_starter'])
 			init_RCT_state = RCT_STATES.wait_end
 		elif init_RCT_state == RCT_STATES.wait_end:
+			time.sleep(3)
 			if 'mraa' in sys.modules:
 				switch_state = switch_handle.read()
 			else:
