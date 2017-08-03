@@ -133,6 +133,7 @@ def init_gps():
 	init_gps_state = GPS_STATES.get_tty
 	counter = 0
 	msg_counter = 0
+	tty_stream = None
 	while init_thread_op:
 		shared_states[2] = str(unichr(init_gps_state.value))
 		if init_gps_state == GPS_STATES.get_tty:
