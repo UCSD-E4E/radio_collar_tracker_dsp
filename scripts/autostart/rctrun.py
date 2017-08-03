@@ -277,9 +277,7 @@ def sigint_handler(signal, frame):
 def main():
 	# Check for autostart
 	autostart_flag = get_var('autostart')
-	if autostart_flag == 'true':
-		continue
-	else:
+	if autostart_flag != 'true':
 		return
 	# Set up mmap files
 	global shared_states
