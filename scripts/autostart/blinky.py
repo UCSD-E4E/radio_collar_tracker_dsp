@@ -59,22 +59,22 @@ def blink_RCT():
 	sta_pin_handle.write(sta_pin_state)
 	while thread_op:
 		rct_state = RCT_STATES(ord(shared_states[3]))
-		if rct_state == RCT_STATES(init):
+		if rct_state == RCT_STATES.init:
 			rdy_pin_state = False
 			sta_pin_state = False
-		elif rct_state == RCT_STATES(wait_init):
+		elif rct_state == RCT_STATES.wait_init:
 			rdy_pin_state = False
 			sta_pin_state = False
-		elif rct_state == RCT_STATES(wait_start):
+		elif rct_state == RCT_STATES.wait_start:
 			rdy_pin_state = False
 			sta_pin_state = True
-		elif rct_state == RCT_STATES(start):
+		elif rct_state == RCT_STATES.start:
 			rdy_pin_state = False
 			sta_pin_state = False
-		elif rct_state == RCT_STATES(wait_end):
+		elif rct_state == RCT_STATES.wait_end:
 			rdy_pin_state = False
 			sta_pin_state = not sta_pin_state
-		elif rct_state == RCT_STATES(finish):
+		elif rct_state == RCT_STATES.finish:
 			rdy_pin_state = False
 			sta_pin_state = True
 		else:
