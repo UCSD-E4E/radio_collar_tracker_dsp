@@ -232,7 +232,7 @@ def init_RCT():
 				init_RCT_state = RCT_STATES.wait_start
 		elif init_RCT_state == RCT_STATES.start:
 			# sdr_starter = subprocess.Popen(['sdr_starter'])
-			sdr_starter = subprocess.Popen(['&INSTALL_PREFIX/bin/sdr_starter'])
+			sdr_starter = subprocess.Popen(['&INSTALL_PREFIX/bin/rct_sdr_starter'])
 			init_RCT_state = RCT_STATES.wait_end
 		elif init_RCT_state == RCT_STATES.wait_end:
 			if 'mraa' in sys.modules:
