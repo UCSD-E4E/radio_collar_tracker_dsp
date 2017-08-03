@@ -143,7 +143,10 @@ def init_gps():
 				tty_stream = serial.Serial(tty_device, tty_baud, timeout = 1)
 			except serial.SerialException, e:
 				init_gps_state = GPS_STATES.fail
-			init_gps_state = GPS_STATES.get_msg
+			if tty_stream is None:
+				init_gps_state = GPS_STATES.fail
+			else:
+				init_gps_state = GPS_STATES.get_msg
 
 		elif init_gps_state == GPS_STATES.get_msg:
 			try:
