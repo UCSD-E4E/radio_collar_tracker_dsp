@@ -245,7 +245,7 @@ def init_RCT():
 		elif init_RCT_state == RCT_STATES.wait_start:
 			time.sleep(1)
 			if 'mraa' in sys.modules:
-				switch_state = switch_handle.read()
+				switch_state = not switch_handle.read()
 			else:
 				switch_state = switch_handle[0]
 			if switch_state:
