@@ -203,7 +203,7 @@ def init_gps():
 				init_gps_state = GPS_STATES.get_msg
 		elif init_gps_state == GPS_STATES.fail:
 			time.sleep(10)
-			init_gps_state = GPS_STATES.get_output_dir
+			init_gps_state = GPS_STATES.get_tty
 		else:
 			time.sleep(1)
 	return 0
