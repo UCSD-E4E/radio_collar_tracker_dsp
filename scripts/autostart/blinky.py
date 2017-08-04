@@ -10,11 +10,11 @@ import time
 thread_op = True
 shared_states = None
 
-STA_PIN = 53
-SDR_PIN = 55
-DIR_PIN = 57
-GPS_PIN = 59
-RDY_PIN = 61
+STA_PIN = 51
+SDR_PIN = 53
+DIR_PIN = 55
+GPS_PIN = 57
+RDY_PIN = 59
 
 class SDR_INIT_STATES(Enum):
 	find_devices = 0

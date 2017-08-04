@@ -12,7 +12,7 @@ import sys
 import mraa
 
 WAIT_COUNT = 60
-SW1_PIN = 51
+SW1_PIN = 61
 
 devnull = None
 init_thread_op = True
