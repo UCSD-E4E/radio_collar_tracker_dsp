@@ -35,8 +35,13 @@ case "$1" in
 		;;
 	restart|reload|condrestart)
 		kill -s SIGTERM `cat /var/run/rct.pid`
+		echo "Service stopped!"
+		rm -f /var/lock/rctstart
 		echo "Service started!"
 		$INSTALL_DIR/bin/rctrun &
+		echo $! > /var/run/rct.pid
+		echo "Service started!"
+		touch /var/lock/rctstart
 		exit
 		;;
 esac
