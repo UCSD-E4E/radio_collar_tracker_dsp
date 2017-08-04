@@ -126,7 +126,6 @@ def init_output_dir():
 	return 0
 
 def accept_gps(msg):
-	return True
 	if msg.gps_qual == 0:
 		return False
 	if msg.gps_qual == 7:
