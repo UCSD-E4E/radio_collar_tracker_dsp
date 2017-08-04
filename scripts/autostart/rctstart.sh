@@ -35,6 +35,7 @@ case "$1" in
 		;;
 	restart|reload|condrestart)
 		kill -s SIGTERM `cat /var/run/rct.pid`
+		sleep 5
 		echo "Service stopped!"
 		rm -f /var/lock/rctstart
 		echo "Service started!"
