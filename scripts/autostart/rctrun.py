@@ -184,7 +184,7 @@ def init_gps():
 						init_gps_state = GPS_STATES.get_msg
 				else:
 					msg_counter = msg_counter + 1
-					if msg_counter > 20:
+					if msg_counter > 60:
 						init_gps_state = GPS_STATES.fail
 						print("GPS fail: no GGA message!")
 						continue
