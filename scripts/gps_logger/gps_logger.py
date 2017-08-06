@@ -91,7 +91,8 @@ while runstate:
                 offset = 0
                 continue
             ref_time = time.time()
-            gps_time = time.mktime(time.strptime(msg.datetime.ctime())) - time.timezone
+            gps_time = time.mktime(msg.datetime)
+            # gps_time = time.mktime(time.strptime(msg.datetime.ctime())) - time.timezone
             offset = gps_time - ref_time
 print("GPS_LOGGER: Ending thread")
 logfile.close()
