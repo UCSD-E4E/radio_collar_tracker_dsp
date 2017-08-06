@@ -163,7 +163,7 @@ int queue_isEmpty(queue_t* queue){
 				fprintf(stderr, "queue.c: Failed to acquire queue mutex, unknown error!\n");
 				break;
 		}
-		return NULL;
+		return 0;
 	}
 	retval = !(queue->length);
 	retval2 = pthread_mutex_unlock(queue->queue_mutex);
@@ -180,7 +180,7 @@ int queue_isEmpty(queue_t* queue){
 				fprintf(stderr, "queue.c: Failed to acquire queue mutex, unknown error!\n");
 				break;
 		}
-		return NULL;
+		return 0;
 	}
 	return retval;
 }
