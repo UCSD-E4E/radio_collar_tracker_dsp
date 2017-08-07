@@ -225,8 +225,8 @@ void print_meta_data(void){
 	timing_stream = fopen(buf, "w");
 
 	fprintf(timing_stream, "start_time: %f\n", start_time.tv_sec + (float)start_time.tv_nsec / 1.e9);
-	fprintf(timing_stream, "center_freq: %d\n", (long long int)tune_request.target_freq);
-	fprintf(timing_stream, "sampling_freq: %d\n", (long long int)rate);
+	fprintf(timing_stream, "center_freq: %lld\n", (long long int)tune_request.target_freq);
+	fprintf(timing_stream, "sampling_freq: %lld\n", (long long int)rate);
 	fprintf(timing_stream, "gain: %f\n", gain);
 
 	fclose(timing_stream);
