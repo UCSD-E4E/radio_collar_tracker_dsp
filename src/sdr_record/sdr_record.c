@@ -451,9 +451,9 @@ void * stream_push_thread(void* args){
 		}
 		gettimeofday(&finishtime, NULL);
 
-		uint64_t starttimeus = starttime.tv_sec * 1e6 + starttime.tv_usec;
-		uint64_t stoptimeus = stoptime.tv_sec * 1e6 + stoptime.tv_usec;
-		uint64_t finishtimeus = finishtime.tv_sec * 1e6 + finishtime.tv_usec;
+		// uint64_t starttimeus = starttime.tv_sec * 1e6 + starttime.tv_usec;
+		// uint64_t stoptimeus = stoptime.tv_sec * 1e6 + stoptime.tv_usec;
+		// uint64_t finishtimeus = finishtime.tv_sec * 1e6 + finishtime.tv_usec;
 
 		// printf("%lu us for record, %lu us for queue\n", stoptimeus - starttimeus, finishtimeus - stoptimeus);
 
