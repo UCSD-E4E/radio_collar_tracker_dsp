@@ -28,6 +28,16 @@ PKG_CHECK_MODULES([uhd], [uhd])
 # Checks for Python libraries
 AC_PYTHON_MODULE([pynmea2], [fatal])
 AC_PYTHON_MODULE([serial], [fatal])
+AC_PYTHON_MODULE([mraa], [fatal])
+
+AC_PYTHON_MODULE([subprocess], [fatal])
+AC_PYTHON_MODULE([os], [fatal])
+AC_PYTHON_MODULE([threading], [fatal])
+AC_PYTHON_MODULE([signal], [fatal])
+AC_PYTHON_MODULE([enum], [fatal])
+AC_PYTHON_MODULE([time], [fatal])
+AC_PYTHON_MODULE([mmap], [fatal])
+AC_PYTHON_MODULE([sys], [fatal])
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdint.h stdlib.h string.h unistd.h getopt.h syslog.h uhd.h])
