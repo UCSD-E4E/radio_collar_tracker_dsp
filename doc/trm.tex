@@ -48,6 +48,27 @@ sudo uhd_usrp_probe --args="type=b200" --init-only
 				\begin{lstlisting}[language=bash]
 sudo uhd_images_downloader
 				\end{lstlisting}
+		\section{Payload Autostart}
+			The payload is configured to automatically initialize itself on boot, and conduct sanity checks of its internal environment.  In addition, the payload provides a simple switch interface to enable the user to start and stop recording data without needing to SSH into the payload.  This system is comprised of two components - the User Control Board, and the payload autostart software.
+			\subsection{User Control Board}
+					The User Control Board is located at the front of the aircraft, just below the fuselage.  The User Control Board has 5 LEDs.  From left to right (when looking at the aircraft), the LEDs are Payload Status (Green), SDR Status (Yellow), Directory Status (Orange), GPS Status (Red), and Payload Ready (Blue).  On the right of the board is the Payload Control Switch.
+
+						\subsubsection{Status LEDs}
+							The Status LEDs provide status information to the user.  On boot, the payload conducts an internal check of the connected hardware to ensure proper operation.  The status of these checks are denoted by the SDR Status LED, Directory Status LED, and GPS Status LED.
+								\subsubsubsection{SDR Status LED}
+									The SDR Status LED denotes the initialization and standby status of the SDR.  Upon boot, the payload checks for the presence and state of a USRP B200 series SDR.  Upon detecting the SDR, the payload loads the firmware for the SDR.  During this time, the SDR Status LED will be blinking, approximately once a second.  Upon loading the firmware for the SDR, the payload will place the SDR in standby, whereupon the SDR Status LED will become solid.  Should the payload fail to detect an SDR, or fail to upload the firmware for the SDR, the LED will turn off.
+								\subsubsubsection{Directory Status LED}
+									The Directory Status LED denotes the detection and status of the output directory for data for the payload.  Upon boot, the payload checks for the presence of the micro SD card.  Unfortunately, due to hardware issues, the payload cannot detect a micro SD card that has been left in during boot, so the micro SD card must be remounted after boot.  Upon detecting the micro SD card (device will enumerate as /dev/mmcblk0), the payload uses udev rules to mount the micro SD card to /mnt/RAW_DATA.  After this, the payload will check the mounted filesystem for free space, to ensure that there is enough space for the next run.  The minimum required space is 9 GB, which is enough for a 20 minute run.  Should the payload fail to detect the micro SD card, or fail to detect enough free space, the LED will turn off.  The payload will attempt to detect the micro SD card again in 10 seconds, trying for 60 seconds.
+								\subsubsubsection{GPS Status LED}
+									The GPS Status LED denotes the detection and state of the GPS.  Upon boot, the payload searches for and connects to the GPS serial device.  The GPS device is expected to supply NMEA data at a baud rate of 9600.  The payload then waits for the GPS device to gain a lock (defined as a 3D fix with greater than 6 satellites).  Should the payload fail to find the GPS device, or fail to receive a fix message, the LED will turn off.  If the payload is communicating with the GPS device and receiving fix messages, but the fix is not yet good enough, the LED will blink.  When the payload has found the GPS device and has determined that the GPS has a good GPS fix, then the LED will stay on.
+								\subsubsubsection{Payload Status LED}
+									The Payload Status LED denotes the recording state of the payload.  The LED is blinking while the payload is actively recording data, and solid while the payload is finishing writing data to the SD card.  The LED is off during standby and initialization.
+								\subsubsubsection{Payload Ready LED}
+									The Payload Ready LED denotes the ready state of the payload.  It is on only when all initialization checks have completed and the payload is standing by for the start command.
+						\subsubsection{Control Switch}
+							The Control Switch controls the recording state of the payload.  The switch must be in the OFF position during boot.  Flipping the switch to the ON position sets the payload to the recording state.  The payload will begin recording immediately if the initialization is complete, or as soon as the initialization completes if not complete already.  Flipping the switch to the OFF position stops the payload recording, at which point the payload finishes writing all recorded data to disk.  When the data is recorded, the payload reinitializes the system, then goes into standby mode waiting for the ON position.
+						\subsubsection{Payload Autostart Software}
+							The payload autostart is controlled by the rctstart Linux service, and the autostart flag in /usr/local/etc/rct_config.  If the line in /usr/local/etc/rct_config is autostart=false, then the payload service will not start.  The service can also be stopped once started by calling sudo service rctstart stop.
 	\appendix
 	\printglossaries
 \end{document}
