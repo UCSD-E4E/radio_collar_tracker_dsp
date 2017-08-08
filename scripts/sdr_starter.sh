@@ -52,6 +52,10 @@ if [[ "sampling_freq" -ne $sampling_freq ]]; then
 	exit 1
 fi
 
+output_dir=$(printf "%s/RUN_%06d" $output_dir $run)
+echo $output_dir
+mkdir $output_dir
+
 rct_gps_logger.py -o $output_dir -r $run -i $gps_port -b $gps_baud &>> ${gps_log} &
 mavproxypid=$!
 
