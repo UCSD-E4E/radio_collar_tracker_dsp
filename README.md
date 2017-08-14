@@ -27,6 +27,8 @@ Installing the payload software
 		7.	`make`
 		8.	`sudo make install`
 		9.	`sudo ldconfig`
+	6.	exfat
+		1.	`sudo apt-get install exfat-fuse exfat-utils`
 2.	Install the software
 	1.	`cd <radio_collar_tracker_drone>`
 	2.  `./autogen.sh`
@@ -35,6 +37,29 @@ Installing the payload software
 	5.	`sudo make install`
 3.	Configure the USRP for the first time
 	1.	`/usr/local/lib/uhd/utils/uhd_images_downloader.py`
+
+tl;dr
+-----
+1.	`sudo add-apt-repository -y ppa:mraa:mraa`
+2.	`sudo apt-get update`
+3.	`sudo apt-get install -y python-serial libmraa1 libmraa-dev mraa-tools python-mraa python3-mraa libboost-all-dev libusb-1.0-0-dev python-mako doxygen python-docutils cmake build-essential exfat-fuse exfat-utils python-pip`
+4.	`sudo pip install pynmea2`
+5.	`cd $HOME`
+6.	`git clone git://github.com/EttusResearch/uhd.git`
+7.	`cd uhd/host`
+8.	`mkdir build`
+9.	`cd build`
+10.	`cmake ../`
+11.	`make -j5`
+12.	`sudo make install`
+13.	`sudo ldconfig`
+14.	`cd $HOME`
+15.	`git clone git://github.com/UCSD-E4E/radio_collar_tracker_drone.git`
+16.	`cd radio_collar_tracker_drone`
+17.  `./autogen.sh`
+18.  `./configure`
+19.	`make -j5`
+20.	`sudo make install`
 
 Running the payload software (standalone)
 =========================================
