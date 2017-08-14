@@ -82,7 +82,7 @@ def init_SDR():
 				init_sdr_state = SDR_INIT_STATES.fail
 		elif init_sdr_state == SDR_INIT_STATES.fail:
 			time.sleep(10)
-			init_sdr_state = SDR_INIT_STATES.init
+			init_sdr_state = SDR_INIT_STATES.find_devices
 		else:
 			time.sleep(1)
 	return 0
