@@ -89,9 +89,9 @@ while runstate:
             alt = 0
             rel_alt = -1
             spd_idx = msg.name_to_idx['spd_over_grnd']
-            spd = msg.data[spd_idx] * 0.514444
+            spd = float(msg.data[spd_idx]) * 0.514444
             bearing_idx = msg.name_to_idx['true_course']
-            bearing = msg.data[bearing_idx]
+            bearing = float(msg.data[bearing_idx])
             vx = spd * math.cos(math.radians(bearing))
             vy = spd * math.sin(math.radians(bearing))
             vz = -1
