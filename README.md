@@ -40,7 +40,7 @@ Installing the payload software
 
 tl;dr
 -----
-1.	`sudo add-apt-repository -y ppa:mraa:mraa`
+1.	`sudo add-apt-repository -y ppa:mraa/mraa`
 2.	`sudo apt-get update`
 3.	`sudo apt-get install -y python-serial libmraa1 libmraa-dev mraa-tools python-mraa python3-mraa libboost-all-dev libusb-1.0-0-dev python-mako doxygen python-docutils cmake build-essential exfat-fuse exfat-utils python-pip`
 4.	`sudo pip install pynmea2`
