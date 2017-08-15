@@ -82,7 +82,10 @@ while runstate:
             lon = 0
             if msg.longitude is not None:
                 lon = msg.longitude
-            global_timestamp = calendar.timegm(msg.datetime.timetuple())
+            if msg.data[0] == '':
+                global_timestamp = 0
+            else:
+                global_timestamp = calendar.timegm(msg.datetime.timetuple())
             alt = 0
             rel_alt = -1
             spd_idx = msg.name_to_idx['spd_over_gnd']
