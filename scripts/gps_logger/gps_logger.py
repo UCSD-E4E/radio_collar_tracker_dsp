@@ -15,6 +15,9 @@ from time import sleep
 import serial
 import pynmea2
 
+import calendar
+import math
+
 def handler(signum, frame):
     global runstate
     runstate = False
@@ -68,31 +71,39 @@ while runstate:
         #     msg.latitude, msg.longitude, msg.timestamp))
         print(msg.sentence_type)
         if msg.sentence_type == 'GGA':
-            local_timestamp = time.time()
-            lat = 0
-            if(msg.latitude is not None):
-                lat = msg.latitude
-            lon = 0
-            if(msg.longitude is not None):
-                lon = msg.longitude
-            global_timestamp = time.time() + offset
             alt = 0;
             if(msg.altitude is not None):
                 alt = msg.altitude
+        if msg.sentence_type == 'RMC':
+            local_timestamp = time.time()
+            lat = 0
+            if msg.latitude is not None:
+                lat = msg.latitude
+            lon = 0
+            if msg.longitude is not None:
+                lon = msg.longitude
+            if msg.data[0] == '':
+                global_timestamp = 0
+            else:
+                global_timestamp = calendar.timegm(msg.datetime.timetuple())
+            alt = 0
             rel_alt = -1
-            vx = -1
-            vy = -1
+            spd_idx = msg.name_to_idx['spd_over_grnd']
+            if msg.data[spd_idx] != '':
+                spd = float(msg.data[spd_idx]) * 0.514444
+            else:
+                spd = 0
+            bearing_idx = msg.name_to_idx['true_course']
+            if msg.data[bearing_idx] != '':
+                bearing = float(msg.data[bearing_idx])
+            else:
+                bearing = 0
+            vx = spd * math.cos(math.radians(bearing))
+            vy = spd * math.sin(math.radians(bearing))
             vz = -1
             hdg = 999
             logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (local_timestamp,
                 lat*1e7, lon*1e7, global_timestamp, alt, rel_alt, vx, vy, vz, hdg))
-        if msg.sentence_type == 'ZDA':
-            if msg.day == None:
-                offset = 0
-                continue
-            ref_time = time.time()
-            gps_time = time.mktime(time.strptime(msg.datetime.ctime())) - time.timezone
-            offset = gps_time - ref_time
 print("GPS_LOGGER: Ending thread")
 logfile.close()
 
