@@ -38,6 +38,8 @@ AC_PYTHON_MODULE([enum], [fatal])
 AC_PYTHON_MODULE([time], [fatal])
 AC_PYTHON_MODULE([mmap], [fatal])
 AC_PYTHON_MODULE([sys], [fatal])
+AC_PYTHON_MODULE([calendar], [fatal])
+AC_PYTHON_MODULE([math], [fatal])
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdint.h stdlib.h string.h unistd.h getopt.h syslog.h uhd.h])

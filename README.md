@@ -29,6 +29,8 @@ Installing the payload software
 		9.	`sudo ldconfig`
 	6.	exfat
 		1.	`sudo apt-get install exfat-fuse exfat-utils`
+	7.	enum34
+		1.	`sudo pip install enum34`
 2.	Install the software
 	1.	`cd <radio_collar_tracker_drone>`
 	2.  `./autogen.sh`
@@ -42,8 +44,8 @@ tl;dr
 -----
 1.	`sudo add-apt-repository -y ppa:mraa/mraa`
 2.	`sudo apt-get update`
-3.	`sudo apt-get install -y python-serial libmraa1 libmraa-dev mraa-tools python-mraa python3-mraa libboost-all-dev libusb-1.0-0-dev python-mako doxygen python-docutils cmake build-essential exfat-fuse exfat-utils python-pip`
-4.	`sudo pip install pynmea2`
+3.	`sudo apt-get install -y python-serial libmraa1 libmraa-dev mraa-tools python-mraa python3-mraa libboost-all-dev libusb-1.0-0-dev python-mako doxygen python-docutils cmake build-essential exfat-fuse exfat-utils python-pip git autoconf`
+4.	`sudo pip install pynmea2 enum34`
 5.	`cd $HOME`
 6.	`git clone git://github.com/EttusResearch/uhd.git`
 7.	`cd uhd/host`

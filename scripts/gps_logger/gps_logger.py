@@ -14,7 +14,6 @@ import sys
 from time import sleep
 import serial
 import pynmea2
-
 import calendar
 import math
 
