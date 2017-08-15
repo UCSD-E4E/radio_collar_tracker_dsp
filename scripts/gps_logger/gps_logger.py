@@ -88,7 +88,7 @@ while runstate:
                 global_timestamp = calendar.timegm(msg.datetime.timetuple())
             alt = 0
             rel_alt = -1
-            spd_idx = msg.name_to_idx['spd_over_gnd']
+            spd_idx = msg.name_to_idx['spd_over_grnd']
             spd = msg.data[spd_idx] * 0.514444
             bearing_idx = msg.name_to_idx['true_course']
             bearing = msg.data[bearing_idx]
