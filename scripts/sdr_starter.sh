@@ -3,6 +3,10 @@ INSTALL_DIR=&INSTALL_PREFIX
 
 source $INSTALL_DIR/etc/rct_config
 
+if [[ -e $output_dir/rct_config ]]; then
+	source $output_dir/rct_config
+fi
+
 sdr_log="$log_dir/rct_sdr_log.log"
 gps_log="$log_dir/rct_gps_log.log"
 run=-1
