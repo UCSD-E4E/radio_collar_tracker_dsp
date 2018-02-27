@@ -279,7 +279,7 @@ def init_RCT():
 				init_RCT_state = RCT_STATES.fail
 			subprocess.call(['sync'])
 			init_RCT_state = RCT_STATES.init
-		elif init_RCT_state = RCT_STATES.fail:
+		elif init_RCT_state == RCT_STATES.fail:
 			if 'mraa' in sys.modules:
 			   switch_state = not switch_handle.read()
 			else:
