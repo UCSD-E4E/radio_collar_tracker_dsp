@@ -257,7 +257,7 @@ def init_RCT():
 			else:
 				init_RCT_state = RCT_STATES.wait_start
 		elif init_RCT_state == RCT_STATES.start:
-			# sdr_starter = subprocess.Popen(['sdr_starter'])
+			EN1385# sdr_starter = subprocess.Popen(['sdr_starter'])
 			sdr_starter = subprocess.Popen(['&INSTALL_PREFIX/bin/rct_sdr_starter'])
 			init_RCT_state = RCT_STATES.wait_end
 		elif init_RCT_state == RCT_STATES.wait_end:
@@ -270,6 +270,8 @@ def init_RCT():
 				init_RCT_state = RCT_STATES.wait_end
 			else:
 				init_RCT_state = RCT_STATES.finish
+			if sdr_starter.poll() != None:
+				init_RCT_state = RCT_STATES.fail
 		elif init_RCT_state == RCT_STATES.finish:
 			sdr_starter.terminate()
 			rct_retval = sdr_starter.wait()
@@ -277,6 +279,16 @@ def init_RCT():
 				init_RCT_state = RCT_STATES.fail
 			subprocess.call(['sync'])
 			init_RCT_state = RCT_STATES.init
+		elif init_RCT_state = RCT_STATES.fail:
+			if 'mraa' in sys.modules:
+			   switch_state = not switch_handle.read()
+			else:
+				switch_state = switch_handle[0]
+			if switch_state:
+				init_RCT_state = RCT_STATES.fail
+			else:
+				init_RCT_state = RCT_STATES.init
+
 		pass
 	if 'mraa' not in sys.modules:
 		switch_file.close()
