@@ -16,6 +16,7 @@ import serial
 import pynmea2
 import calendar
 import math
+import datetime
 
 def handler(signum, frame):
     global runstate
@@ -25,7 +26,7 @@ def handler(signum, frame):
 signal.signal(signal.SIGINT, handler)
 
 global runstate
-print("GPS_LOGGER: Started")
+print("GPS_LOGGER: Started %s" % datetime.datetime.now().strftime("%H%M"))
 runstate = True
 
 parser = argparse.ArgumentParser(description = "GPS Logging using MAVLink")
@@ -47,7 +48,7 @@ baud = args.baud
 logfile = open("%s/%s%06d" % (dataDir, gpsPrefix, runNum), "w")
 stream = serial.Serial(port, baud, timeout = 5)
 print("GPS_LOGGER: Running")
-
+print("GPS_LOGGER: Run %d" % runNum)
 
 ref_time = time.time()
 gps_time = 0
@@ -58,17 +59,20 @@ while runstate:
     try:
         line = stream.readline()
     except serial.serialutil.SerialException, e:
+        print("Bad Serial!")
         continue
 
     if line is not None:
+        print(line)
         msg = None
         try:
             msg = pynmea2.parse(line);
         except pynmea2.ParseError, e:
+            print("Bad NMEA!")
             continue
         # logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (time.time(),
         #     msg.latitude, msg.longitude, msg.timestamp))
-        print(msg.sentence_type)
+        # print(msg.sentence_type)
         if msg.sentence_type == 'GGA':
             alt = 0;
             if(msg.altitude is not None):
@@ -103,6 +107,8 @@ while runstate:
             hdg = 999
             logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (local_timestamp,
                 lat*1e7, lon*1e7, global_timestamp, alt, rel_alt, vx, vy, vz, hdg))
-print("GPS_LOGGER: Ending thread")
+            logfile.flush()
+# print("GPS_LOGGER: Ending thread")
+print("GPS_LOGGER: Ending thread %s" % (datetime.datetime.now().strftime('%H%M')))
 logfile.close()
 
