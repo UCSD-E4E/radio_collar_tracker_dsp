@@ -2,6 +2,7 @@
  * @file rct_sdr.c
  *
  * @author Jacob W Torres, jaketorres00@gmail.com
+ * @author Nathan Hui, nthui@eng.ucsd.edu
  * 
  * @description 
  *
