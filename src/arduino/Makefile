@@ -50,7 +50,7 @@ core.a: ${AVRLIB_OBJ} $(AVRC_OBJ) $(AVRCPP_OBJ)
 
 install: $(HEX)
 	./reset.py $(PORT)
-	avrdude -v -c avr109 -p $(DEVICE) -P ${PORT} -U flash:w:$< -C $(LIBRARY_DIR)/../../tools/avrdude.conf -b 57600 -D -V
+	avrdude -v -c avr109 -p $(DEVICE) -P ${PORT} -U flash:w:$< -C $(LIBRARY_DIR)/../../../tools/avrdude.conf -b 57600 -D -V
 
 clean:
 	rm -f $(AVRC_OBJ) $(AVRLIB_OBJ) $(AVRCPP_OBJ)
