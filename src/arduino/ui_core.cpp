@@ -28,19 +28,20 @@ void setup() {
 	Serial1.begin(9600); // GPS
 }
 
-//NMEA gps(ALL);
+
+NMEA gps(ALL);
 
 void loop() {
 	// put your main code here, to run repeatedly:
 	if (Serial1.available() > 0){
 		char c = Serial1.read();
 		Serial.write(c);
-		//if(gps.decode(c)){
-		//  if(gps.gprmc_status() == 'A'){
-		//    Serial.print(gps.gprmc_latitude());
-		//    Serial.println(gps.gprmc_longitude());
-	//  }
-	//}
+		if(gps.decode(c)){
+			if(gps.gprmc_status() == 'A'){
+				Serial.print(gps.gprmc_latitude());
+				Serial.println(gps.gprmc_longitude());
+			}
+		}
 	}
 	if(Serial.available() > 0){
 		char c = Serial.read();
