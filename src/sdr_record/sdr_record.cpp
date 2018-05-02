@@ -23,19 +23,22 @@
  */
 
 #include "sdr_record.hpp"
-#include <getopt.h>
-#include <syslog.h>
-#include <uhd/utils/thread_priority.hpp>
+#include "sdr.hpp"
+#include "dsp.hpp"
+#include "dspv1.hpp"
+#include "localization.hpp"
 #include <string>
-#include <signal.h>
 #include <mutex>
 #include <queue>
 #include <iostream>
-#include "sdr.hpp"
-#include <sys/time.h>
 #include <csignal>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
+#include <getopt.h>
+#include <syslog.h>
+#include <signal.h>
+#include <sys/time.h>
 
 namespace RTT{
 	const std::string META_PREFIX = "META_";
@@ -50,7 +53,7 @@ namespace RTT{
 				"    -s (sample rate in Hz)\n"
 				"    -g (gain)\n"
 				"    -o (output directory)\n"
-				"    -v [1-9]            Verbosity Level\n"
+				"    -v [1-7]            Verbosity Level\n"
 				"    -h (print this help message)\n");
 
 		exit(0);
@@ -68,7 +71,7 @@ namespace RTT{
 		return m_pInstance;
 	}
 
-	void SDR_RECORD::init(int argc, char * const*argv){
+	void SDR_RECORD::process_args(int argc, char* const* argv){
 		int option = 0;
 		while((option = getopt(argc, argv, "hg:s:f:r:o:v:")) != -1){
 			switch(option)
@@ -130,6 +133,10 @@ namespace RTT{
 			syslog(LOG_ERR, "Must set rate\n");
 			print_help();
 		}
+	}
+
+	void SDR_RECORD::init(int argc, char * const*argv){
+		this->process_args(argc, argv);		
 
 		try{
 			syslog(LOG_INFO, "Initializing Radio");
@@ -138,6 +145,9 @@ namespace RTT{
 			syslog(LOG_CRIT, "No devices found!");
 			exit(1);
 		}
+
+		dsp = new RTT::DSP_V1(args.data_dir, args.run_num);
+		localizer = new RTT::PingLocalizer();
 	}
 
 	void SDR_RECORD::sig_handler(int sig){
@@ -154,7 +164,7 @@ namespace RTT{
 
 		std::ostringstream buffer;
 		buffer << args.data_dir << "/" << META_PREFIX;
-		buffer.width(6);
+		buffer << std::setw(6) << std::setfill('0');
 		buffer << args.run_num;
 
 		timing_stream.open(buffer.str());		
@@ -177,7 +187,12 @@ namespace RTT{
 		this->print_meta_data();
 
 		syslog(LOG_INFO, "Starting threads");
-
+		sdr->startStreaming(sdr_queue, sdr_queue_mutex, &program_on);
+		dsp->startProcessing(sdr_queue, sdr_queue_mutex, ping_queue, ping_queue_mutex, &program_on);
+		while(program_on){
+			
+		}
+		sdr->stopStreaming();
 	}
 }
 

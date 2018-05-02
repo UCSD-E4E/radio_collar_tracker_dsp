@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([rct_payload], [1.0], [nthui@eng.ucsd.edu])
-AM_PROG_CC_C_O
+AC_INIT([rct_payload], [2.0], [nthui@eng.ucsd.edu])
+AC_PROG_CXX
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -42,17 +42,11 @@ AC_PYTHON_MODULE([calendar], [fatal])
 AC_PYTHON_MODULE([math], [fatal])
 
 # Checks for header files.
-AC_CHECK_HEADERS([float.h stdint.h stdlib.h string.h unistd.h getopt.h syslog.h uhd.h])
+AC_CHECK_HEADERS([sys/time.h syslog.h signal.h error.h uhd.h getopt.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
-AC_TYPE_UINT32_T
-AC_TYPE_UINT64_T
-AC_TYPE_UINT8_T
 
 # Checks for library functions.
-AC_FUNC_MALLOC
-AC_CHECK_FUNCS([clock_gettime sqrt])
 
 AC_CONFIG_FILES([Makefile
                  doc/Makefile

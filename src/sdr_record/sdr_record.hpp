@@ -6,6 +6,9 @@
 #include <queue>
 #include <vector>
 #include "sdr.hpp"
+#include "dsp.hpp"
+#include "dspv1.hpp"
+#include "localization.hpp"
 
 namespace RTT{
 	class SDR_RECORD{
@@ -13,6 +16,7 @@ namespace RTT{
 		SDR_RECORD();
 		void print_meta_data();
 		void print_help();
+		void process_args(int argc, char* const *argv);
 
 		struct cmd_args{
 			double gain = 0;
@@ -24,9 +28,16 @@ namespace RTT{
 
 		static SDR_RECORD* m_pInstance;
 		volatile bool program_on = true;
-		std::mutex sdr_queue_mutex;
+
 		std::queue<std::vector<std::complex<short>>*> sdr_queue;
+		std::mutex sdr_queue_mutex;
+
+		std::queue<Ping*> ping_queue;
+		std::mutex ping_queue_mutex;
+
 		RTT::SDR* sdr;
+		RTT::DSP* dsp;
+		RTT::PingLocalizer* localizer;
 	protected:
 		void receiver();
 	public:
