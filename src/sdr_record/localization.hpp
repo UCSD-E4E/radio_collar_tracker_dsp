@@ -8,11 +8,21 @@
 #include <thread>
 
 namespace RTT{
+	/**
+	 * Data structure representing a single ping detection.
+	 */
 	struct Ping{
-		long int northing;
-		long int easting;
+
+		/**
+		 * Convenience constructor
+		 *
+		 * @param	time_ms		time in ms of ping w.r.t. local system clock
+		 * @param	amplitude	amplitude of ping in dB (reference not important)
+		 */
+		Ping(long long int time_ms, double amplitude) : time_ms{time_ms}, amplitude{amplitude}{};
+
+		long long int time_ms;
 		double amplitude;
-		std::string zone;
 	};
 
 	class PingLocalizer{
