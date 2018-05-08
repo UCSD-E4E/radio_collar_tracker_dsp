@@ -21,30 +21,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <Arduino.h>
+#include <pins_arduino.h>
+#include "nmea.hpp"
+#include "HMC5983.hpp"
+
+NMEA gps(ALL);
+HMC5983 compass;
+
+float lat;
+float lon;
+float time;
+double hdg;
 
 void setup() {
-	// put your setup code here, to run once:
 	Serial.begin(9600); // via USB
 	Serial1.begin(9600); // GPS
+	compass.begin(NULL);
 }
 
 
-NMEA gps(ALL);
-
 void loop() {
-	// put your main code here, to run repeatedly:
 	if (Serial1.available() > 0){
 		char c = Serial1.read();
-		Serial.write(c);
 		if(gps.decode(c)){
-			if(gps.gprmc_status() == 'A'){
-				Serial.print(gps.gprmc_latitude());
-				Serial.println(gps.gprmc_longitude());
+			if(gps.gprmc_status() == 'V'){
+				lat = gps.gprmc_latitude();
+				lon = gps.gprmc_longitude();
+				time = gps.gprmc_utc();
+				hdg = compass.read();
+				Serial.print(lat);
+				Serial.print("\t");
+				Serial.print(lon);
+				Serial.print("\t");
+				Serial.print(time);
+				Serial.print("\t");
+				Serial.println(hdg);
 			}
 		}
-	}
-	if(Serial.available() > 0){
-		char c = Serial.read();
-		Serial1.write(c);
 	}
 }
