@@ -1,14 +1,11 @@
 \documentclass{report}
 \usepackage{draftwatermark}
+\usepackage{fullpage,bookmark,hyperref,lmodern,listings}
+\usepackage[toc,nonumberlist]{glossaries}
 \title{Radio Collar Tracker Technical Reference Manual}
 \author{Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
 \date{\today\\v0.1}
-\usepackage{fullpage}
-\usepackage{bookmark}
-\usepackage[toc,nonumberlist]{glossaries}
 \makeglossaries
-\usepackage{hyperref}
-\usepackage{lmodern}
 \hypersetup{
     colorlinks,
     citecolor=black,
@@ -16,17 +13,20 @@
     linkcolor=black,
     urlcolor=blue
 }
-\renewcommand*{\chapterautorefname}{Chapter}
-\usepackage{listings}
 \lstset{
 	basicstyle=\ttfamily,
 	breaklines=true
 }
+\renewcommand*{\chapterautorefname}{Chapter}
 \begin{document}
 	\maketitle
 	\tableofcontents
 	\listoffigures
 	\listoftables
+	\chapter{Overview}
+	\chapter{Signal Processing}
+		\section{Version 1}
+			
 	\chapter{Payload}
 		\section{Payload Configuration}
 			All configuration options are set in the file \lstinline[language=sh]{/usr/local/etc/rct_config}.  This file is owned by \lstinline[language=sh]{root}, and should have permissions set to \lstinline{644}.
