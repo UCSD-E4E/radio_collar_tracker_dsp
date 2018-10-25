@@ -63,7 +63,7 @@ mkdir $output_dir
 rct_gps_logger.py -o $output_dir -r $run -i $gps_port -b $gps_baud &>> ${gps_log} &
 mavproxypid=$!
 
-sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output_dir &>> ${sdr_log} &
+sdr_record -g $gain -s $sampling_freq -c $freq -r $run -o $output_dir &>> ${sdr_log} &
 sdr_record_pid=$!
 
 trap "echo 'got sigint'; kill -s SIGINT $mavproxypid; kill -s SIGINT $sdr_record_pid; sleep 1; exit 0" SIGINT SIGTERM

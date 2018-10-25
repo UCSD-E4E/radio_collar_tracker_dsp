@@ -24,8 +24,10 @@
 
 #include "sdr_record.hpp"
 #include "sdr.hpp"
+#include "sdr_test.hpp"
 #include "dsp.hpp"
 #include "dspv1.hpp"
+// #include "dspv2.hpp"
 #include "localization.hpp"
 #include <string>
 #include <mutex>
@@ -39,6 +41,8 @@
 #include <syslog.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <vector>
+#include <condition_variable>
 
 namespace RTT{
 	const std::string META_PREFIX = "META_";
@@ -49,7 +53,8 @@ namespace RTT{
 		printf("sdr_record - Radio Collar Tracker drone application to pull IQ samples from USRP and dump to disk\n\n"
 				"Options:\n"
 				"    -r (run_number)\n"
-				"    -f (center frequency in Hz)\n"
+				"    -c (center frequency in Hz)\n"
+				"    -f (collar frequency in Hz)\n"
 				"    -s (sample rate in Hz)\n"
 				"    -g (gain)\n"
 				"    -o (output directory)\n"
@@ -73,7 +78,7 @@ namespace RTT{
 
 	void SDR_RECORD::process_args(int argc, char* const* argv){
 		int option = 0;
-		while((option = getopt(argc, argv, "hg:s:f:r:o:v:")) != -1){
+		while((option = getopt(argc, argv, "hg:s:c:r:o:v:f:")) != -1){
 			switch(option)
 			{
 				case 'h':
@@ -88,9 +93,13 @@ namespace RTT{
 					args.rate = std::stol(optarg);
 					syslog(LOG_INFO, "Got sampling rate setting of %ld", args.rate);
 					break;
-				case 'f':
+				case 'c':
 					args.rx_freq = std::stod(optarg);
 					syslog(LOG_INFO, "Got center frequency target of %ld", args.rx_freq);
+					break;
+				case 'f':
+					args.tx_freq = std::stod(optarg);
+					syslog(LOG_INFO, "Got collar frequency target of %ld", args.rx_freq);
 					break;
 				case 'r':
 					args.run_num = std::stoi(optarg);
@@ -140,18 +149,26 @@ namespace RTT{
 
 		try{
 			syslog(LOG_INFO, "Initializing Radio");
-			sdr = new RTT::SDR(args.gain, args.rate, args.rx_freq);
+			// sdr = new RTT::SDR(args.gain, args.rate, args.rx_freq);
+			sdr = new RTT::SDR_TEST(std::string("/home/ntlhui/workspace/tmp/testData"));
 		}catch(uhd::key_error e){
 			syslog(LOG_CRIT, "No devices found!");
 			exit(1);
 		}
 
-		dsp = new RTT::DSP_V1(args.data_dir, args.run_num);
+		std::vector<std::uint32_t> freqs{};
+		freqs.push_back(args.tx_freq);
+
+		// dsp = new RTT::DSP_V1(args.data_dir, args.run_num);
+		dsp = new RTT::DSP_V2(freqs, args.rx_freq, args.rate);
 		localizer = new RTT::PingLocalizer();
 	}
 
 	void SDR_RECORD::sig_handler(int sig){
+		std::unique_lock<std::mutex> run_lock(SDR_RECORD::instance()->run_mutex);
 		SDR_RECORD::instance()->program_on = 0;
+		run_lock.unlock();
+		SDR_RECORD::instance()->run_var.notify_all();
 		syslog(LOG_WARNING, "Caught termination signal");
 	}
 
@@ -187,12 +204,25 @@ namespace RTT{
 		this->print_meta_data();
 
 		syslog(LOG_INFO, "Starting threads");
-		sdr->startStreaming(sdr_queue, sdr_queue_mutex, &program_on);
-		dsp->startProcessing(sdr_queue, sdr_queue_mutex, ping_queue, ping_queue_mutex, &program_on);
-		while(program_on){
-			
+		dsp->startProcessing(sdr_queue, sdr_queue_mutex, sdr_var, ping_queue, 
+			ping_queue_mutex, ping_var, &program_on);
+		sdr->startStreaming(sdr_queue, sdr_queue_mutex, sdr_var, &program_on);
+		while(true){
+			std::unique_lock<std::mutex> run_lock(run_mutex);
+			if(program_on){
+				run_var.wait_for(run_lock, std::chrono::milliseconds{100});
+			}else{
+				break;
+			}
 		}
 		sdr->stopStreaming();
+		dsp->stopProcessing();
+	}
+
+	SDR_RECORD::~SDR_RECORD(){
+		delete sdr;
+		delete dsp;
+		delete localizer;
 	}
 }
 
