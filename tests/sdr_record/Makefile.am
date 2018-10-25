@@ -1,5 +1,5 @@
 check_PROGRAMS = testDSPV2 testIQdata testUtility testPingFIR testMixer \
-	testResampler testPingClassifier testProcessor testSDRTest
+	testResampler testPingClassifier testProcessor testSDRTest testGPStest
 
 TESTS = $(check_PROGRAMS)
 
@@ -32,6 +32,9 @@ testProcessor_SOURCES = testProcessor.cpp $(test_src)/mixer.cpp \
 	$(test_src)/utility.cpp $(test_src)/ping_classifier.cpp \
 	$(test_src)/resampler.cpp $(test_src)/ping_fir.cpp \
 	$(test_src)/Processor.cpp
+
+testGPStest_SOURCES = testGPStest.cpp $(test_src)/gps_test.cpp \
+	$(test_src)/gps.cpp $(test_src)/timeblock.cpp
 
 maintainer-clean-local:
 	rm Makefile.in
