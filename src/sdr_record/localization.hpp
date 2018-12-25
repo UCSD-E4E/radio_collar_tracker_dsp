@@ -6,35 +6,30 @@
 #include <vector>
 #include <mutex>
 #include <thread>
+#include <condition_variable>
+#include "ping.hpp"
+#include "gps.hpp"
+#include <dlib/optimization.h>
 
 namespace RTT{
-	/**
-	 * Data structure representing a single ping detection.
-	 */
-	struct Ping{
-
-		/**
-		 * Convenience constructor
-		 *
-		 * @param	time_ms		time in ms of ping w.r.t. local system clock
-		 * @param	amplitude	amplitude of ping in dB (reference not important)
-		 */
-		Ping(long long int time_ms, double amplitude) : time_ms{time_ms}, amplitude{amplitude}{};
-
-		long long int time_ms;
-		double amplitude;
-	};
+	
 
 	class PingLocalizer{
-		void process(const bool& die);
-		std::queue<Ping>* inputQueue;
-		std::mutex* queue_mutex;
-		std::thread* localizer_thread;
-	protected:
+
 	public:
+		typedef dlib::matrix<double, 5, 1> parameter_vector;
+		typedef dlib::matrix<double, 4, 1> input_vector;
 		PingLocalizer();
 		~PingLocalizer();
-		void start(std::queue<Ping>&, std::mutex&, const bool& die);
+		void start(std::queue<PingPtr>&, std::mutex&, std::condition_variable&, GPS&, const volatile bool* die);
+		void stop();
+	protected:
+	private:
+		void process(std::queue<PingPtr>& queue, std::mutex& mutex, std::condition_variable&, GPS& gps_module, const volatile bool* die);
+		std::thread* localizer_thread;
+		std::condition_variable* _input_cv;
+		parameter_vector params;
+
 	};
 }
 
