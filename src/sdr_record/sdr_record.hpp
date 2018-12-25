@@ -6,38 +6,47 @@
 #include <queue>
 #include <vector>
 #include "sdr.hpp"
+#include "sdr_test.hpp"
 #include "dsp.hpp"
-#include "dspv1.hpp"
+#include "dspv2.hpp"
 #include "localization.hpp"
+#include <condition_variable>
 
 namespace RTT{
 	class SDR_RECORD{
 
 		SDR_RECORD();
+		~SDR_RECORD();
 		void print_meta_data();
 		void print_help();
 		void process_args(int argc, char* const *argv);
 
 		struct cmd_args{
-			double gain = 0;
-			long int rate = 0;
-			long int rx_freq = 0;
-			int run_num = 0;
+			double gain = 10.0;
+			long int rate = 2000000;
+			long int rx_freq = 172500000;
+			long int tx_freq = 173763000;
+			int run_num = 1;
 			std::string data_dir = "";
 		} args;
 
 		static SDR_RECORD* m_pInstance;
 		volatile bool program_on = true;
 
-		std::queue<std::vector<std::complex<short>>*> sdr_queue;
+		std::queue<IQdataPtr> sdr_queue;
 		std::mutex sdr_queue_mutex;
+		std::condition_variable sdr_var;
 
-		std::queue<Ping*> ping_queue;
+		std::queue<PingPtr> ping_queue;
 		std::mutex ping_queue_mutex;
+		std::condition_variable ping_var;
 
-		RTT::SDR* sdr;
+		RTT::SDR_TEST* sdr;
 		RTT::DSP* dsp;
 		RTT::PingLocalizer* localizer;
+
+		std::condition_variable run_var;
+		std::mutex run_mutex;
 	protected:
 		void receiver();
 	public:
