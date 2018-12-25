@@ -63,9 +63,9 @@ namespace RTT{
 		Processor(const std::size_t frequency, const std::size_t center_freq, 
 			const std::size_t sampling_freq, std::size_t start_time = 0,
 			const std::size_t fir_size = 100,
-			const std::size_t down_factor = 200, 
+			const std::size_t down_factor = 1000, 
 			const std::size_t up_factor = 1, 
-			const std::size_t filter_freq = 500,
+			const std::size_t filter_freq = 0,
 			const double initial_threshold = 3.0);
 
 		/**
