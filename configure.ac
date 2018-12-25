@@ -3,10 +3,11 @@
 
 AC_PREREQ([2.69])
 AC_INIT([rct_payload], [2.0], [nthui@eng.ucsd.edu])
-AC_PROG_CXX
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
+AC_LANG([C++])
+AC_PROG_CXX
 
 # Checks for python.
 AM_PATH_PYTHON(2.7)
@@ -58,6 +59,28 @@ AC_CHECK_HEADERS([sys/time.h syslog.h signal.h error.h uhd.h getopt.h])
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
+
+# Check for and configure dlib
+AC_ARG_VAR([DLIB_INCLUDEDIR], [contains the include path to the Seqan headers, typically here /home/ntlhui/workspace/dlib/dlib-19.16/dlib])
+AC_MSG_CHECKING([whether dlib headers are available])
+DLIB_CPPFLAGS="-I$DLIB_INCLUDEDIR -DDLIB_NO_GUI_SUPPORT"
+AC_SUBST([DLIB_CPPFLAGS])
+DLIB_LDFLAGS="-DDLIB_NO_GUI_SUPPORT -lpthread"
+AC_SUBST([DLIB_LDFLAGS])
+save_cppflags="$CPPFLAGS"
+CPPFLAGS="-std=c++11 $DLIB_CPPFLAGS $DLIB_LDFLAGS"
+AC_LINK_IFELSE([
+    AC_LANG_SOURCE(
+        [[
+        #include <dlib/optimization.h>
+        #include <dlib/global_optimization.h>
+        int main() { dlib::matrix<double,0,1> column_vector;; return 0; }
+        ]]
+    )],
+    [AC_MSG_RESULT([yes])],
+    [AC_MSG_ERROR([could not find/link dlib headers! If the dlib headers are not located within the compiler's default search path, specify them with the DLIB_INCLUDEDIR variable to the configure script.])]
+)
+CPPFLAGS="$save_cppflags"
 
 AC_CONFIG_FILES([Makefile
                  doc/Makefile
