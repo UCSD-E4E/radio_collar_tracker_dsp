@@ -16,6 +16,7 @@
 
 #include <cassert>
 #include <chrono>
+#include <utility.hpp>
 
 void testCopy_threaded(){
 	std::cout << "Testing copy threads" << std::endl;
@@ -94,10 +95,16 @@ void testCopy_func(){
 }
 
 void testDSP_throughput(){
+
+	const std::size_t f1 = 500000;
+	const std::size_t f_s = 2000000;
+	const std::size_t f_c = 172500000;
+	const std::size_t N = 1 * f_s;
+
 	std::cout << "Testing DSP threads" << std::endl;
 	std::vector<uint32_t> freqs;
-	freqs.push_back(172000000);
-	RTT::DSP_V2 testObj(freqs, 172000000, 2000000);
+	freqs.push_back(f_c + f1);
+	RTT::DSP_V2 testObj(freqs, f_c, f_s);
 
 	std::queue<RTT::IQdataPtr> dataQueue{};
 	std::mutex dataMutex{};
@@ -109,13 +116,23 @@ void testDSP_throughput(){
 	std::queue<std::complex<short>> inputSignal{};
 
 	volatile bool run = true;
-	std::size_t samples_per_ping = 0.06 * 2000000;
-	for(std::size_t i = 0; i < samples_per_ping; i++){
-		inputSignal.push(std::complex<short>(55, 0));
+
+	std::size_t samples_per_ping = 0.06 * f_s;
+	std::complex<double>* ping = RTT::generateSinusoid(f1, f_s, samples_per_ping);
+
+
+	std::size_t j = 0;
+	for(; j < 3000; j++){
+		inputSignal.push(std::complex<short>(0.0001,0));
 	}
-	for(std::size_t i = 0; i < 2000000 - samples_per_ping; i++){
-		inputSignal.push(std::complex<short>(1, 0));
+
+	for(std::size_t i = 0; i < samples_per_ping; i++, j++){
+		inputSignal.push(ping[i]);
 	}
+	for(; j < N; j++){
+		inputSignal.push(std::complex<short>(0.0001, 0));
+	}
+
 	for(std::size_t i = 0; i < inputSignal.size() / 1000; i++){
 		RTT::IQdataPtr data(new RTT::IQdata(1000));
 		for(std::size_t j = 0; j < 1000; j++){
