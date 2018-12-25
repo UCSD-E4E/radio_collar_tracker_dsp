@@ -12,8 +12,8 @@ namespace RTT{
 		std::size_t sampling_frequency, std::size_t length, 
 		double amplitude){
 		std::complex<double>* retval = new std::complex<double>[length];
-		for(std::size_t i = 0; i < length; i++){
-			retval[i] = amplitude * cexp(2.0i * M_PI * frequency * i /
+		for(std::size_t j = 0; j < length; j++){
+			retval[j] = amplitude * cexp(2.0i * M_PI * frequency * j /
 				sampling_frequency);
 		}
 		return retval;
