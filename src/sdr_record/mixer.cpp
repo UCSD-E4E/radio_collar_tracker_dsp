@@ -36,7 +36,7 @@ namespace RTT{
 		const volatile bool* run){
 		// Store blocking condition variable to wake on later
 		_input_cv = &input_cv;
-		syslog(LOG_INFO, "Mixer storing input condition variable as %08x", _input_cv);
+		syslog(LOG_INFO, "Mixer storing input condition variable as 0x%08x", _input_cv);
 		// Start thread
 		_thread = new std::thread(&Mixer::_process, this, std::ref(input_queue),
 			std::ref(input_mutex), std::ref(input_cv), std::ref(output_queue),
