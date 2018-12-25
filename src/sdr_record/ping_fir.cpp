@@ -70,11 +70,16 @@ namespace RTT{
 				if(data.size() < _num_taps){
 					continue;
 				}
-				std::complex<double> filter_output = convolve(data, 
-					_filter_taps, _num_taps);
+				// std::complex<double> filter_output = convolve(data, 
+					// _filter_taps, _num_taps);
+				std::complex<double> filter_output = 0;
+				for(auto it = data.begin(); it != data.end(); it++){
+					filter_output += *it;
+					// std::cout << filter_output << std::endl;
+				}
 				double amplitude = std::abs(filter_output);
 				double dBvalue = powerToDB(amplitude);
-				// std::cout << dBvalue << std::endl;
+				// std::cout << "FIR " << dBvalue << std::endl;
 				std::unique_lock<std::mutex> out_lock(output_mutex);
 				output_queue.push(dBvalue);
 				out_lock.unlock();
