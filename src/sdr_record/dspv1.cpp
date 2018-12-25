@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iomanip>
 #include <syslog.h>
+#include <functional>
 
 namespace RTT{
 	DSP_V1::DSP_V1(std::string output_dir, size_t run_num) : output_folder(output_dir), run_num(run_num){
@@ -14,11 +15,13 @@ namespace RTT{
 	DSP_V1::DSP_V1(const char* output_dir, size_t run_num) : output_folder(output_dir), run_num(run_num){
 	}
 
-	void DSP_V1::startProcessing(std::queue<std::vector<std::complex<short>>*>& inputQueue, 
-			std::mutex& inputMutex, std::queue<Ping*>& outputQueue, 
-			std::mutex& outputMutex, const volatile bool* ndie){
+	void DSP_V1::startProcessing(std::queue<IQdataPtr>& inputQueue, 
+			std::mutex& inputMutex, std::condition_variable& inputVar,
+			std::queue<PingPtr>& outputQueue, std::mutex& outputMutex, 
+			std::condition_variable& outputVar, const volatile bool* ndie){
 		input_queue = &inputQueue;
 		input_mutex = &inputMutex;
+		input_var = &inputVar;
 		stream_thread = new std::thread(&DSP_V1::process, this, ndie);
 	}
 
@@ -44,6 +47,10 @@ namespace RTT{
 		StorageEngine storage(output_folder, StorageEngine::FileSize::FS_64M, generatePrefix(), std::string());
 
 		while(*ndie || !input_queue->empty()){
+			std::unique_lock<std::mutex> in_lock(*input_mutex);
+			if(input_queue->empty()){
+				input_var->wait(in_lock);
+			}
 			syslog(LOG_DEBUG, "wx: checking for frame");
 			syslog(LOG_DEBUG, "wx: queue has %zd remaining", input_queue->size());
 			if(input_queue->size() > QUEUE_WARNING_LENGTH){
@@ -55,18 +62,18 @@ namespace RTT{
 
 			if(!input_queue->empty()){
 				syslog(LOG_DEBUG, "wx: data frame exists");
-				std::vector<std::complex<short>>* data_buffer = input_queue->front();
+				IQdataPtr data_buffer = input_queue->front();
 				input_queue->pop();
-				data_array = new int16_t[data_buffer->size() * 2];
-				for(size_t i = 0; i < data_buffer->size(); i++){
-					data_array[2 * i] = (*data_buffer)[i].real();
-					data_array[2 * i + 1] = (*data_buffer)[i].imag();
+				in_lock.unlock();
+				data_array = new int16_t[data_buffer->data->size() * 2];
+				for(size_t i = 0; i < data_buffer->data->size(); i++){
+					data_array[2 * i] = (*data_buffer->data)[i].real();
+					data_array[2 * i + 1] = (*data_buffer->data)[i].imag();
 				}
 
-				storage.write(data_array, data_buffer->size() * 2 * sizeof(int16_t));
+				storage.write(data_array, data_buffer->data->size() * 2 * sizeof(int16_t));
 
 				delete(data_array);
-				delete(data_buffer);
 			}
 		}
 	}

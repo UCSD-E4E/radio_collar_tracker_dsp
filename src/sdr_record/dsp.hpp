@@ -2,42 +2,53 @@
 #define __RTT_DSP_H__
 
 #include <complex>
+#include "ping.hpp"
+#include "iq_data.hpp"
 #include <queue>
 #include <vector>
 #include <mutex>
-#include "localization.hpp"
+#include <memory>
+#include <condition_variable>
 
 namespace RTT{
+
+
 	/**
-	 * 
+	 * DSP Class
 	 */
 	class DSP{
 	public:
-		
+
+		virtual ~DSP(){
+			
+		}
+
 		/**
-		 * @param	inputQueue	a std::queue<std::vector<std::complex<short>>*>
-		 * 							pointer for incoming data
-		 * @param	inputMutex	a std::mutex pointer for the input queue
-		 * @param	outputQueue	a std::queue<RTT::Ping*> pointer for detected
-		 * 							pings
-		 * @param	outputMutex	a std::mutex pointer for the output queue
-		 * @param	ndie			a pointer to a bool that is true when the 
-		 * 							program should be running, and false when 
-		 * 							the program should be shutting down
+		 * @param	inputQueue	a std::queue<IQdata> reference for incoming 
+		 *                   	data
+		 * @param	inputMutex	a std::mutex for the input queue
+		 * @param	inputVar	a std::condition_variable for the input queue
+		 * @param	outputQueue	a std::queue<RTT::Ping*> for detected pings
+		 * @param	outputMutex	a std::mutex for the output queue
+		 * @param	outputVar	a std::condition_variable for the output queue
+		 * @param	ndie		a pointer to a bool that is true when the 
+		 * 						program should be running, and false when the 
+		 * 						program should be shutting down
 		 *
 		 * This should be a non-blocking function that starts a thread which 
 		 * processes the incoming data and detects the pings in that data, and 
 		 * sends it along out the outputQueue queue.
 		 */
 		virtual void startProcessing(
-			std::queue<std::vector<std::complex<short>>*>& inputQueue, 
-			std::mutex& inputMutex, std::queue<Ping*>& outputQueue, 
-			std::mutex& outputMutex, const volatile bool* ndie){}
+			std::queue<IQdataPtr>& inputQueue, 
+			std::mutex& inputMutex, std::condition_variable& inputVar,
+			std::queue<PingPtr>& outputQueue, std::mutex& outputMutex, 
+			std::condition_variable& outputVar, const volatile bool* ndie) = 0;
 
 		/**
 		 * Waits for the processing thread to stop.
 		 */
-		virtual void stopProcessing(){}
+		virtual void stopProcessing() = 0;
 	};
 }
 

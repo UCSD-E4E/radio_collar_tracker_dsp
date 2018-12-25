@@ -3,13 +3,16 @@
 
 #include "dsp.hpp"
 #include "localization.hpp"
+#include "iq_data.hpp"
 #include <string>
 #include <fstream>
+#include <condition_variable>
 
 namespace RTT{
 	class DSP_V1 : public DSP{
-		std::queue<std::vector<std::complex<short>>*>* input_queue;
+		std::queue<IQdataPtr>* input_queue;
 		std::mutex* input_mutex;
+		std::condition_variable* input_var;
 		std::thread* stream_thread;
 		void process(const volatile bool*);
 		std::string output_folder;
@@ -22,9 +25,10 @@ namespace RTT{
 		DSP_V1(std::string, size_t run_num);
 		DSP_V1(const char*, size_t run_num);
 		void startProcessing(
-			std::queue<std::vector<std::complex<short>>*>& inputQueue, 
-			std::mutex& inputMutex, std::queue<Ping*>& outputQueue, 
-			std::mutex& outputMutex, const volatile bool* ndie);
+			std::queue<IQdataPtr>& inputQueue, 
+			std::mutex& inputMutex, std::condition_variable& inputVar,
+			std::queue<PingPtr>& outputQueue, std::mutex& outputMutex, 
+			std::condition_variable& outputVar, const volatile bool* ndie);
 		void stopProcessing();
 	};
 

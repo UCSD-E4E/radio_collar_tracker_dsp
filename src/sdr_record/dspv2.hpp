@@ -33,7 +33,6 @@ namespace RTT{
 		/**
 		 * Array of processor objects
 		 */
-		// Processor** _processors;
 		Processor _processor;
 
 		/**
@@ -55,19 +54,16 @@ namespace RTT{
 		 * Internal queues from the stream splitter (copyQueue) to processing
 		 * threads (process).
 		 */
-		// std::queue<std::complex<double>>* _innerQueues = nullptr;
 		std::queue<std::complex<double>> _innerQueue;
 
 		/**
 		 * Mutexes for each internal data queue
 		 */
-		// std::mutex** _innerMutexes = nullptr;
 		std::mutex _innerMutex;
 
 		/**
 		 * Conditional variables for internal data queues
 		 */
-		// std::condition_variable* _innerVars = nullptr;
 		std::condition_variable _innerVar;
 
 		void _process(std::queue<std::complex<double>>& input_queue,

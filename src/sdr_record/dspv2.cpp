@@ -13,39 +13,16 @@ namespace RTT{
 		const std::size_t center_freq, const std::size_t sampling_freq) : 
 		_center_freq(center_freq),
 		_sampling_freq(sampling_freq), 
+		_frequency(freqs2process[0]),
 		_processor(freqs2process[0], center_freq, sampling_freq),
 		_innerQueue{},
 		_innerMutex{},
 		_innerVar{}
-		// _frequencies(),
 		{
 		
-		// _frequencies.insert(_frequencies.end(), freqs2process.cbegin(), 
-		// 	freqs2process.cend());
-		_frequency = freqs2process[0];
-		// _innerQueues = new std::queue<std::complex<double> >[_frequencies.size()];
-		// _innerQueue{};
-		// _innerMutexes = new std::mutex*[_frequencies.size()];
-		// _innerMutex{};
-		// _innerVars = new std::condition_variable[_frequencies.size()];
-		// _innerVar{};
-		// _processors = new Processor*[_frequencies.size()];
-		// _processors = new Processor*[_frequencies.size()];
-		// for(std::size_t i = 0; i < _frequencies.size(); i++){
-			// _innerMutexes[i] = new std::mutex();
-			// _processors[i] = new Processor(_frequencies[i], center_freq, 
-			// 	sampling_freq);
-		// }
 	}
 
 	DSP_V2::~DSP_V2(){
-		// for(std::size_t i = 0; i < _frequencies.size(); i++){
-		// 	delete _innerMutexes[i];
-		// 	delete _processors[i];
-		// }
-		// delete[] _innerQueues;
-		// delete[] _innerMutexes;
-		// delete[] _innerVars;
 		if(_copy_thread){
 			delete _copy_thread;
 		}
