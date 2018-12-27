@@ -15,4 +15,8 @@ namespace RTT{
 		data = new std::vector<std::complex<short>>(*cpy.data);
 		time_ms = cpy.time_ms;
 	}
+
+	std::size_t IQdata::size(){
+		return data->size();
+	}
 }

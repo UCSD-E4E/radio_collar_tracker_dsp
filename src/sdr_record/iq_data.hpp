@@ -38,6 +38,8 @@ namespace RTT{
 		 */
 		~IQdata();
 
+		std::size_t size();
+
 		/**
 		 * Data vector.  Data should be in ascending temporal order.
 		 */
