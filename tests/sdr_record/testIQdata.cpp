@@ -10,6 +10,12 @@ void testCopy(){
 	assert(data2->data->at(0) == std::complex<short>(0xf00d, 0));
 }
 
+void testSize(){
+	RTT::IQdata data1{1024};
+	data1.data->at(0) = std::complex<short>(0xf00d, 0);
+	assert(data1.size() == 1024);
+}
+
 int main(int argc, char const *argv[])
 {
 	testCopy();

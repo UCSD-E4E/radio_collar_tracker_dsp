@@ -65,7 +65,7 @@ void testDownsample_threaded(){
 }
 
 void testDownsample_func(){
-	RTT::Resampler testObj(1, 100);
+	RTT::Resampler testObj(1, 1000);
 	std::queue<std::complex<double>> input_queue{};
 	std::mutex input_mutex{};
 	std::condition_variable input_cv{};
@@ -113,9 +113,9 @@ void testConstructor(){
 
 int main(int argc, char const *argv[])
 {
-	testConstructor();
+	// testConstructor();
 	// testUpsample();
-	testDownsample_threaded();
+	// testDownsample_threaded();
 	testDownsample_func();
 	// testResample();
 	return 0;

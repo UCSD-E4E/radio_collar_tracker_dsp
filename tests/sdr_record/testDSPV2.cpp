@@ -18,6 +18,10 @@
 #include <chrono>
 #include <utility.hpp>
 
+#ifdef DEBUG
+#include <fstream>
+#endif
+
 void testCopy_threaded(){
 	std::cout << "Testing copy threads" << std::endl;
 	std::vector<uint32_t> freqs;
@@ -96,10 +100,15 @@ void testCopy_func(){
 
 void testDSP_throughput(){
 
-	const std::size_t f1 = 500000;
+	const std::size_t f1 = 100000;
 	const std::size_t f_s = 2000000;
 	const std::size_t f_c = 172500000;
 	const std::size_t N = 1 * f_s;
+	volatile bool run = true;
+
+	const std::size_t samples_per_ping = 0.06 * f_s;
+	std::complex<double>* ping = RTT::generateSinusoid(f1, f_s, samples_per_ping);
+	std::complex<double>* test_signal = new std::complex<double>[N];
 
 	std::cout << "Testing DSP threads" << std::endl;
 	std::vector<uint32_t> freqs;
@@ -113,38 +122,48 @@ void testDSP_throughput(){
 	std::queue<RTT::PingPtr> pingQueue{};
 	std::mutex pingMutex{};
 	std::condition_variable pinVar{};
-	std::queue<std::complex<short>> inputSignal{};
-
-	volatile bool run = true;
-
-	std::size_t samples_per_ping = 0.06 * f_s;
-	std::complex<double>* ping = RTT::generateSinusoid(f1, f_s, samples_per_ping);
-
+	
+	#ifdef DEBUG
+	std::ofstream _ostr{"test_signal.log"};
+	std::size_t _out_idx = 0;
+	#endif
 
 	std::size_t j = 0;
 	for(; j < 3000; j++){
-		inputSignal.push(std::complex<short>(0.0001,0));
+		test_signal[j] = 1;
 	}
 
 	for(std::size_t i = 0; i < samples_per_ping; i++, j++){
-		inputSignal.push(ping[i]);
+		// test_signal[j] = 5;
+		test_signal[j] = 4096.0 * ping[j - 3000];
 	}
 	for(; j < N; j++){
-		inputSignal.push(std::complex<short>(0.0001, 0));
+		test_signal[j] = 1;
 	}
 
-	for(std::size_t i = 0; i < inputSignal.size() / 1000; i++){
-		RTT::IQdataPtr data(new RTT::IQdata(1000));
+	for(std::size_t i = 0; i < N / 1000; i++){
+		RTT::IQdataPtr data(new RTT::IQdata(0));
 		for(std::size_t j = 0; j < 1000; j++){
-			data->data->push_back(inputSignal.front());
-			inputSignal.pop();
+			data->data->push_back(test_signal[i * 1000 + j]);
 		}
 		data->time_ms = 1000;
 		std::unique_lock<std::mutex> data_lock{dataMutex};
 		dataQueue.push(data);
 		data_lock.unlock();
 		dataVar.notify_all();
+		#ifdef DEBUG
+		for(auto it = data->data->begin(); it != data->data->end(); it++){
+			_ostr << _out_idx++ << ", " << *it << std::endl;
+		}
+		#endif
 	}
+
+	// std::unique_lock<std::mutex> data_lock{dataMutex};
+	// for(auto it = dataQueue.front(); it != dataQueue.back(); it++){
+	// 	_ostr << _out_idx++ << ", " << (*it)->data << std::endl;	
+	// }
+	// data_lock.unlock();
+
 	auto start = std::chrono::steady_clock::now();
 	testObj.startProcessing(dataQueue, dataMutex, dataVar, pingQueue, pingMutex,
 		pinVar, &run);
@@ -162,12 +181,15 @@ void testDSP_throughput(){
 	assert(pingQueue.size() == 1);
 	assert((pingQueue.front()->time_ms - 1000) / 1e3 < 0.06);
 	std::cout << "Done testing DSP threads" << std::endl;
+	#ifdef DEBUG
+	_ostr.close();
+	#endif
 }
 
 int main(int argc, char const *argv[])
 {
-	testCopy_threaded();
-	testCopy_func();
+	// testCopy_threaded();
+	// testCopy_func();
 	testDSP_throughput();
 	return 0;
 }
