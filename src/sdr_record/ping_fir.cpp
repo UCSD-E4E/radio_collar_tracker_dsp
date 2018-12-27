@@ -6,6 +6,10 @@
 #include <iostream>
 #include <limits>
 
+#ifdef DEBUG
+#include <fstream>
+#endif
+
 namespace RTT{
 	PingFIR::PingFIR(std::size_t frequency, std::size_t sampling_frequency,
 		std::size_t size) : 
@@ -43,12 +47,14 @@ namespace RTT{
 		delete _thread;
 	}
 
-	
-
 	void PingFIR::_process(std::queue<std::complex<double>>& input_queue,
 		std::mutex& input_mutex, std::condition_variable& input_cv,
 		std::queue<double>& output_queue, std::mutex& output_mutex,
 		std::condition_variable& output_cv, const volatile bool* run){
+		#ifdef DEBUG
+		std::ofstream _ostr{"ping_fir.log"};
+		std::size_t _out_idx = 0;
+		#endif
 
 		// Local vars
 		// std::complex<double> data[_num_taps];
@@ -80,6 +86,11 @@ namespace RTT{
 				double amplitude = std::abs(filter_output);
 				double dBvalue = powerToDB(amplitude);
 				// std::cout << "FIR " << dBvalue << std::endl;
+
+				#ifdef DEBUG
+				_ostr << _out_idx++ << ", " << dBvalue << ", " << amplitude << std::endl;
+				#endif
+
 				std::unique_lock<std::mutex> out_lock(output_mutex);
 				output_queue.push(dBvalue);
 				out_lock.unlock();
@@ -87,6 +98,11 @@ namespace RTT{
 				output_cv.notify_all();
 			}
 		}
+
+		#ifdef DEBUG
+		_ostr.close();
+		#endif
+
 		std::cout << "PingFIR consumed " << count << " samples" << std::endl;
 		std::cout << "PingFIR output " << out_count << " samples" << std::endl;
 	}
