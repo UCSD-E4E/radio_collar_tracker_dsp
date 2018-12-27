@@ -6,11 +6,12 @@
 #include <chrono>
 #include <syslog.h>
 
-#include <fstream>
 #include <iostream>
 #include <complex>
 
-
+#ifdef DEBUG
+#include <fstream>
+#endif
 
 namespace RTT{
 	Mixer::Mixer(std::int64_t shift, std::size_t sampling_frequency) : 
@@ -36,7 +37,7 @@ namespace RTT{
 		const volatile bool* run){
 		// Store blocking condition variable to wake on later
 		_input_cv = &input_cv;
-		syslog(LOG_INFO, "Mixer storing input condition variable as 0x%08x", _input_cv);
+		syslog(LOG_INFO, "Mixer storing input condition variable as 0x%08p", _input_cv);
 		// Start thread
 		_thread = new std::thread(&Mixer::_process, this, std::ref(input_queue),
 			std::ref(input_mutex), std::ref(input_cv), std::ref(output_queue),
@@ -57,8 +58,10 @@ namespace RTT{
 		std::mutex& output_mutex, std::condition_variable& output_cv,
 		const volatile bool* run){
 
-		std::ofstream output("/home/ntlhui/workspace/tmp/testData/sampler_output", std::ios::binary | std::ios::app);
-		int16_t data_array[2];
+		#ifdef DEBUG
+		std::ofstream _output{"mixer.log"};
+		std::size_t _out_idx = 0;
+		#endif
 
 		// Local vars
 		std::size_t period_idx = 0;
@@ -79,6 +82,10 @@ namespace RTT{
 				input_queue.pop();
 				lock.unlock();
 
+				#ifdef DEBUG
+				_output << _out_idx++ << ", " << sample.real() << ", " << sample.imag();
+				#endif
+
 				sample *= _bbeat[period_idx];
 
 				period_idx++;
@@ -92,15 +99,15 @@ namespace RTT{
 				count++;
 
 
-				// for testing only
-				data_array[0] = sample.real() * 4096.0;
-				data_array[1] = sample.imag() * 4096.0;
-				output.write(reinterpret_cast<char*>(data_array), sizeof(int16_t) * 2);
+				#ifdef DEBUG
+				_output << ", " << sample.real() << ", " << sample.imag() << std::endl;
+				#endif
 				
 			}
 		}
 		std::cout << "Mixer processed " << count << " samples" << std::endl;
-		output.close();
-
+		#ifdef DEBUG
+		_output.close();
+		#endif
 	}
 }
