@@ -3,6 +3,11 @@
 #include <iostream>
 #include <chrono>
 
+#ifdef DEBUG
+#include <fstream>
+#endif
+
+
 namespace RTT{
 	Resampler::Resampler(std::size_t upsample_factor, 
 		std::size_t downsample_factor) : 
@@ -80,6 +85,11 @@ namespace RTT{
 		std::queue<std::complex<double>>& output_queue,
 		std::mutex& output_mutex, std::condition_variable& output_cv,
 		const volatile bool* run){
+
+		#ifdef DEBUG
+		std::ofstream _ostr{"resampler.log"};
+		std::size_t _out_idx = 0;
+		#endif
 		
 		// for testing only
 
@@ -98,9 +108,14 @@ namespace RTT{
 					count++;
 				}
 				in_lock.unlock();
+
+
 				std::unique_lock<std::mutex> out_lock(output_mutex);
 				downsample(internal_queue, output_queue, _downsample_factor);
 				out_count++;
+				#ifdef DEBUG
+				_ostr << _out_idx++ << ", " << output_queue.back() << std::endl;
+				#endif
 				out_lock.unlock();
 				output_cv.notify_all();
 			}else{
@@ -108,12 +123,17 @@ namespace RTT{
 				if(!*run && !input_queue.empty()){
 					std::size_t size = input_queue.size();
 					for(std::size_t i = 0; i < _downsample_factor - size; i++){
-						input_queue.push(std::complex<double>(0, 0));
+						input_queue.push(std::complex<double>(0.0001,0));
 					}
 				}
 				in_lock.unlock();
 			}
 		}
+
+		#ifdef DEBUG
+		_ostr.close();
+		#endif
+
 		std::cout << "Resampler consumed " << count << " samples" << std::endl;
 		std::cout << "Resampler output " << out_count << " samples" << std::endl;
 	}
