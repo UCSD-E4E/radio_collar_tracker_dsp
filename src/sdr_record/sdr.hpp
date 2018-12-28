@@ -14,7 +14,6 @@ namespace RTT{
 
 		uhd_usrp_handle usrp;
 
-		size_t rx_buffer_size = 16384;
 		std::string device_args;
 		std::string subdev;
 		std::string ant;
@@ -36,6 +35,7 @@ namespace RTT{
 	protected:
 		SDR();
 	public:
+		const size_t rx_buffer_size = 16384;
 		SDR(double gain, long int rate, long int freq);
 		~SDR();
 		void setBufferSize(size_t buff_size);
