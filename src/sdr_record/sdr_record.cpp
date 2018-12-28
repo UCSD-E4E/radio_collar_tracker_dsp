@@ -160,7 +160,7 @@ namespace RTT{
 		freqs.push_back(args.tx_freq);
 
 		// dsp = new RTT::DSP_V1(args.data_dir, args.run_num);
-		dsp = new RTT::DSP_V2(freqs, args.rx_freq, args.rate);
+		dsp = new RTT::DSP_V2(freqs, args.rx_freq, args.rate, sdr->rx_buffer_size);
 		localizer = new RTT::PingLocalizer();
 	}
 
