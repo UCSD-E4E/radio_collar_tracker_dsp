@@ -14,6 +14,7 @@
 #include <iostream>
 #include <utility.hpp>
 #include <unistd.h>
+#include <chrono>
 
 void test_constructor(){
 	RTT::PingFIR test_obj(172500000, 2000000, 200);
@@ -48,7 +49,11 @@ void test_func(){
 	volatile bool run = true;
 
 	run = false;
+	auto start = std::chrono::steady_clock::now();
 	test_obj._process(i_q, i_mux, i_cv, o_q, o_mux, o_cv, &run);
+	auto end = std::chrono::steady_clock::now();
+	auto diff = end - start;
+	std::cout << "Duration: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() << "s" << std::endl;
 	// sleep(2);
 	std::cout << "notified" << std::endl;
 	i_cv.notify_all();
