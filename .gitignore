@@ -22,3 +22,4 @@ configure
 depcomp
 install-sh
 missing
+callgrind.out.*
