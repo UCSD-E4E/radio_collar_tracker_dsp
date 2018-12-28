@@ -14,14 +14,16 @@ namespace RTT{
 	typedef std::complex<double> cmpx;
 
 	DSP_V2::DSP_V2(const std::vector<uint32_t>& freqs2process, 
-		const std::size_t center_freq, const std::size_t sampling_freq) : 
+		const std::size_t center_freq, const std::size_t sampling_freq,
+		const std::size_t frame_size) : 
 		_center_freq(center_freq),
 		_sampling_freq(sampling_freq), 
 		_frequency(freqs2process[0]),
 		_processor(freqs2process[0], center_freq, sampling_freq),
 		_innerQueue{},
 		_innerMutex{},
-		_innerVar{}
+		_innerVar{},
+		_frame_size{frame_size}
 		{
 		
 	}
@@ -82,6 +84,8 @@ namespace RTT{
 		std::size_t _output_idx = 0;
 		#endif
 
+		std::complex<double>* double_data = new std::complex<double>[_frame_size];
+
 		// Thread body
 		while(*run || !inputQueue.empty()){
 			// Lock input queues
@@ -99,8 +103,7 @@ namespace RTT{
 				// release mutex
 				inputLock.unlock();
 				// convert to doubles
-				std::complex<double>* double_data = new std::complex<double>[dataObj->size()];
-				std::size_t numVals = IQdataToDouble(dataObj, double_data, dataObj->size());
+				std::size_t numVals = IQdataToDouble(dataObj, double_data, _frame_size);
 
 				// update time_start_ms
 				if(time_start_ms == 0){
@@ -133,13 +136,13 @@ namespace RTT{
 				}
 				innerLock.unlock();
 				_innerVar.notify_all();
-				delete double_data;
 			}
 		}
 
 		#ifdef DEBUG
 		_ostr.close();
 		#endif
+		delete double_data;
 	}
 
 	void DSP_V2::stopProcessing(){

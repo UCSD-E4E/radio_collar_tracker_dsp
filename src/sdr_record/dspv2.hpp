@@ -66,6 +66,12 @@ namespace RTT{
 		 */
 		std::condition_variable _innerVar;
 
+
+		/**
+		 * Frame size
+		 */
+		std::size_t _frame_size;
+
 		void _process(std::queue<std::complex<double>>& input_queue,
 			std::mutex& input_mutex, std::condition_variable& input_cv,
 			std::queue<PingPtr>& output_queue, std::mutex& output_mutex,
@@ -88,7 +94,8 @@ namespace RTT{
 		 * @param center_freq	Center frequency of IQ data
 		 */
 		DSP_V2(const std::vector<uint32_t>& freqs2process, 
-			const std::size_t center_freq, const std::size_t sampling_freq);
+			const std::size_t center_freq, const std::size_t sampling_freq, 
+			const std::size_t frame_size);
 
 		~DSP_V2();
 
