@@ -44,12 +44,9 @@ void testMixer(){
 	volatile bool run = true;
 	
 
-	testObj.start(input_queue, input_mutex, input_cv, output_queue, 
-		output_mutex, output_cv, &run);
 
 	std::complex<double>* testSignal = RTT::generateSinusoid(t1, f_s, N);
 	
-	auto start = std::chrono::steady_clock::now();
 	for(std::size_t i = 0; i < N; i++){
 		std::unique_lock<std::mutex> lock(input_mutex);
 		input_queue.push(testSignal[i]);
@@ -57,6 +54,9 @@ void testMixer(){
 		input_cv.notify_all();
 	}
 
+	auto start = std::chrono::steady_clock::now();
+	testObj.start(input_queue, input_mutex, input_cv, output_queue, 
+		output_mutex, output_cv, &run);
 	run = false;
 	testObj.stop();
 	auto end = std::chrono::steady_clock::now();
