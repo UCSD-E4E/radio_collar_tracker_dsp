@@ -7,6 +7,10 @@
 
 using namespace boost::accumulators;
 
+#ifdef DEBUG
+#include <fstream>
+#endif
+
 namespace RTT{
 	PingClassifier::PingClassifier(const double threshold, 
 		const std::size_t& time_start_ms, const double ms_per_sample) : 
@@ -55,6 +59,11 @@ namespace RTT{
 		std::size_t count = 0;
 		std::size_t out_count = 0;
 
+		#ifdef DEBUG
+		std::ofstream _ostr1{"classifier_in.log"};
+		std::ofstream _ostr2{"classifier_out.log"};
+		#endif
+
 		while(*run || !input_queue.empty()){
 			std::unique_lock<std::mutex> in_lock(input_mutex);
 			if(input_queue.empty()){
@@ -66,6 +75,11 @@ namespace RTT{
 				input_queue.pop();
 				count++;
 				in_lock.unlock();
+
+				#ifdef DEBUG
+				_ostr1 << value << std::endl;
+				#endif
+
 				if(value > maxVal){
 					maxVal = value;
 					maxIndex = _sample_count;
@@ -89,6 +103,10 @@ namespace RTT{
 						out_count++;
 						out_lock.unlock();
 						output_cv.notify_all();
+
+						#ifdef DEBUG
+						_ostr2 << out_count << ", " << maxIndex << ", " << maxVal << std::endl;
+						#endif
 					}
 					maxVal = std::numeric_limits<double>::lowest();
 				}
@@ -99,5 +117,9 @@ namespace RTT{
 		std::cout << "Classifier output " << out_count << " pings" << std::endl;
 		std::cout << "Mean at " << mean(acc) << std::endl;
 		std::cout << "Variance at " << variance(acc) << std::endl;
+		#ifdef DEBUG
+		_ostr1.close();
+		_ostr2.close();
+		#endif
 	}
 }
