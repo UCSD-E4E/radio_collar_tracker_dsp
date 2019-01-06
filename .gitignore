@@ -23,3 +23,5 @@ depcomp
 install-sh
 missing
 callgrind.out.*
+**.log
+oprofile_data
