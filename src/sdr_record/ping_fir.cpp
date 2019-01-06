@@ -6,6 +6,8 @@
 #include <iostream>
 #include <limits>
 
+#include <boost/circular_buffer.hpp>
+
 #ifdef DEBUG
 #include <fstream>
 #endif
@@ -23,7 +25,7 @@ namespace RTT{
 	}
 
 	PingFIR::~PingFIR(){
-		delete _filter_taps;
+		delete[] _filter_taps;
 	}
 
 	void PingFIR::start(std::queue<std::complex<double>>& input_queue, 
@@ -51,14 +53,17 @@ namespace RTT{
 		std::mutex& input_mutex, std::condition_variable& input_cv,
 		std::queue<double>& output_queue, std::mutex& output_mutex,
 		std::condition_variable& output_cv, const volatile bool* run){
+
 		#ifdef DEBUG
-		std::ofstream _ostr{"ping_fir.log"};
-		std::size_t _out_idx = 0;
+		std::ofstream _ostr1{"fir_in.log"};
+		std::ofstream _ostr2{"fir_out.log"};
 		#endif
 
 		// Local vars
-		// std::complex<double> data[_num_taps];
-		std::list<std::complex<double>> data{};
+		boost::circular_buffer<std::complex<double>> data{_num_taps};
+		for(std::size_t i = 0; i < _num_taps; i++){
+			data.push_back(std::complex<double>(0, 0));
+		}
 		const std::size_t SAMPLE_STEP = 1;
 
 		std::size_t count = 0;
@@ -70,37 +75,44 @@ namespace RTT{
 				input_cv.wait(in_lock);
 			}
 			if(input_queue.size() >= SAMPLE_STEP){
-				load_data(input_queue, data, SAMPLE_STEP, _num_taps);
+				for(std::size_t i = 0; i < SAMPLE_STEP; i++){
+					data.push_back(input_queue.front());
+					#ifdef DEBUG
+					_ostr1 << input_queue.front().real();
+					if(input_queue.front().imag() >= 0){
+						_ostr1 << "+";
+					}
+					_ostr1 << input_queue.front().imag() << "i" << std::endl;
+					#endif
+					input_queue.pop();
+				}
 				count += SAMPLE_STEP;
 				in_lock.unlock();
-				if(data.size() < _num_taps){
-					continue;
-				}
-				// std::complex<double> filter_output = convolve(data, 
-					// _filter_taps, _num_taps);
 				std::complex<double> filter_output = 0;
-				for(auto it = data.begin(); it != data.end(); it++){
-					filter_output += *it;
+				for(std::size_t i = 0; i < _num_taps; i++){
+					filter_output += data[i];
 					// std::cout << filter_output << std::endl;
 				}
+				filter_output /= std::complex<double>(_num_taps, 0);
 				double amplitude = std::abs(filter_output);
-				double dBvalue = powerToDB(amplitude);
+				double dBvalue = amplitudeToDB(amplitude);
 				// std::cout << "FIR " << dBvalue << std::endl;
 
-				#ifdef DEBUG
-				_ostr << _out_idx++ << ", " << dBvalue << ", " << amplitude << std::endl;
-				#endif
 
 				std::unique_lock<std::mutex> out_lock(output_mutex);
 				output_queue.push(dBvalue);
 				out_lock.unlock();
+				#ifdef DEBUG
+				_ostr2 << dBvalue << std::endl;
+				#endif
 				out_count++;
 				output_cv.notify_all();
 			}
 		}
 
 		#ifdef DEBUG
-		_ostr.close();
+		_ostr2.close();
+		_ostr1.close();
 		#endif
 
 		std::cout << "PingFIR consumed " << count << " samples" << std::endl;
