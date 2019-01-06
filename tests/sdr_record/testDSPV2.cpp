@@ -1,3 +1,5 @@
+// #define DEBUG
+
 #include <vector>
 #include <queue>
 #include <mutex>
@@ -17,6 +19,9 @@
 #include <cassert>
 #include <chrono>
 #include <utility.hpp>
+#include <sdr_test.hpp>
+#include <unistd.h>
+#include <syslog.h>
 
 #ifdef DEBUG
 #include <fstream>
@@ -30,7 +35,7 @@ void testCopy_threaded(){
 	// freqs.push_back(172500002);
 	// freqs.push_back(172500003);
 
-	RTT::DSP_V2 dsp(freqs, 172500000, 2000000);
+	RTT::DSP_V2 dsp(freqs, 172500000, 2000000, 1000);
 
 	std::queue<RTT::IQdataPtr> dataQueue;
 	std::mutex dataMutex;
@@ -59,7 +64,7 @@ void testCopy_threaded(){
 	auto diff = end - start;
 	std::cout << "Duration: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() << "s" << std::endl;
 	// assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count() <= 
-		// 1024.0 / 2000000));
+	// 	1024.0 / 2000000));
 	// for(std::size_t i = 0; i < dsp._frequencies.size(); i++){
 	// 	assert(dsp._innerQueues[i].size() == 1024);
 	// }
@@ -72,7 +77,9 @@ void testCopy_func(){
 	std::vector<uint32_t> freqs;
 	freqs.push_back(172500000);
 
-	RTT::DSP_V2 dsp(freqs, 172500000, 2000000);
+	std::size_t N = 4096;
+
+	RTT::DSP_V2 dsp(freqs, 172500000, 2000000, 1000);
 
 
 	std::queue<RTT::IQdataPtr> dataQueue;
@@ -84,7 +91,7 @@ void testCopy_func(){
 	std::condition_variable pingVar;
 	volatile bool ndie = false;
 
-	RTT::IQdataPtr data1(new RTT::IQdata(1024));
+	RTT::IQdataPtr data1(new RTT::IQdata(N));
 	dataQueue.push(data1);
 	
 	auto start = std::chrono::steady_clock::now();
@@ -92,9 +99,10 @@ void testCopy_func(){
 	auto end = std::chrono::steady_clock::now();
 	assert(dataQueue.empty());
 	auto diff = end - start;
-	assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count() <= 
-		1024.0 / 2000000));
-	assert(dsp._innerQueue.size() == 1024);
+	std::cout << "Duration: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() << "s" << std::endl;
+	// assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count() <= 
+	// 	N / 2000000.0));
+	assert(dsp._innerQueue.size() == N);
 	std::cout << "Done testing copy function" << std::endl;
 }
 
@@ -113,7 +121,7 @@ void testDSP_throughput(){
 	std::cout << "Testing DSP threads" << std::endl;
 	std::vector<uint32_t> freqs;
 	freqs.push_back(f_c + f1);
-	RTT::DSP_V2 testObj(freqs, f_c, f_s);
+	RTT::DSP_V2 testObj(freqs, f_c, f_s, 1000);
 
 	std::queue<RTT::IQdataPtr> dataQueue{};
 	std::mutex dataMutex{};
@@ -173,10 +181,9 @@ void testDSP_throughput(){
 	auto end = std::chrono::steady_clock::now();
 	auto diff = end - start;
 	std::cout << "Duration: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() << "s" << std::endl;
-	assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count() <= 
-		1));
+	// assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count() <= N / f_s));
 	assert(dataQueue.empty());
-	assert(testObj._processor.queue1.empty());
+	assert(testObj._processor.queue2.empty());
 	assert(!pingQueue.empty());
 	assert(pingQueue.size() == 1);
 	assert((pingQueue.front()->time_ms - 1000) / 1e3 < 0.06);
@@ -184,12 +191,53 @@ void testDSP_throughput(){
 	#ifdef DEBUG
 	_ostr.close();
 	#endif
+
+	delete[] ping;
+	delete[] test_signal;
+}
+
+void test_signal(){
+	openlog("DSPV2 Test signal", LOG_PID | LOG_PERROR, LOG_USER);
+	setlogmask(LOG_UPTO(LOG_INFO));
+	const std::size_t f_1 =		172017000;
+	const std::size_t f_s = 	  2000000;
+	const std::size_t f_c = 	172500000;
+	const std::size_t rbuf = 	    16384;
+	const std::string d_loc = "/home/ntlhui/workspace/tmp/testData/RUN_000014";
+	volatile bool run = true;
+
+	RTT::SDR_TEST sdr{d_loc};
+	std::queue<RTT::IQdataPtr> iq_q{};
+	std::mutex iq_mux{};
+	std::condition_variable iq_cv{};
+
+	std::vector<uint32_t> freqs{};
+	freqs.push_back(f_1);
+	RTT::DSP_V2 dsp(freqs, f_c, f_s, rbuf);
+	std::queue<RTT::PingPtr> ping_q{};
+	std::mutex ping_mux{};
+	std::condition_variable ping_cv{};
+
+	auto start = std::chrono::steady_clock::now();
+	sdr.startStreaming(iq_q, iq_mux, iq_cv, &run);
+	dsp.startProcessing(iq_q, iq_mux, iq_cv, ping_q, ping_mux, ping_cv, &run);
+	// sleep(1);
+	sdr.stopStreaming();
+	run = false;
+	dsp.stopProcessing();
+	auto end = std::chrono::steady_clock::now();
+
+	auto diff = end - start;
+	std::cout << "Duration: " << std::chrono::duration<double, std::ratio<1, 1>>(diff).count() << "s" << std::endl;
+
+
 }
 
 int main(int argc, char const *argv[])
 {
-	// testCopy_threaded();
-	// testCopy_func();
+	testCopy_threaded();
+	testCopy_func();
 	testDSP_throughput();
+	test_signal();
 	return 0;
 }

@@ -54,12 +54,11 @@ void test_func(){
 	auto end = std::chrono::steady_clock::now();
 	auto diff = end - start;
 	std::cout << "Duration: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() << "s" << std::endl;
-	// sleep(2);
+	// assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count()) < (double) N / f_s);
 	std::cout << "notified" << std::endl;
 	i_cv.notify_all();
 
 	assert(i_q.empty());
-
 
 }
 

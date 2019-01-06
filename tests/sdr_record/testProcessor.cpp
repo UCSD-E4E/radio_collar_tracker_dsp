@@ -18,8 +18,12 @@
 #include <condition_variable>
 #include <ping.hpp>
 #include <unistd.h>
+#include <syslog.h>
+#include <chrono>
 
 void testSimulated(){
+	openlog("testSimulatedProcessor", LOG_PID | LOG_PERROR, LOG_USER);
+	setlogmask(LOG_UPTO(LOG_INFO));
 	const std::size_t t1 = 100000;
 	const std::size_t f_s = 2000000;
 	const std::size_t f_c = 172500000;
@@ -51,24 +55,30 @@ void testSimulated(){
 
 	bool run = true;
 
-	_proc.start(i_q, i_mux, i_cv, o_q, o_mux, o_cv, &run);
 	for(std::size_t i = 0; i < N; i++){
 		std::unique_lock<std::mutex> lock(i_mux);
 		i_q.push(test_signal[i]);
 		lock.unlock();
 		i_cv.notify_all();
 	}
-	sleep(1);
+	auto start = std::chrono::steady_clock::now();
+	_proc.start(i_q, i_mux, i_cv, o_q, o_mux, o_cv, &run);
+	// sleep(1);
 	run = false;
+	_proc.stop();
+	auto end = std::chrono::steady_clock::now();
+	auto diff = end - start;
+	std::cout << "Duration: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() << "s" << std::endl;
+	// assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count()) <= (double)N / f_s);
 
 	assert(i_q.empty());
 	std::cout << o_q.size() << std::endl;
 
 
 
-	_proc.stop();
-	delete(test_signal);
-	delete(ping);
+	delete[] test_signal;
+	delete[] ping;
+	closelog();
 }
 
 void testRecorded(){

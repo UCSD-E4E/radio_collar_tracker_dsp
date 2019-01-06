@@ -31,7 +31,7 @@ void testThroughPut(){
 int main(int argc, char const* argv[]){
 	openlog("sdr_record", LOG_PERROR, LOG_USER);
 	setlogmask(LOG_UPTO(8));
-	RTT::PingLocalizer localizer{}                                ;
+	RTT::PingLocalizer localizer{};
 
 	volatile bool run = true;
 
@@ -43,7 +43,7 @@ int main(int argc, char const* argv[]){
 
 	std::vector<uint32_t> freqs;
 	freqs.push_back(172017000);
-	RTT::DSP_V2 dsp(freqs, 172500000, 2000000);
+	RTT::DSP_V2 dsp(freqs, 172500000, 2000000, sdr.rx_buffer_size);
 	std::queue<RTT::PingPtr> pingQueue{};
 	std::mutex pingMutex{};
 	std::condition_variable pingVar{};

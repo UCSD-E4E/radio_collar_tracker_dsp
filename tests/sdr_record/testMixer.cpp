@@ -18,7 +18,7 @@ std::complex<double>* generateMixedSinusoid(std::int64_t t1, std::int64_t t2,
 	std::size_t f_s, std::size_t N, double amplitude){
 	std::complex<double>* retval = new std::complex<double>[N];
 	for(std::size_t j = 0; j < N; j++){
-		retval[j] = amplitude * amplitude * (cexp(2.0i * M_PI * (t1 + t2) * j / f_s));
+		retval[j] = amplitude * amplitude * (std::exp(std::complex<double>(0, 2.0 * M_PI * (t1 + t2) * j / f_s)));
 	}
 	return retval;
 }

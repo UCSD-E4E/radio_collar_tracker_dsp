@@ -65,7 +65,9 @@ void testDownsample_threaded(){
 }
 
 void testDownsample_func(){
-	RTT::Resampler testObj(1, 1000);
+	std::size_t factor = 1000;
+	std::size_t N = 10000;
+	RTT::Resampler testObj(1, factor);
 	std::queue<std::complex<double>> input_queue{};
 	std::mutex input_mutex{};
 	std::condition_variable input_cv{};
@@ -73,7 +75,7 @@ void testDownsample_func(){
 	std::mutex output_mutex{};
 	std::condition_variable output_cv{};
 	volatile bool run = true;
-	for(std::size_t i = 0; i < 10000; i++){
+	for(std::size_t i = 0; i < N; i++){
 		// std::cout << "Try " << i << std::endl;
 		std::unique_lock<std::mutex> lock(input_mutex);
 		input_queue.push(std::complex<double>(i, 0));
@@ -91,11 +93,12 @@ void testDownsample_func(){
 	assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count() <= 
 		10000.0 / 2000000));
 	assert(input_queue.size() == 0);
-	assert(output_queue.size() == 100);
-	for(std::size_t i = 0; i < 100; i++){
+	assert(output_queue.size() == N / factor);
+	for(std::size_t i = 0; i < N; i+= factor){
 		std::complex<double> value = output_queue.front();
 		output_queue.pop();
-		double ref_val = (i * 100.0 + ((i + 1) * 100.0 - 1)) / 2;
+		double ref_val = (i + ((i + factor) - 1)) / 2.0;
+		std::cout << value << ", " << ref_val << std::endl;
 		assert(std::abs(value.real() - ref_val) < 0.001);
 		assert(std::abs(value.imag()) < 0.001);
 	}
@@ -113,10 +116,10 @@ void testConstructor(){
 
 int main(int argc, char const *argv[])
 {
-	// testConstructor();
-	// testUpsample();
-	// testDownsample_threaded();
+	testConstructor();
+	testUpsample();
+	testDownsample_threaded();
 	testDownsample_func();
-	// testResample();
+	testResample();
 	return 0;
 }
