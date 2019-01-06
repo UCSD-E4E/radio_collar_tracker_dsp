@@ -15,4 +15,5 @@ testResampler
 testSDRTest
 testUtility
 testIQdata
+testRemixer
 .deps/
