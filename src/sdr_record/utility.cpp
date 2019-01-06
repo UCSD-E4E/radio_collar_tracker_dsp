@@ -1,10 +1,13 @@
 #include "utility.hpp"
-#include <complex.h>
 #include <queue>
 #include <complex>
 #include <list>
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
+#endif
+
+#ifndef M_NLOG10
+	#define M_NLOG10 0.301029995663981195
 #endif
 
 namespace RTT{
@@ -13,8 +16,8 @@ namespace RTT{
 		double amplitude){
 		std::complex<double>* retval = new std::complex<double>[length];
 		for(std::size_t j = 0; j < length; j++){
-			retval[j] = amplitude * cexp(2.0i * M_PI * frequency * j /
-				sampling_frequency);
+			retval[j] = amplitude * std::exp(std::complex<double>(0, 2.0 * 
+				M_PI * frequency * j / sampling_frequency));
 		}
 		return retval;
 	}
@@ -77,7 +80,8 @@ namespace RTT{
 	}
 
 	double amplitudeToDB(double amplitude){
-		return 20 * log10(amplitude);
+		// return 20 * log10(amplitude);
+		return 20 * M_NLOG10 * log2(amplitude);
 	}
 
 	double powerToDB(double power){
