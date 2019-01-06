@@ -74,14 +74,12 @@ namespace RTT{
 		const volatile bool* ndie){
 
 		syslog(LOG_INFO, "SDR Test starting threads");
-		_input_cv = &input_cv;
 
 		_thread = new std::thread(&SDR_TEST::_process, this, 
 			std::ref(input_queue), std::ref(input_mutex), std::ref(input_cv),
 			ndie);
 	}
 	void SDR_TEST::stopStreaming(){
-		_input_cv->notify_all();
 		_thread->join();
 		delete _thread;
 	}
@@ -97,7 +95,7 @@ namespace RTT{
 		std::int16_t buffer[2 * _buffer_size];
 		auto start = std::chrono::steady_clock::now();
 
-		for(std::size_t i = 0; i < _files.size(); i++){
+		for(std::size_t i = 0; i < 1; i++){
 			_stream.open(_files[i].c_str(), std::ios::binary | std::ios::in);
 			if(!_stream){
 				std::cout << "Stream not ready!" << std::endl;
@@ -142,13 +140,15 @@ namespace RTT{
 				buffer_count++;
 				olock.unlock();
 				data_cv.notify_all();
+				syslog(LOG_NOTICE, "SDR output %d", _buffer_size);
 				auto measure = std::chrono::steady_clock::now();
 				auto diff = measure - start;
+				syslog(LOG_NOTICE, "SDR sleeping");
 				usleep(ms_per_buffer * 1000);
-				if(!*ndie){
-					_stream.close();
-					return;
-				}
+				// if(!*ndie){
+				// 	_stream.close();
+				// 	return;
+				// }
 			}
 			std::cout << "issued all samples for file" << std::endl;
 
