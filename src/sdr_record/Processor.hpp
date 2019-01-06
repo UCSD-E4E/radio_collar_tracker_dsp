@@ -1,10 +1,11 @@
 #ifndef __PROCESSOR_H__
 #define __PROCESSOR_H__
 
-#include "mixer.hpp"
-#include "resampler.hpp"
+// #include "mixer.hpp"
+// #include "resampler.hpp"
 #include "ping_fir.hpp"
 #include "ping_classifier.hpp"
+#include "remixer.hpp"
 
 namespace RTT{
 	class Processor{
@@ -30,13 +31,17 @@ namespace RTT{
 
 		const double _initial_threshold;
 
-		Mixer _mixer;
+		// Mixer _mixer;
+
+		// volatile bool _mixer_run = true;
+
+		// Resampler _resampler;
+
+		// volatile bool _resampler_run = true;
+
+		Remixer _mixer;
 
 		volatile bool _mixer_run = true;
-
-		Resampler _resampler;
-
-		volatile bool _resampler_run = true;
 
 		PingFIR _fir;
 
@@ -46,9 +51,9 @@ namespace RTT{
 
 		volatile bool _classifier_run = true;
 
-		std::queue<std::complex<double>> queue1{};
-		std::mutex mutex1{};
-		std::condition_variable var1{};
+		// std::queue<std::complex<double>> queue1{};
+		// std::mutex mutex1{};
+		// std::condition_variable var1{};
 
 		std::queue<std::complex<double>> queue2{};
 		std::mutex mutex2{};
@@ -66,7 +71,7 @@ namespace RTT{
 			const std::size_t down_factor = 1000, 
 			const std::size_t up_factor = 1, 
 			const std::size_t filter_freq = 0,
-			const double initial_threshold = 3.0);
+			const double initial_threshold = -20);
 
 		/**
 		 * Takes in a sequence of complex<double> IQ samples, and identifies

@@ -21,8 +21,10 @@ namespace RTT{
 		_upsampling_factor(up_factor),
 		_filter_freq(filter_freq),
 		_initial_threshold(initial_threshold),
-		_mixer((std::int64_t)frequency - (std::int64_t)center_freq - filter_freq, sampling_freq),
-		_resampler(up_factor, down_factor),
+		// _mixer((std::int64_t)frequency - (std::int64_t)center_freq - filter_freq, sampling_freq),
+		// _resampler(up_factor, down_factor),
+		_mixer((std::int64_t)(filter_freq - (frequency - center_freq)), 
+			sampling_freq, up_factor, down_factor),
 		_fir(filter_freq, sampling_freq / down_factor, fir_size),
 		_classifier{_initial_threshold, _time_start_ms, 
 			down_factor * 1000.0 / sampling_freq}{
@@ -32,10 +34,11 @@ namespace RTT{
 		std::queue<PingPtr>& output_queue, std::mutex& output_mutex,
 		std::condition_variable& output_cv, const volatile bool* run){
 
-		_mixer.start(input_queue, input_mutex, input_cv, queue1, mutex1, var1, 
-			&_mixer_run);
-		_resampler.start(queue1, mutex1, var1, queue2, mutex2, var2, 
-			&_resampler_run);
+		// _mixer.start(input_queue, input_mutex, input_cv, queue1, mutex1, var1, 
+		// 	&_mixer_run);
+		// _resampler.start(queue1, mutex1, var1, queue2, mutex2, var2, 
+		// 	&_resampler_run);
+		_mixer.start(input_queue, input_mutex, input_cv, queue2, mutex2, var2, &_mixer_run);
 		_fir.start(queue2, mutex2, var2, queue3, mutex3, var3, &_fir_run);
 		_classifier.start(queue3, mutex3, var3, output_queue, output_mutex, 
 			output_cv, &_classifier_run);
@@ -47,11 +50,11 @@ namespace RTT{
 
 	void Processor::stop(){
 		_mixer_run = false;
-		std::cout << "Stopping mixer" << std::endl;
+		std::cout << "Stopping remixer" << std::endl;
 		_mixer.stop();
-		_resampler_run = false;
-		std::cout << "Stopping resampler" << std::endl;
-		_resampler.stop();
+		// _resampler_run = false;
+		// std::cout << "Stopping resampler" << std::endl;
+		// _resampler.stop();
 		_fir_run = false;
 		std::cout << "Stopping fir" << std::endl;
 		_fir.stop();
