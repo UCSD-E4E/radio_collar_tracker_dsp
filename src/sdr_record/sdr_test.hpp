@@ -2,7 +2,7 @@
 #define __SDR_TEST_H__
 
 #include "iq_data.hpp"
-#include "sdr.hpp"
+// #include "sdr.hpp"
 #include <string>
 #include <queue>
 #include <mutex>
@@ -11,7 +11,7 @@
 #include <fstream>
 #include <thread>
 namespace RTT{
-	class SDR_TEST : public SDR{
+	class SDR_TEST{
 	private:
 		std::string _input_dir;
 		std::fstream _stream;
@@ -27,6 +27,7 @@ namespace RTT{
 			std::condition_variable&, const volatile bool* ndie);
 
 	public:
+		const size_t rx_buffer_size = 16384;
 		SDR_TEST(std::string input_dir);
 		~SDR_TEST();
 
