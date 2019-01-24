@@ -5,3 +5,4 @@ maintainer-clean-local:
 	-rm compile
 	-rm config.h-in~ config.sub
 	-rm *.log
+	-rm -rf oprofile_data
