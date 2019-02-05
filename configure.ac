@@ -40,7 +40,7 @@ AX_BOOST_THREAD
 # Checks for Python libraries
 AC_PYTHON_MODULE([pynmea2], [fatal])
 AC_PYTHON_MODULE([serial], [fatal])
-AC_PYTHON_MODULE([mraa], [fatal])
+# AC_PYTHON_MODULE([mraa], [fatal])
 
 AC_PYTHON_MODULE([subprocess], [fatal])
 AC_PYTHON_MODULE([os], [fatal])
