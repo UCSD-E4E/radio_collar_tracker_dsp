@@ -23,8 +23,8 @@
  */
 
 #include "sdr_record.hpp"
-#include "sdr.hpp"
-// #include "sdr_test.hpp"
+// #include "sdr.hpp"
+#include "sdr_test.hpp"
 #include "dsp.hpp"
 #include "dspv1.hpp"
 // #include "dspv2.hpp"
@@ -151,7 +151,7 @@ namespace RTT{
 			syslog(LOG_INFO, "Initializing Radio");
 			// sdr = new RTT::SDR(args.gain, args.rate, args.rx_freq);
 			sdr = new RTT::SDR_TEST(std::string("/home/ntlhui/workspace/tmp/testData"));
-		}catch(uhd::key_error e){
+		}catch(std::runtime_error e){
 			syslog(LOG_CRIT, "No devices found!");
 			exit(1);
 		}
