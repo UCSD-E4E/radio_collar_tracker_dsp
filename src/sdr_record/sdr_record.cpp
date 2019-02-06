@@ -23,8 +23,14 @@
  */
 
 #include "sdr_record.hpp"
-// #include "sdr.hpp"
-#include "sdr_test.hpp"
+#ifdef TEST_SDR
+	#include "sdr_test.hpp"
+	#ifndef SDR_TEST_DATA
+		#define SDR_TEST_DATA "/home/ntlhui/workspace/tmp/testData"
+	#endif
+#else
+	#include "sdr.hpp"
+#endif
 #include "dsp.hpp"
 #include "dspv1.hpp"
 // #include "dspv2.hpp"
@@ -149,8 +155,11 @@ namespace RTT{
 
 		try{
 			syslog(LOG_INFO, "Initializing Radio");
-			// sdr = new RTT::SDR(args.gain, args.rate, args.rx_freq);
-			sdr = new RTT::SDR_TEST(std::string("/home/ntlhui/workspace/tmp/testData"));
+			#ifdef TEST_SDR
+			sdr = new RTT::SDR_TEST(std::string(SDR_TEST_DATA));
+			#else
+			sdr = new RTT::SDR(args.gain, args.rate, args.rx_freq);
+			#endif
 		}catch(std::runtime_error e){
 			syslog(LOG_CRIT, "No devices found!");
 			exit(1);

@@ -5,8 +5,11 @@
 #include <mutex>
 #include <queue>
 #include <vector>
-// #include "sdr.hpp"
+#ifdef TEST_SDR
 #include "sdr_test.hpp"
+#else
+#include "sdr.hpp"
+#endif
 #include "dsp.hpp"
 #include "dspv2.hpp"
 #include "localization.hpp"
@@ -41,7 +44,11 @@ namespace RTT{
 		std::mutex ping_queue_mutex;
 		std::condition_variable ping_var;
 
+		#ifdef TEST_SDR
 		RTT::SDR_TEST* sdr;
+		#else
+		RTT::SDR* sdr
+		#endif
 		RTT::DSP* dsp;
 		RTT::PingLocalizer* localizer;
 
