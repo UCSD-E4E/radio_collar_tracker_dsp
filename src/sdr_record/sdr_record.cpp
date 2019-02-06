@@ -32,8 +32,8 @@
 	#include "sdr.hpp"
 #endif
 #include "dsp.hpp"
-#include "dspv1.hpp"
-// #include "dspv2.hpp"
+// #include "dspv1.hpp"
+#include "dspv2.hpp"
 #include "localization.hpp"
 #include <string>
 #include <mutex>

@@ -47,7 +47,7 @@ namespace RTT{
 		#ifdef TEST_SDR
 		RTT::SDR_TEST* sdr;
 		#else
-		RTT::SDR* sdr
+		RTT::SDR* sdr;
 		#endif
 		RTT::DSP* dsp;
 		RTT::PingLocalizer* localizer;
