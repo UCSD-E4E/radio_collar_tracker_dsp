@@ -1,9 +1,7 @@
 # Dockerfile for RCT
 
 # Usage: docker build -t rct .
-# docker run -t -d --rm --name rct --device=/dev/bus/usb/ rct
-# docker exec -it rct /bin/bash
-# docker container stop rct
+# docker run -it --rm --name rct --device=/dev/bus/usb/ rct
 FROM ubuntu:16.04
 RUN apt-get update && apt-get install -y git vim htop gdb valgrind cmake \
 	build-essential python libboost-all-dev python-mako python-pip \
