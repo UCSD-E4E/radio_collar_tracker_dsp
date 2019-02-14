@@ -2,6 +2,9 @@
 
 # Usage: docker build -t rct .
 # docker run -it --rm --name rct --device=/dev/bus/usb/ rct
+
+# For debugging, use:
+# docker run -it --rm --name rct -v /home/ntlhui/workspace/radio_collar_tracker_drone/:/root/code -v /home/ntlhui/workspace/tmp/testData/:/home/ntlhui/workspace/tmp/testData --privileged rct
 FROM ubuntu:16.04
 RUN apt-get update && apt-get install -y git vim htop gdb valgrind cmake \
 	build-essential python libboost-all-dev python-mako python-pip \
@@ -42,3 +45,5 @@ RUN git checkout online_proc
 RUN ./autogen.sh
 RUN ./configure DLIB_INCLUDEDIR=/root/dlib
 RUN make
+
+RUN mkdir /root/code
