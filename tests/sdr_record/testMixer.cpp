@@ -63,7 +63,9 @@ void testMixer(){
 	auto diff = end - start;
 	std::cout << "Duration: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() << "s" << std::endl;
 	
+	#ifndef DEBUG
 	assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count() <= N / double(f_s)));
+	#endif
 	
 	assert(input_queue.empty());
 	std::cout << output_queue.size() << std::endl;
@@ -109,7 +111,9 @@ void testFunc(){
 	auto end = std::chrono::steady_clock::now();
 	auto diff = end - start;
 	std::cout << "Duration: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() << "s" << std::endl;
+	#ifndef DEBUG
 	assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count() <= 2000000.0 / 2000000));
+	#endif
 	assert(input_queue.empty());
 	std::cout << output_queue.size() << std::endl;
 	assert(output_queue.size() == 2000000);
