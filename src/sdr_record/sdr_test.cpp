@@ -37,13 +37,18 @@
 #include <sys/stat.h>
 #include <syslog.h>
 
+// #define DEBUG
+
+#ifdef DEBUG
+#include <fstream>
+#endif
 
 namespace RTT{
 	SDR_TEST::SDR_TEST(std::string input_dir) : 
 		_input_dir(input_dir),
 		_stream(),
 		_files(),
-		_buffer_size(65536),
+		_buffer_size(16384),
 		_sampling_freq(2000000){
 		glob_t glob_output;
 		std::ostringstream globfilestream{};
@@ -93,6 +98,11 @@ namespace RTT{
 			_sampling_freq * 1000);
 
 		std::int16_t buffer[2 * _buffer_size];
+
+		#ifdef DEBUG
+		std::ofstream _ostr{"sdr_test.log"};
+		#endif
+
 		auto start = std::chrono::steady_clock::now();
 
 		for(std::size_t i = 0; i < 1; i++){
@@ -134,6 +144,13 @@ namespace RTT{
 						buffer[2 * k + 1]);
 					// std::cout << buffer[2 * k] << ", " << buffer[2 * k + 1] << std::endl;
 					sample_count++;
+					#ifdef DEBUG
+					_ostr << buffer[2*k];
+					if(buffer[2*k+1] >= 0){
+						_ostr << "+";
+					}
+					_ostr << buffer[2*k+1] << "i" << std::endl;
+					#endif
 				}
 				std::unique_lock<std::mutex> olock(data_mutex);
 				data_queue.push(databuf);
@@ -154,6 +171,10 @@ namespace RTT{
 
 			_stream.close();
 		}
+		#ifdef DEBUG
+		_ostr.close();
+		#endif
+		std::cout << "TEST SDR issued " << buffer_count << " data packets" << std::endl;
 		std::cout << "Test SDR output " << sample_count << " samples" << std::endl;
 		std::cout << "You can stop now" << std::endl;
 	}
