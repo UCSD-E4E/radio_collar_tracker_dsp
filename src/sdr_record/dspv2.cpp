@@ -5,6 +5,8 @@
 #include <complex.h>
 #include <syslog.h>
 
+#define DEBUG
+
 #ifdef DEBUG
 #include <fstream>
 #endif
@@ -75,16 +77,30 @@ namespace RTT{
 		return i;
 	}
 
+	std::size_t IQdataToDouble(IQdataPtr data_obj, std::vector<std::complex<double>>& data, std::size_t N){
+		std::vector<short_cpx>& short_vec =*data_obj->data;
+		std::size_t i = 0;
+		for(; i < short_vec.size() && i < N; i++){
+			data[i] = std::complex<double>(short_vec[i].real() / 4096.0, short_vec[i].imag() / 4096.0);
+		}
+		return i;
+	}
+
 	void DSP_V2::copyQueue(const volatile bool* run, 
 		std::queue<IQdataPtr>& inputQueue, std::mutex& inputMutex, 
 		std::condition_variable& inputVar){
 
-		#ifdef DEBUG
-		std::ofstream _ostr{"copy.log"};
-		std::size_t _output_idx = 0;
-		#endif
 
-		std::complex<double>* double_data = new std::complex<double>[_frame_size];
+		#ifdef DEBUG
+		std::ofstream _ostr{"dspv2_copy.log"};
+		std::size_t _output_idx = 0;
+		std::size_t _output_idx_2 = 0;
+		#endif
+		// std::complex<double>* double_data = new std::complex<double>[_frame_size];
+		std::vector<std::complex<double>>* double_data = new std::vector<std::complex<double>>{};
+		double_data->resize(_frame_size);
+		std::cout << "_frame_size: " << _frame_size << std::endl;
+		
 
 		// Thread body
 		while(*run || !inputQueue.empty()){
@@ -100,10 +116,13 @@ namespace RTT{
 				IQdataPtr dataObj = inputQueue.front();
 				// pop queue
 				inputQueue.pop();
+				#ifdef DEBUG
+				_output_idx_2++;
+				#endif
 				// release mutex
 				inputLock.unlock();
 				// convert to doubles
-				std::size_t numVals = IQdataToDouble(dataObj, double_data, _frame_size);
+				std::size_t numVals = IQdataToDouble(dataObj, *double_data, _frame_size);
 
 				// update time_start_ms
 				if(time_start_ms == 0){
@@ -128,10 +147,15 @@ namespace RTT{
 				// 	_innerVars[i].notify_all();
 				// }
 				std::unique_lock<std::mutex> innerLock(_innerMutex);
-				for(std::size_t j = 0; j < dataObj->size(); j++){
-					_innerQueue.push(double_data[j]);
+				for(std::size_t j = 0; j < _frame_size; j++){
+					_innerQueue.push((*double_data)[j]);
 					#ifdef DEBUG
-					_ostr << _output_idx++ << ", " << double_data[j].real() << ", " << double_data[j].imag() << std::endl;
+					_output_idx++;
+					_ostr << (*double_data)[j].real();
+					if((*double_data)[j].imag() >= 0){
+						_ostr << "+";
+					}
+					_ostr << (*double_data)[j].imag() << "i" << std::endl;
 					#endif
 				}
 				innerLock.unlock();
@@ -141,6 +165,8 @@ namespace RTT{
 
 		#ifdef DEBUG
 		_ostr.close();
+		std::cout << "DSP Copy received " << _output_idx_2 << " data objects" << std::endl;
+		std::cout << "DSP Copy output " << _output_idx << " samples" << std::endl;
 		#endif
 		delete double_data;
 	}
