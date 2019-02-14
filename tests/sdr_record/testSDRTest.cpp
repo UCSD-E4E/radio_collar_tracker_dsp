@@ -24,8 +24,9 @@ void testConstructor(){
 }
 
 void testThroughput(){
-	RTT::SDR_TEST testObj("/home/ntlhui/workspace/tmp/");
-	assert(testObj._files.size() == 4);
+	RTT::SDR_TEST testObj("/home/ntlhui/workspace/tmp/testData/");
+	assert(testObj._files.size() == 1);
+	double maxTime = 67108864 / 4 / 2000000.0 * testObj._files.size();
 	
 	std::queue<RTT::IQdataPtr> input_queue;
 	std::mutex input_mutex;
@@ -38,6 +39,9 @@ void testThroughput(){
 	auto end = std::chrono::steady_clock::now();
 	auto diff = end - start;
 	std::cout << "Duration: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() << "s" << std::endl;
+	double time_elapsed = std::chrono::duration <double, std::ratio<1, 1>> (diff).count();
+	assert(abs(time_elapsed / maxTime - 1) < 0.1);
+	std::cout << "Difference: " << time_elapsed / maxTime - 1 << '%' << std::endl;
 	assert(!input_queue.empty());
 }
 

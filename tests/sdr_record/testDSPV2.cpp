@@ -203,7 +203,7 @@ void test_signal(){
 	const std::size_t f_s = 	  2000000;
 	const std::size_t f_c = 	172500000;
 	const std::size_t rbuf = 	    16384;
-	const std::string d_loc = "/home/ntlhui/workspace/tmp/testData/RUN_000014";
+	const std::string d_loc = "/home/ntlhui/workspace/tmp/testData";
 	volatile bool run = true;
 
 	RTT::SDR_TEST sdr{d_loc};
