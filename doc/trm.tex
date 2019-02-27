@@ -1,14 +1,11 @@
 \documentclass{report}
-\usepackage{draftwatermark}
+% \usepackage{draftwatermark}
 \title{Radio Collar Tracker Technical Reference Manual}
 \author{Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
 \date{\today\\v0.1}
-\usepackage{fullpage}
-\usepackage{bookmark}
+\usepackage{fullpage,bookmark,hyperref,listings,lmodern}
 \usepackage[toc,nonumberlist]{glossaries}
 \makeglossaries
-\usepackage{hyperref}
-\usepackage{lmodern}
 \hypersetup{
     colorlinks,
     citecolor=black,
@@ -17,7 +14,6 @@
     urlcolor=blue
 }
 \renewcommand*{\chapterautorefname}{Chapter}
-\usepackage{listings}
 \lstset{
 	basicstyle=\ttfamily,
 	breaklines=true
@@ -27,7 +23,94 @@
 	\tableofcontents
 	\listoffigures
 	\listoftables
+	\lstlistoflistings
 	\chapter{Payload}
+		\section{UP Core}
+			\subsection{Locating the UP Core}
+				The UP Core is currently configured to automatically connect to either the Sealab or UCSD-Protected networks.  It has a hostname of e4e-UPCORE-1.
+
+				At current, the Sealab network is configured as a bridge to the UCSD network, so all devices can be accessed via hostname.dynamic.ucsd.edu.
+
+				The UP Core can always be accessed (on UCSD campus) at e4e-upcore-1.dynamic.ucsd.edu.
+
+				Due to this network configuration, the UP Core is accessible only via SSH public key authentication.  To add a public key, append the appropriate key to \lstinline[language=sh]{/home/e4e/.ssh/authorized_keys}.
+		\section{UI Board} \label{sec:ui}
+			\subsection{Flashing the UI Board} \label{ssec:flash_ui}
+				The UI Board currently uses an Atmel ATmega32u4.  The best way to flash this is to use the Dragon ISP (In System Programmer) to load the program into flash.  The recommended way to interact with the Dragon ISP for Atmel microcontrollers is by using \lstinline[language=sh]{avrdude}.  See Listing \ref{lst:avrdude_usage} for details on specific command line options.
+
+				For the UI Board, use the following options:
+
+				\begin{itemize}
+					\item \lstinline{partno}: \lstinline{m32u4}
+					\item \lstinline{bitclock}: \lstinline{10}
+					\item \lstinline{programmer}: \lstinline{dragon_isp}
+					\item \lstinline{port}: \lstinline{usb}
+					\item \lstinline{memtype}: \lstinline{flash}
+				\end{itemize}
+				
+				For example, if we were to flash the file \lstinline{foo.hex} to the UI Board, we would use the command in Listing \ref{lst:avrdude_example}.
+
+				\begin{lstlisting}[language=sh, caption={Example avrdude command}, label={lst:avrdude_example}]
+avrdude -p m32u4 -c dragon_isp -B 10 -P usb -U flash:w:foo.hex
+				\end{lstlisting}
+
+				\begin{lstlisting}[caption={\lstinline{avrdude} usage}, label={lst:avrdude_usage}]
+Usage: avrdude [options]
+Options:
+  -p <partno>                Required. Specify AVR device.
+  -b <baudrate>              Override RS-232 baud rate.
+  -B <bitclock>              Specify JTAG/STK500v2 bit clock period (us).
+  -C <config-file>           Specify location of configuration file.
+  -c <programmer>            Specify programmer type.
+  -D                         Disable auto erase for flash memory
+  -i <delay>                 ISP Clock Delay [in microseconds]
+  -P <port>                  Specify connection port.
+  -F                         Override invalid signature check.
+  -e                         Perform a chip erase.
+  -O                         Perform RC oscillator calibration (see 
+                             AVR053). 
+  -U <memtype>:r|w|v:<filename>[:format]
+                             Memory operation specification.
+                             Multiple -U options are allowed, each request
+                             is performed in the order specified.
+  -n                         Do not write anything to the device.
+  -V                         Do not verify.
+  -u                         Disable safemode, default when running from a
+                             script.
+  -s                         Silent safemode operation, will not ask you 
+                             if fuses should be changed back.
+  -t                         Enter terminal mode.
+  -E <exitspec>[,<exitspec>] List programmer exit specifications.
+  -x <extended_param>        Pass <extended_param> to programmer.
+  -y                         Count # erase cycles in EEPROM.
+  -Y <number>                Initialize erase cycle # in EEPROM.
+  -v                         Verbose output. -v -v for more.
+  -q                         Quell progress output. -q -q for less.
+  -l logfile                 Use logfile rather than stderr for 
+                             diagnostics.
+  -?                         Display this usage.
+				\end{lstlisting}
+
+			\subsection{Compiling Programs for the UI Board} \label{ssec:ui_compile}
+				\subsubsection{Arduino IDE} \label{sssec:ui_arduino_compile}
+					To use the Arduino IDE to compile programs, load the code into the Arduino IDE.  In the IDE, set the \lstinline{Board} option to \lstinline{Arduino Leonardo}, and enable verbose output for compilation.
+
+					Compile the code by clicking the \lstinline{Verify} button, or by selecting \lstinline{Verify/Compile} from the \lstinline{Sketch} menu.  In the output area, look for the line that invokes \lstinline{avr-objcopy} and outputs a file that hax the \lstinline{.hex} extension.  This is the file that needs to be uploaded to the UI Board using the instructions in Subsection \ref{ssec:flash_ui}.
+
+				\subsubsection{avr-gcc} \label{sssec:ui_make_compile}
+					If the Arduino IDE is not available, or not an option, we can use the AVR compilation toolchain.  This is a version of \lstinline{gcc} that compiles specifically to the AVR instruction set.
+
+					In general, use \lstinline{avr-g++} or \lstinline{avr-gcc} to compile the individual object files as appropriate.  Then use \lstinline{avr-g++} to link all the object files and libraries into an \lstinline{.elf} (Executable and Linkable Format).  Finally, use \lstinline{avr-objcopy} to copy the text and data portions of the program into the appropriate locations in the \lstinline{.hex} file (Intel Hexcode).
+
+					An example compilation may look like the following:
+
+					\begin{lstlisting}[language=sh, caption={Example avr-gcc compilation}, label={lst:avr-gcc_example}]
+avr-g++ -c test.cpp -o test.o
+avr-g++ -o test.elf test.o
+avr-objcopy -j .text -j .data -O ihex test.elf test.hex
+					\end{lstlisting}
+
+					See \url{https://github.com/UCSD-E4E/radio_collar_tracker_drone/blob/ui_board/src/arduino/Makefile} for a makefile containing the rules to compile, link, and format the program.
 		\section{Payload Configuration}
 			All configuration options are set in the file \lstinline[language=sh]{/usr/local/etc/rct_config}.  This file is owned by \lstinline[language=sh]{root}, and should have permissions set to \lstinline{644}.
 			\subsection{Center Frequency}
@@ -39,13 +122,13 @@
 			\subsection{Initializing the USRP B200-mini(-i)}
 				The USRP B200-mini and USRP B200-mini-i are not capable of retaining an FPGA image between boots.  This image needs to be flashed every boot.  This can be accomplished via command line.
 
-				\begin{lstlisting}[language=bash]
+				\begin{lstlisting}[language=sh]
 sudo uhd_usrp_probe --args="type=b200" --init-only
 				\end{lstlisting}
 
 				Images can be downloaded on Linux systems via command line.  This requires at least 200 MB of disk space.
 
-				\begin{lstlisting}[language=bash]
+				\begin{lstlisting}[language=sh]
 sudo uhd_images_downloader
 				\end{lstlisting}
 		\section{Payload Autostart}
