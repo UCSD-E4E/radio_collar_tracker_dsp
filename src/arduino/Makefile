@@ -29,7 +29,7 @@ OBJ			=	ui_core.o nmea.o HMC5983.o
 .PHONY: all install clean
 
 $(HEX): $(ELF)
-	${OBJCOPY} -O ihex -R .eeprom $< $@
+	${OBJCOPY} -j .text -j .data -O ihex $< $@
 
 $(ELF): $(OBJ) core.a
 	${LD} -o $@ $^ $(LDFLAGS)
@@ -66,6 +66,9 @@ core.a: ${AVRLIB_OBJ} $(AVRC_OBJ) $(AVRCXX_OBJ) ${WIRE_C_OBJ} ${WIRE_CXX_OBJ}
 install: $(HEX)
 	# ./reset.py $(PORT)
 	avrdude -v -c avr109 -p $(DEVICE) -P ${PORT} -U flash:w:$< -C $(LIBRARY_DIR)/../../../tools/avrdude.conf -b 57600 -D -V
+
+install-dragon: $(HEX)
+	avrdude -p m32u4 -c dragon_isp -B 10 -P usb -U flash:w:$<
 
 clean:
 	rm -f $(AVRC_OBJ) $(AVRLIB_OBJ) $(AVRCXX_OBJ)
