@@ -27,4 +27,4 @@ trm.pdf: trm.tex
 	pdflatex -halt-on-error trm.tex -output-directory .
 	makeglossaries trm
 	pdflatex -halt-on-error trm.tex -output-directory .
-	-rm *.aux *.glg *.glo *.gls *.ist *.log *.toc *.lof *.lot
+	-rm *.aux *.glg *.glo *.gls *.ist *.log *.toc *.lof *.lot *.lol
