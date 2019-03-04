@@ -21,42 +21,64 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <Arduino.h>
-#include <pins_arduino.h>
 #include "nmea.hpp"
 #include "HMC5983.hpp"
+#include <stdio.h>
+#include "ui_core.hpp"
+#include "Sensor_Module.hpp"
+#include "Status_Module.hpp"
 
-NMEA gps(ALL);
+#define SENSOR_PACKET_MAX_LEN 128
+
 HMC5983 compass;
 
-float lat;
-float lon;
-float time;
-double hdg;
+int ref = 1;
+int count = 0;
+int state = 0;
+char sensor_packet_buf[SENSOR_PACKET_MAX_LEN];
+StatusPacket status;
+Sensor_Module sensor(&status.gps);
+Status_Module obc(&status);
+
 
 void setup() {
 	Serial.begin(9600); // via USB
 	Serial1.begin(9600); // GPS
-	compass.begin(NULL);
+	pinMode(9, OUTPUT);
+	// Broken!!!
+	// compass.begin(NULL);
+	// status.gps = GPS_INIT;
+	// obc = new Status_Module(&status);
+	// sensor = new Sensor_Module(&status.gps);
 }
 
-
 void loop() {
+	// Serial.println("Hello");
 	if (Serial1.available() > 0){
 		char c = Serial1.read();
-		if(gps.decode(c)){
-			if(gps.gprmc_status() == 'V'){
-				lat = gps.gprmc_latitude();
-				lon = gps.gprmc_longitude();
-				time = gps.gprmc_utc();
-				hdg = compass.read();
-				Serial.print(lat);
-				Serial.print("\t");
-				Serial.print(lon);
-				Serial.print("\t");
-				Serial.print(time);
-				Serial.print("\t");
-				Serial.println(hdg);
-			}
+		Serial.print(c);
+		if(sensor.decode(c)){
+			sensor.getPacket(sensor_packet_buf, SENSOR_PACKET_MAX_LEN);
+			Serial.println(sensor_packet_buf);
 		}
+	}
+
+	if(Serial.available() > 0){
+		char c = Serial.read();
+		if(obc.decode(c)){
+
+		}
+	}
+
+	if(count++ == ref){
+		count = 0;
+		digitalWrite(9, state);
+		state = !state;
+	}
+	delay(50);
+	if(count++ == ref){
+		count = 0;
+		digitalWrite(9, state);
+		state = !state;
 	}
 }
