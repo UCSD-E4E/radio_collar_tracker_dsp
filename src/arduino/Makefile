@@ -20,7 +20,6 @@ AVRLIB_OBJ	=	malloc.o realloc.o
 AVRC_OBJ	=	wiring.o wiring_analog.o wiring_digital.o wiring_pulse.o wiring_shift.o WInterrupts.o
 WIRE_C_OBJ	=	twi.o
 WIRE_CXX_OBJ=	Wire.o
-# AVRCXX_OBJ	=	CDC.o HardwareSerial.o HID.o IPAddress.o main.o Print.o Stream.o Tone.o USBCore.o WMath.o WString.o new.o
 AVRCXX_OBJ	=	CDC.o HardwareSerial.o HID.o IPAddress.o main.o Print.o Stream.o Tone.o USBCore.o WMath.o WString.o new.o
 AVR_AR		=	core.a
 HEX			=	ui_core.hex
