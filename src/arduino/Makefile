@@ -2,9 +2,9 @@ DEVICE		=	atmega32u4
 PORT		=	/dev/ttyACM0
 BAUD		=	115200
 CLOCK		=	16000000
-ARDUINO_DIR	=	/usr/share/arduino
-LIBRARY_DIR	=	$(ARDUINO_DIR)/hardware/arduino/cores/arduino/
-INC			=	-I$(LIBRARY_DIR) -I$(LIBRARY_DIR)/../../variants/leonardo -I$(LIBRARY_DIR)/../../../../libraries/Wire -I/usr/share/arduino/libraries/Wire/utility
+ARDUINO_DIR	=	Arduino
+LIBRARY_DIR	=	$(ARDUINO_DIR)/hardware/arduino/avr/cores/arduino/
+INC			=	-I$(LIBRARY_DIR) -I$(LIBRARY_DIR)/../../variants/leonardo -I$(LIBRARY_DIR)../../libraries/Wire/ -I$(LIBRARY_DIR)../../libraries/Wire/utility
 MACRO_DEFS	=	-DF_CPU=$(CLOCK) -DUSB_VID=0x2341 -DUSB_PID=0x8036 -DARDUINO=105 -D__PROG_TYPES_COMPAT__
 CFLAGS		=	-c -g -Wall -ffunction-sections -fdata-sections -mmcu=$(DEVICE) $(INC) $(MACRO_DEFS)
 CXXFLAGS	=	-c -g -Wall -ffunction-sections -fdata-sections -fno-exceptions -mmcu=$(DEVICE) $(INC) $(MACRO_DEFS)
@@ -17,7 +17,7 @@ AR			=	avr-ar
 OBJCOPY		=	avr-objcopy
 
 AVRLIB_OBJ	=	malloc.o realloc.o
-AVRC_OBJ	=	wiring.o wiring_analog.o wiring_digital.o wiring_pulse.o wiring_shift.o WInterrupts.o
+AVRC_OBJ	=	wiring.o wiring_analog.o wiring_digital.o wiring_pulse.o wiring_shift.o WInterrupts.o hooks.o
 WIRE_C_OBJ	=	twi.o
 WIRE_CXX_OBJ=	Wire.o
 AVRCXX_OBJ	=	CDC.o HardwareSerial.o HID.o IPAddress.o main.o Print.o Stream.o Tone.o USBCore.o WMath.o WString.o new.o
