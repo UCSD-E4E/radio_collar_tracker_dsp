@@ -1,3 +1,0 @@
-[submodule "src/arduino/cJSON"]
-	path = src/arduino/cJSON
-	url = https://github.com/DaveGamble/cJSON
