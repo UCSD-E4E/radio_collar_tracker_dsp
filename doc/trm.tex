@@ -2,7 +2,7 @@
 % \usepackage{draftwatermark}
 \title{Radio Collar Tracker Technical Reference Manual}
 \author{Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
-\date{\today\\v0.2}
+\date{\today\\v0.3}
 \usepackage{fullpage,bookmark,hyperref,listings,lmodern,siunitx}
 \usepackage[toc,nonumberlist]{glossaries}
 \makeglossaries
@@ -192,27 +192,37 @@ avr-objcopy -j .text -j .data -O ihex test.elf test.hex
 					\centering
 					\caption{Status Message Lookup Tables}
 					\label{tbl:obc_status_vals}
-					\begin{tabular}{c|c}
-						Storage State & STR value \\\hline
-						Init & 0\\
-						Ready & 1\\
-						Fail & 2\\
-						Retry & 3
+					\begin{tabular}{c|c|c}
+						Storage State & State Name & STR value \\\hline
+						Init & \lstinline!STR_INIT! & 0\\
+						Ready & \lstinline!STR_READY! & 1\\
+						Fail & \lstinline!STR_FAIL! & 2\\
+						Retry & \lstinline!STR_RETRY! & 3
 					\end{tabular}
-					\begin{tabular}{c|c}
-						SDR State & SDR value \\\hline
-						Init & 0\\
-						Ready & 1\\
-						Fail & 2\\
-						Retry & 3
+					
+					\begin{tabular}{c|c|c}
+						SDR State & State Name & SDR value \\\hline
+						Init & \lstinline!SDR_INIT! & 0\\
+						Ready & \lstinline!SDR_READY! & 1\\
+						Fail & \lstinline!SDR_FAIL! & 2\\
+						Retry & \lstinline!SDR_RETRY! & 3
 					\end{tabular}
-					\begin{tabular}{c|c}
-						System State & SYS value\\\hline
-						Init & 0\\
-						Wait for Start & 1\\
-						Wait for End & 2\\
-						Finish & 3\\
-						Fail & 4
+					
+					\begin{tabular}{c|c|c}
+						GPS State & State Name & GPS value\\\hline
+						Init & \lstinline!GPS_INIT! & 0\\
+						Ready & \lstinline!GPS_READY! & 1\\
+						Fail & \lstinline!GPS_FAIL! & 2\\
+						Retry & \lstinline!GPS_RETRY! & 3
+					\end{tabular}
+					
+					\begin{tabular}{c|c|c}
+						System State & State Name & SYS value\\\hline
+						Init & \lstinline!SYS_INIT! & 0\\
+						Wait for Start & \lstinline!SYS_WAIT_FOR_START! & 1\\
+						Wait for End & \lstinline!SYS_WAIT_FOR_END! & 2\\
+						Finish & \lstinline!SYS_FINISH! & 3\\
+						Fail & \lstinline!SYS_FAIL! & 4
 					\end{tabular}
 				\end{table}
 

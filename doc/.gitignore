@@ -1,4 +1,5 @@
 *.pdf
+!trm.pdf
 !3dr_solo.pdf
 *.sublime*
 Makefile
