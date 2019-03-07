@@ -4,7 +4,8 @@ BAUD		=	115200
 CLOCK		=	16000000
 ARDUINO_DIR	=	Arduino
 LIBRARY_DIR	=	$(ARDUINO_DIR)/hardware/arduino/avr/cores/arduino/
-INC			=	-I$(LIBRARY_DIR) -I$(LIBRARY_DIR)/../../variants/leonardo -I$(LIBRARY_DIR)../../libraries/Wire/ -I$(LIBRARY_DIR)../../libraries/Wire/utility
+WIRE_LIBDIR	=	$(LIBRARY_DIR)../../libraries/Wire/
+INC			=	-I$(LIBRARY_DIR) -I$(LIBRARY_DIR)/../../variants/leonardo -I${WIRE_LIBDIR} -I${WIRE_LIBDIR}/utility
 MACRO_DEFS	=	-DF_CPU=$(CLOCK) -DUSB_VID=0x2341 -DUSB_PID=0x8036 -DARDUINO=105 -D__PROG_TYPES_COMPAT__
 CFLAGS		=	-c -g -Wall -ffunction-sections -fdata-sections -mmcu=$(DEVICE) $(INC) $(MACRO_DEFS)
 CXXFLAGS	=	-c -g -Wall -ffunction-sections -fdata-sections -fno-exceptions -mmcu=$(DEVICE) $(INC) $(MACRO_DEFS)
@@ -25,7 +26,6 @@ AVR_AR		=	core.a
 HEX			=	ui_core.hex
 ELF			=	ui_core.elf
 OBJ			=	ui_core.o nmea.o HMC5983.o Status_Module.o Sensor_Module.o
-CJSON_OBJ	=	cJSON.o
 BIT_RATE	=	4
 # OBC_HOST	=	e4e-upcore-1.dynamic.ucsd.edu
 OBC_HOST	=	100.80.229.30
@@ -36,7 +36,7 @@ $(HEX): $(ELF)
 	${OBJCOPY} -j .text -j .data -O ihex $< $@
 	# ${OBJCOPY} -j .text -j .data -O ihex $< $@
 
-$(ELF): $(OBJ) ${CJSON_OBJ} core.a
+$(ELF): $(OBJ) core.a
 	${LD} -o $@ $^ $(LDFLAGS)
 
 ui_core.o: ui_core.cpp ui_core.hpp nmea.hpp HMC5983.hpp
@@ -54,10 +54,6 @@ Sensor_Module.o: Sensor_Module.cpp Sensor_Module.hpp Status_Packet.hpp
 Status_Module.o: Status_Module.cpp Status_Module.hpp Status_Packet.hpp
 	$(CXX) $(CXXFLAGS) $< -o $@	
 
-${CJSON_OBJ}:
-	make -C cJSON cJSON.o CC=${CC} R_CFLAGS="${CFLAGS}"
-	mv cJSON/cJSON.o .
-
 ${AVRLIB_OBJ}: 
 	$(CC) $(CFLAGS) $(LIBRARY_DIR)/avr-libc/$(*F).c -o $@
 
@@ -68,10 +64,10 @@ ${AVRCXX_OBJ}:
 	$(CXX) $(CXXFLAGS) $(LIBRARY_DIR)/$(*F).cpp -o $@
 
 ${WIRE_C_OBJ}:
-	$(CC) $(CFLAGS) $(LIBRARY_DIR)/../../../../libraries/Wire/utility/$(*F).c -o $@	
+	$(CC) $(CFLAGS) $(WIRE_LIBDIR)/utility/$(*F).c -o $@	
 
 ${WIRE_CXX_OBJ}:
-	$(CXX) $(CXXFLAGS) $(LIBRARY_DIR)/../../../../libraries/Wire/$(*F).cpp -o $@	
+	$(CXX) $(CXXFLAGS) $(WIRE_LIBDIR)/$(*F).cpp -o $@	
 
 
 core.a: ${AVRLIB_OBJ} $(AVRC_OBJ) $(AVRCXX_OBJ) ${WIRE_C_OBJ} ${WIRE_CXX_OBJ}
