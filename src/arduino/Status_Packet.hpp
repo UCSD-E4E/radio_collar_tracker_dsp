@@ -23,9 +23,10 @@ enum SDRState{
 
 enum SystemState{
 	SYS_INIT = 0,
-	SYS_READY = 1,
-	SYS_FAIL = 2,
-	SYS_RETRY = 3
+	SYS_WAIT_FOR_START = 1,
+	SYS_WAIT_FOR_END = 2,
+	SYS_FINISH = 3,
+	SYS_FAIL = 4,
 };
 typedef struct StatusPacket{
 	StorageState storage;
