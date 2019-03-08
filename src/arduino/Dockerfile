@@ -2,7 +2,11 @@
 # docker run -it --rm --name rct_avr rct_avr
 
 FROM ubuntu:16.04
-RUN apt-get update && apt-get install -y git vim gcc-avr binutils-avr avr-libc gdb-avr avrdude libelf-dev build-essential
+
+ARG dev_tools="git vim"
+ARG build_env="build-essential gcc-avr binutils-avr avr-libc gdb-avr avrdude libelf-dev"
+
+RUN apt-get update && apt-get install -y $dev_tools $build_env
 
 RUN mkdir /code
 WORKDIR /code
