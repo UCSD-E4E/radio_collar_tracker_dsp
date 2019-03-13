@@ -1,5 +1,5 @@
 #include "Processor.hpp"
-#include "mixer.hpp"
+#include "remixer.hpp"
 #include "resampler.hpp"
 #include "ping_fir.hpp"
 #include "ping_classifier.hpp"
@@ -23,7 +23,7 @@ namespace RTT{
 		_initial_threshold(initial_threshold),
 		// _mixer((std::int64_t)frequency - (std::int64_t)center_freq - filter_freq, sampling_freq),
 		// _resampler(up_factor, down_factor),
-		_mixer((std::int64_t)(filter_freq - (frequency - center_freq)), 
+		_mixer((std::int64_t)(filter_freq - (center_freq - frequency)), 
 			sampling_freq, up_factor, down_factor),
 		_fir(filter_freq, sampling_freq / down_factor, fir_size),
 		_classifier{_initial_threshold, _time_start_ms, 
