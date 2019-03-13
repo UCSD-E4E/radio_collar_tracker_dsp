@@ -15,3 +15,10 @@ sdr_record_CXXFLAGS= -std=gnu++11 -Wall $(BOOST_CPPFLAGS) $(uhd_CFLAGS) $(DLIB_C
 
 maintainer-clean-local:
 	rm Makefile.in
+
+clean-local: clean-local-check
+
+.PHONY: clean-local-check
+
+clean-local-check:
+	-rm -f *.log*

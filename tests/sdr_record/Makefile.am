@@ -1,14 +1,14 @@
 check_PROGRAMS = testDSPV2 testIQdata testUtility testPingFIR testMixer \
-	testResampler testPingClassifier testProcessor testSDRTest testGPStest
-# testRemixer
+	testResampler testPingClassifier testProcessor testSDRTest testGPStest \
+	testRemixer
 # testLocalization testRemixer
 
 TESTS = $(check_PROGRAMS)
 
 AM_CXXFLAGS=-std=gnu++14 -Wall $(BOOST_CPPFLAGS) -I../../src/sdr_record/
 # AM_CXXFLAGS=-std=gnu++14 -Wall $(BOOST_CPPFLAGS) -I../../src/sdr_record/ $(DLIB_CPPFLAGS)
-LDADD=-lstdc++ $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
-# LDADD=-lfftw3_threads -lfftw3 -lstdc++ $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
+# LDADD=-lstdc++ $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
+LDADD=-lfftw3_threads -lfftw3 -lstdc++ $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
 AM_LDFLAGS=-pthread $(BOOST_LDFLAGS) 
 # AM_LDFLAGS=-pthread $(BOOST_LDFLAGS) $(DLIB_LDFLAGS)
 
@@ -60,3 +60,10 @@ testLocalization_LDADD = $(uhd_LIBS)
 
 testRemixer_SOURCES = testRemixer.cpp $(test_src)/remixer.cpp \
 	$(test_src)/utility.cpp
+
+clean-local: clean-local-check
+
+.PHONY: clean-local-check
+
+clean-local-check:
+	-rm -f *.log*
