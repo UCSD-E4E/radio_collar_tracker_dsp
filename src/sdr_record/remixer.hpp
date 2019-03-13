@@ -16,6 +16,7 @@ namespace RTT{
 		std::condition_variable* _input_cv;
 		std::size_t _upsample_factor;
 		std::size_t _downsample_factor;
+		std::int64_t _shift_freq;
 		void _process(std::queue<std::complex<double>>& input_queue, 
 			std::mutex& input_mutex, std::condition_variable& input_cv,
 			std::queue<std::complex<double>>& output_queue,
@@ -31,9 +32,16 @@ namespace RTT{
 			std::unique_lock<std::mutex>& lock, std::condition_variable& q_cv, 
 			std::complex<double>* data, std::size_t N, const volatile bool* run);
 		/**
-		 * Process a block of data of size _period.
-		 * @param data	Pointer to a block of memory of at least _period 
-		 *             	elements
+		 * Process a block of data of size _period.  This is essentially the
+		 * downsampling function (serial multiply-accumulate) that 
+		 * simultaneously multiplies the data by the beat frequency and 
+		 * downsamples the input data by _downsample_factor and normalizes the 
+		 * data.
+		 * 
+		 * @param data	 Pointer to a block of memory of at least _period 
+		 *             	 elements
+		 * @param output Pointer to a block of memory of at least _period / 
+		 *               _downsample_factor elements.
 		 */
 		void func(std::complex<double>* data, std::complex<double>* output);
 	protected:

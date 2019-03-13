@@ -4,6 +4,8 @@
 #include <utility.hpp>
 #include <syslog.h>
 
+#define DEBUG
+
 #ifdef DEBUG
 #include <fstream>
 #endif
@@ -14,11 +16,12 @@ namespace RTT{
 		_thread(nullptr),
 		_input_cv(nullptr),
 		_upsample_factor(up_factor),
-		_downsample_factor(down_factor)
+		_downsample_factor(down_factor),
+		_shift_freq(shift)
 		{
 		_period = 2 * sampling_frequency / boost::math::gcd(std::abs(shift), 
 			(std::int64_t)sampling_frequency);
-		_period = boost::math::lcm(_period, down_factor);
+		_period = boost::math::lcm(_period, _downsample_factor);
 		_bbeat = generateSinusoid(shift, sampling_frequency, _period);
 		syslog(LOG_DEBUG, "Remixer: period %lu", _period);
 	}
@@ -67,6 +70,11 @@ namespace RTT{
 		#ifdef DEBUG
 		std::ofstream _ostr1{"remixer_in.log"};
 		std::ofstream _ostr2{"remixer_out.log"};
+		std::ofstream _ostr3{"remixer_out.log.meta"};
+		_ostr3 << "up_factor: " << _upsample_factor << std::endl;
+		_ostr3 << "down_factor: " << _downsample_factor << std::endl;
+		_ostr3 << "shift: " << _shift_freq << std::endl;
+		_ostr3.close();
 		std::size_t _out_count = 0;
 		#endif
 
@@ -87,13 +95,13 @@ namespace RTT{
 				syslog(LOG_DEBUG, "Remixer: got data, remaining %7lu", input_queue.size());
 
 				#ifdef DEBUG
-				for(std::size_t i = 0; i < _period; i++){
-					_ostr1 << data_array[i].real();
-					if(data_array[i].imag() >= 0){
-						_ostr1 << "+";
+					for(std::size_t i = 0; i < _period; i++){
+						_ostr1 << data_array[i].real();
+						if(data_array[i].imag() >= 0){
+							_ostr1 << "+";
+						}
+						_ostr1 << data_array[i].imag() << "i" << std::endl;
 					}
-					_ostr1 << data_array[i].imag() << "i" << std::endl;
-				}
 				#endif
 
 				func(data_array, output_array);
@@ -102,12 +110,13 @@ namespace RTT{
 				out_lock.lock();
 				for(std::size_t i = 0; i < _period / _downsample_factor; i++){
 					output_queue.push(output_array[i]);
+					
 					#ifdef DEBUG
-					_ostr2 << output_array[i].real();
-					if(output_array[i].imag() >= 0){
-						_ostr2 << "+";
-					}
-					_ostr2 << output_array[i].imag() << "i" << std::endl;
+						_ostr2 << output_array[i].real();
+						if(output_array[i].imag() >= 0){
+							_ostr2 << "+";
+						}
+						_ostr2 << output_array[i].imag() << "i" << std::endl;
 					#endif
 				}
 				out_lock.unlock();
@@ -126,9 +135,13 @@ namespace RTT{
 	}
 
 	void Remixer::func(std::complex<double>* data, std::complex<double>* out){
+		// for each output element
 		for(std::size_t i = 0; i < _period / _downsample_factor; i++){
 			std::size_t base = i * _downsample_factor;
+			out[i] = 0;
+			// for each input element in the output bracket
 			for(std::size_t j = 0; j < _downsample_factor; j++){
+				// accumulate
 				out[i] += data[base + j] * _bbeat[base + j];
 			}
 			out[i] /= std::complex<double>(_downsample_factor, 0);
