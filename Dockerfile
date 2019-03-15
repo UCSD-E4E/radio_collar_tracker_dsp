@@ -55,3 +55,4 @@ RUN tar -xzf fftw-3.3.8.tar.gz
 WORKDIR /root/fftw-3.3.8
 RUN ./bootstrap.sh && ./configure --enable-threads && make && make install
 
+WORKDIR /root/code/
