@@ -1,14 +1,11 @@
 #ifndef __RTT_DSP_H__
 #define __RTT_DSP_H__
 
-#include <complex>
-#include "ping.hpp"
-#include "iq_data.hpp"
 #include <queue>
-#include <vector>
+#include "iq_data.hpp"
 #include <mutex>
-#include <memory>
 #include <condition_variable>
+#include "ping.hpp"
 
 namespace RTT{
 
@@ -43,7 +40,7 @@ namespace RTT{
 			std::queue<IQdataPtr>& inputQueue, 
 			std::mutex& inputMutex, std::condition_variable& inputVar,
 			std::queue<PingPtr>& outputQueue, std::mutex& outputMutex, 
-			std::condition_variable& outputVar, const volatile bool* ndie) = 0;
+			std::condition_variable& outputVar) = 0;
 
 		/**
 		 * Waits for the processing thread to stop.

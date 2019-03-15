@@ -33,7 +33,7 @@
 #endif
 #include "dsp.hpp"
 // #include "dspv1.hpp"
-#include "dspv2.hpp"
+#include "dspv3.hpp"
 #include "localization.hpp"
 #include <string>
 #include <mutex>
@@ -59,7 +59,6 @@ namespace RTT{
 		printf("sdr_record - Radio Collar Tracker drone application to pull IQ samples from USRP and dump to disk\n\n"
 				"Options:\n"
 				"    -r (run_number)\n"
-				"    -c (center frequency in Hz)\n"
 				"    -f (collar frequency in Hz)\n"
 				"    -s (sample rate in Hz)\n"
 				"    -g (gain)\n"
@@ -99,17 +98,13 @@ namespace RTT{
 					args.rate = std::stol(optarg);
 					syslog(LOG_INFO, "Got sampling rate setting of %ld", args.rate);
 					break;
-				case 'c':
-					args.rx_freq = std::stod(optarg);
-					syslog(LOG_INFO, "Got center frequency target of %ld", args.rx_freq);
-					break;
 				case 'f':
-					args.tx_freq = std::stod(optarg);
-					syslog(LOG_INFO, "Got collar frequency target of %ld", args.rx_freq);
+					args.rx_freq = std::stod(optarg);
+					syslog(LOG_INFO, "Got collar/center frequency target of %ld", args.rx_freq);
 					break;
 				case 'r':
 					args.run_num = std::stoi(optarg);
-					syslog(LOG_INFO, "Got run number of %d", args.run_num);
+					syslog(LOG_INFO, "Got run number of %ld", args.run_num);
 					break;
 				case 'o':
 					args.data_dir = std::string(optarg);
@@ -129,7 +124,7 @@ namespace RTT{
 			print_help();
 		}
 
-		if (args.gain == 0){
+		if (args.gain < 0){
 			syslog(LOG_ERR, "Must set gain\n");
 			print_help();
 		}
@@ -165,11 +160,8 @@ namespace RTT{
 			exit(1);
 		}
 
-		std::vector<std::uint32_t> freqs{};
-		freqs.push_back(args.tx_freq);
-
 		// dsp = new RTT::DSP_V1(args.data_dir, args.run_num);
-		dsp = new RTT::DSP_V2(freqs, args.rx_freq, args.rate, sdr->rx_buffer_size);
+		dsp = new RTT::DSP_V3{args.rate};
 		localizer = new RTT::PingLocalizer();
 	}
 
@@ -214,7 +206,7 @@ namespace RTT{
 
 		syslog(LOG_INFO, "Starting threads");
 		dsp->startProcessing(sdr_queue, sdr_queue_mutex, sdr_var, ping_queue, 
-			ping_queue_mutex, ping_var, &program_on);
+			ping_queue_mutex, ping_var);
 		sdr->startStreaming(sdr_queue, sdr_queue_mutex, sdr_var, &program_on);
 		while(true){
 			std::unique_lock<std::mutex> run_lock(run_mutex);

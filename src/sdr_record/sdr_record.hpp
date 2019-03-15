@@ -11,7 +11,6 @@
 #include "sdr.hpp"
 #endif
 #include "dsp.hpp"
-#include "dspv2.hpp"
 #include "localization.hpp"
 #include <condition_variable>
 
@@ -25,11 +24,10 @@ namespace RTT{
 		void process_args(int argc, char* const *argv);
 
 		struct cmd_args{
-			double gain = 10.0;
-			long int rate = 2000000;
-			long int rx_freq = 172500000;
-			long int tx_freq = 173763000;
-			int run_num = 1;
+			double gain = -1;
+			std::size_t rate = 250000;
+			std::size_t rx_freq = 172500000;
+			std::size_t run_num = 1;
 			std::string data_dir = "";
 		} args;
 

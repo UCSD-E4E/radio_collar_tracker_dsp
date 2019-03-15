@@ -1,6 +1,6 @@
-check_PROGRAMS = testDSPV2 testIQdata testUtility testPingFIR testMixer \
-	testResampler testPingClassifier testProcessor testSDRTest testGPStest \
-	testRemixer
+check_PROGRAMS = testIQdata testUtility \
+	testSDRTest testGPStest \
+	testFIR testIntegrator testClassifier testDSPV3
 # testLocalization testRemixer
 
 TESTS = $(check_PROGRAMS)
@@ -14,36 +14,22 @@ AM_LDFLAGS=-pthread $(BOOST_LDFLAGS)
 
 test_src = ../../src/sdr_record
 
-testDSPV2_SOURCES = testDSPV2.cpp $(test_src)/dspv2.cpp \
-	$(test_src)/iq_data.cpp $(test_src)/ping_fir.cpp $(test_src)/utility.cpp \
-	$(test_src)/ping_classifier.cpp $(test_src)/Processor.cpp \
-	$(test_src)/remixer.cpp $(test_src)/sdr_test.cpp $(test_src)/sdr.cpp
-
-testDSPV2_LDADD = $(uhd_LIBS)
-
 testIQdata_SOURCES = testIQdata.cpp $(test_src)/iq_data.cpp
 
 testUtility_SOURCES = testUtility.cpp $(test_src)/utility.cpp
-
-testPingFIR_SOURCES = testPingFIR.cpp $(test_src)/ping_fir.cpp \
-	$(test_src)/utility.cpp
-
-testMixer_SOURCES = testMixer.cpp $(test_src)/mixer.cpp $(test_src)/utility.cpp
-
-testResampler_SOURCES = testResampler.cpp $(test_src)/resampler.cpp
-
-testPingClassifier_SOURCES = testPingClassifier.cpp \
-	$(test_src)/ping_classifier.cpp
-
-testProcessor_SOURCES = testProcessor.cpp $(test_src)/utility.cpp \
-	$(test_src)/ping_classifier.cpp $(test_src)/ping_fir.cpp \
-	$(test_src)/Processor.cpp $(test_src)/remixer.cpp
 
 testGPStest_SOURCES = testGPStest.cpp $(test_src)/gps_test.cpp \
 	$(test_src)/gps.cpp $(test_src)/timeblock.cpp
 
 maintainer-clean-local:
 	rm Makefile.in
+clean-local: clean-local-check
+
+.PHONY: clean-local-check
+
+clean-local-check:
+	-rm -f *.log*
+	
 testSDRTest_LDADD=$(uhd_LIBS)
 testSDRTest_SOURCES = testSDRTest.cpp $(test_src)/sdr_test.cpp \
 	$(test_src)/iq_data.cpp $(test_src)/sdr.cpp 
@@ -58,12 +44,13 @@ testSDRTest_SOURCES = testSDRTest.cpp $(test_src)/sdr_test.cpp \
 
 testLocalization_LDADD = $(uhd_LIBS)
 
-testRemixer_SOURCES = testRemixer.cpp $(test_src)/remixer.cpp \
+testFIR_SOURCES = testFIR.cpp $(test_src)/fir.cpp
+
+testIntegrator_SOURCES = testIntegrator.cpp $(test_src)/integrator.cpp \
 	$(test_src)/utility.cpp
 
-clean-local: clean-local-check
+testClassifier_SOURCES = testClassifier.cpp $(test_src)/classifier.cpp
 
-.PHONY: clean-local-check
-
-clean-local-check:
-	-rm -f *.log*
+testDSPV3_SOURCES = testDSPV3.cpp $(test_src)/dspv3.cpp $(test_src)/fir.cpp \
+	$(test_src)/integrator.cpp $(test_src)/utility.cpp \
+	$(test_src)/classifier.cpp $(test_src)/iq_data.cpp
