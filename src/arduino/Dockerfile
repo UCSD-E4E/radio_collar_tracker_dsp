@@ -8,12 +8,14 @@ ARG build_env="build-essential gcc-avr binutils-avr avr-libc gdb-avr avrdude lib
 
 RUN apt-get update && apt-get install -y $dev_tools $build_env
 
-RUN mkdir /code
-WORKDIR /code
+WORKDIR /root/
 RUN git clone https://github.com/UCSD-E4E/radio_collar_tracker_drone.git
-WORKDIR /code/radio_collar_tracker_drone
+WORKDIR /root/radio_collar_tracker_drone
 RUN git checkout ui_board
 RUN git submodule init
 RUN git submodule update
-WORKDIR /code/radio_collar_tracker_drone/src/arduino
+WORKDIR /root/radio_collar_tracker_drone/src/arduino
 RUN make ui_core.hex
+
+RUN mkdir /root/code
+WORKDIR /root/code
