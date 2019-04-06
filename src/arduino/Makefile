@@ -34,7 +34,6 @@ OBC_HOST	=	100.80.229.30
 
 $(HEX): $(ELF)
 	${OBJCOPY} -j .text -j .data -O ihex $< $@
-	# ${OBJCOPY} -j .text -j .data -O ihex $< $@
 
 $(ELF): $(OBJ) core.a
 	${LD} -o $@ $^ $(LDFLAGS)
@@ -76,7 +75,7 @@ core.a: ${AVRLIB_OBJ} $(AVRC_OBJ) $(AVRCXX_OBJ) ${WIRE_C_OBJ} ${WIRE_CXX_OBJ}
 
 install: $(HEX)
 	# ./reset.py $(PORT)
-	avrdude -v -c avr109 -p $(DEVICE) -P ${PORT} -U flash:w:$< -C $(LIBRARY_DIR)/../../../tools/avrdude.conf -b 57600 -D -V
+	avrdude -v -c avr109 -p $(DEVICE) -P ${PORT} -U flash:w:$< -C ./avrdude.conf -b 57600 -D -V
 
 install-dragon: $(HEX)
 	avrdude -p m32u4 -c dragon_isp -B ${BIT_RATE} -P usb -U flash:w:$<
