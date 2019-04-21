@@ -160,7 +160,6 @@ namespace RTT{
 			exit(1);
 		}
 
-		// dsp = new RTT::DSP_V1(args.data_dir, args.run_num);
 		dsp = new RTT::DSP_V3{args.rate};
 		localizer = new RTT::PingLocalizer();
 	}
