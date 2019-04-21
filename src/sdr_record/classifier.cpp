@@ -245,11 +245,11 @@ namespace RTT{
 					for(std::size_t i = 0; i < sig.size(); i++){
 						cplx_hist.push_back(sig[i]);
 						#ifdef DEBUG
-						_ostr5 << sig[i].real();
-						if(sig[i].imag() >= 0){
-							_ostr5 << "+";
-						}
-						_ostr5 << sig[i].imag() << "i" << std::endl;
+						// _ostr5 << sig[i].real();
+						// if(sig[i].imag() >= 0){
+						// 	_ostr5 << "+";
+						// }
+						// _ostr5 << sig[i].imag() << "i" << std::endl;
 						#endif
 					}
 				}
@@ -300,18 +300,16 @@ namespace RTT{
 						fft_in[i][1] = cplx_hist[i + fft_offset].imag();
 
 						#ifdef DEBUG
-						_ostr4 << cplx_hist[i + fft_offset].real();
-						if(cplx_hist[i + fft_offset].imag() >= 0){
-							_ostr4 << "+";
-						}
-						_ostr4 << cplx_hist[i + fft_offset].imag() << "i, ";
+						// _ostr4 << cplx_hist[i + fft_offset].real();
+						// if(cplx_hist[i + fft_offset].imag() >= 0){
+						// 	_ostr4 << "+";
+						// }
+						// _ostr4 << cplx_hist[i + fft_offset].imag() << "i, ";
 						#endif
 
 					}
-					for(std::size_t i = 0; i < cplx_hist.size(); i++){
-					}
 					#ifdef DEBUG
-					_ostr4 << std::endl;
+					// _ostr4 << std::endl;
 					#endif
 					fftw_execute(fft_plan);
 					std::size_t max_idx = 0;
@@ -343,10 +341,12 @@ namespace RTT{
 					std::cout << out_count << ", " << (ping_start_ms - _time_start_ms) / 1e3 << 
 						", " << amplitude << ", average: " <<  threshold << 
 						", width: " << pulse_width * _ms_per_sample << 
+						", freq: " << sig_freq <<
 						std::endl;
 					_ostr2 << out_count << ", " << (ping_start_ms - _time_start_ms) / 1e3 << 
 						", " << amplitude << ", average: " <<  threshold << 
 						", width: " << pulse_width * _ms_per_sample << 
+						", freq: " << sig_freq <<
 						std::endl;
 					#endif
 				}

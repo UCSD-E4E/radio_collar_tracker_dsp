@@ -1,6 +1,6 @@
 #include "dspv3.hpp"
-
-#define DEBUG
+#include "tagged_signal.hpp"
+// #define DEBUG
 
 #ifdef DEBUG
 #include <fstream>
@@ -27,8 +27,8 @@ namespace RTT{
 		_run = true;
 		_thread = new std::thread(&DSP_V3::_unpack, this, std::ref(i_q), 
 			std::ref(i_m), std::ref(i_v));
-		_fir.start(_iq_data_queue, _iq_mux, _iq_cv, _mag_data_queue, _mag_mux,
-			_mag_cv);
+		// _fir.start(_iq_data_queue, _iq_mux, _iq_cv, _mag_data_queue, _mag_mux,
+		// 	_mag_cv);
 		_int.start(_mag_data_queue, _mag_mux, _mag_cv, _candidate_queue, 
 			_can_mux, _can_cv);
 		_clfr.start(_candidate_queue, _can_mux, _can_cv, o_q, o_m, o_v);
@@ -41,11 +41,11 @@ namespace RTT{
 
 		#ifdef DEBUG
 		std::cout << "DSP_V3 is stopping:" << std::endl;
-		std::cout << "_fir has " << _iq_data_queue.size() << " data waiting, stopping" << std::endl;
+		// std::cout << "_fir has " << _iq_data_queue.size() << " data waiting, stopping" << std::endl;
 		#endif
-		_fir.stop();
+		// _fir.stop();
 		#ifdef DEBUG
-		std::cout << "_fir has " << _iq_data_queue.size() << " waiting after being stopped" << std::endl;
+		// std::cout << "_fir has " << _iq_data_queue.size() << " waiting after being stopped" << std::endl;
 		std::cout << "_int has " << _mag_data_queue.size() << " data waiting, stopping" << std::endl;
 		#endif
 		_int.stop();
@@ -99,12 +99,16 @@ namespace RTT{
 					_clfr.setStartTime(dataObj->time_ms);
 				}
 
-				std::unique_lock<std::mutex> dataLock(_iq_mux);
+				std::unique_lock<std::mutex> dataLock(_mag_mux);
 				for(std::size_t j = 0; j < double_data.size(); j++){
-					_iq_data_queue.push(double_data[j]);
+					double data = std::abs(double_data[j]) * std::abs(double_data[j]);
+					auto sig = new std::vector<std::complex<double>>();
+					sig->push_back(double_data[j]);
+					auto tsig = new TaggedSignal(data, *sig);
+					_mag_data_queue.push(tsig);
 				}
 				dataLock.unlock();
-				_iq_cv.notify_all();
+				_mag_cv.notify_all();
 			}
 		}
 	}
