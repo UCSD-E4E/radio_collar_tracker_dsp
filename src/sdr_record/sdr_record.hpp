@@ -25,9 +25,9 @@ namespace RTT{
 
 		struct cmd_args{
 			double gain = -1;
-			std::size_t rate = 250000;
-			std::size_t rx_freq = 172500000;
-			std::size_t run_num = 1;
+			std::size_t rate = 0;
+			std::size_t rx_freq = 0;
+			std::size_t run_num = 0;
 			std::string data_dir = "";
 		} args;
 

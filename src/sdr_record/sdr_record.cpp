@@ -49,6 +49,9 @@
 #include <sys/time.h>
 #include <vector>
 #include <condition_variable>
+#include <boost/program_options.hpp>
+
+namespace po = boost::program_options;
 
 namespace RTT{
 	const std::string META_PREFIX = "META_";
@@ -82,71 +85,105 @@ namespace RTT{
 	}
 
 	void SDR_RECORD::process_args(int argc, char* const* argv){
-		int option = 0;
-		while((option = getopt(argc, argv, "hg:s:c:r:o:v:f:")) != -1){
-			switch(option)
-			{
-				case 'h':
-					syslog(LOG_INFO, "Got help flag");
-					print_help();
-					break;
-				case 'g':
-					args.gain = std::stod(optarg);
-					syslog(LOG_INFO, "Got gain setting of %.2f", args.gain);
-					break;
-				case 's':
-					args.rate = std::stol(optarg);
-					syslog(LOG_INFO, "Got sampling rate setting of %ld", args.rate);
-					break;
-				case 'f':
-					args.rx_freq = std::stod(optarg);
-					syslog(LOG_INFO, "Got collar/center frequency target of %ld", args.rx_freq);
-					break;
-				case 'r':
-					args.run_num = std::stoi(optarg);
-					syslog(LOG_INFO, "Got run number of %ld", args.run_num);
-					break;
-				case 'o':
-					args.data_dir = std::string(optarg);
-					syslog(LOG_INFO, "Got an output directory of %s", args.data_dir.c_str());
-					break;
-				case 'v':
-					syslog(LOG_INFO, "Setting log output to %d", std::stoi(optarg));
-					setlogmask(LOG_UPTO(std::stoi(optarg)));
-					break;
-			}
+		std::uint8_t verbosity = 0;
+
+		po::options_description desc("sdr_record - Radio "
+			"Collar Tracker drone application\n\nOptions");
+		desc.add_options()
+			("help,h", "Prints help message")
+			("gain,g", po::value(&args.gain), "Gain")
+			("sampling_freq,s", po::value(&args.rate), "Sampling Frequency")
+			("center_freq,c", po::value(&args.rx_freq), "Center Frequency")
+			("run,r", po::value(&args.run_num), "Run Number")
+			("output,o", po::value(&args.data_dir), "Output Directory")
+			("verbose,v", po::value(&verbosity), "Verbosity")
+		;
+		po::variables_map vm;
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		notify(vm);
+
+		if(vm.count("help")){
+			std::cout << desc << std::endl;
+			exit(0);
 		}
+
+		setlogmask(LOG_UPTO(verbosity));
+
+		// int option = 0;
+		// while((option = getopt(argc, argv, "hg:s:c:r:o:v:f:")) != -1){
+		// 	switch(option)
+		// 	{
+		// 		case 'h':
+		// 			syslog(LOG_INFO, "Got help flag");
+		// 			print_help();
+		// 			break;
+		// 		case 'g':
+		// 			args.gain = std::stod(optarg);
+		// 			syslog(LOG_INFO, "Got gain setting of %.2f", args.gain);
+		// 			break;
+		// 		case 's':
+		// 			args.rate = std::stol(optarg);
+		// 			syslog(LOG_INFO, "Got sampling rate setting of %ld", args.rate);
+		// 			break;
+		// 		case 'f':
+		// 			args.rx_freq = std::stod(optarg);
+		// 			syslog(LOG_INFO, "Got collar/center frequency target of %ld", args.rx_freq);
+		// 			break;
+		// 		case 'r':
+		// 			args.run_num = std::stoi(optarg);
+		// 			syslog(LOG_INFO, "Got run number of %ld", args.run_num);
+		// 			break;
+		// 		case 'o':
+		// 			args.data_dir = std::string(optarg);
+		// 			syslog(LOG_INFO, "Got an output directory of %s", args.data_dir.c_str());
+		// 			break;
+		// 		case 'v':
+		// 			syslog(LOG_INFO, "Setting log output to %d", std::stoi(optarg));
+		// 			setlogmask(LOG_UPTO(std::stoi(optarg)));
+		// 			break;
+		// 	}
+		// }
 
 		syslog(LOG_INFO, "Sanity checking args");
 
 		if (!args.run_num) {
 			syslog(LOG_ERR, "Must set run number\n");
-			print_help();
+			std::cout << desc << std::endl;
+			exit(0);
 		}
+		syslog(LOG_DEBUG, "Got run_num as %lu\n", args.run_num);
 
 		if (args.gain < 0){
 			syslog(LOG_ERR, "Must set gain\n");
-			print_help();
+			std::cout << desc << std::endl;
+			exit(0);
 		}
+		syslog(LOG_DEBUG, "Got gain as %.2f\n", args.gain);
 
 		if (args.data_dir.empty()){
 			syslog(LOG_ERR, "Must set directory\n");
-			print_help();
+			std::cout << desc << std::endl;
+			exit(0);
 		}
+		syslog(LOG_DEBUG, "Got data_dir as %s\n", args.data_dir.c_str());
 
 		if (!args.rx_freq){
 			syslog(LOG_ERR, "Must set freq\n");
-			print_help();
+			std::cout << desc << std::endl;
+			exit(0);
 		}
+		syslog(LOG_DEBUG, "Got rx_freq as %lu\n", args.rx_freq);
 
 		if (!args.rate){
 			syslog(LOG_ERR, "Must set rate\n");
-			print_help();
+			std::cout << desc << std::endl;
+			exit(0);
 		}
+		syslog(LOG_DEBUG, "Got rate as %lu\n", args.rate);
 	}
 
 	void SDR_RECORD::init(int argc, char * const*argv){
-		this->process_args(argc, argv);		
+		this->process_args(argc, argv);
 
 		try{
 			syslog(LOG_INFO, "Initializing Radio");
@@ -217,6 +254,7 @@ namespace RTT{
 		}
 		sdr->stopStreaming();
 		dsp->stopProcessing();
+		
 	}
 
 	SDR_RECORD::~SDR_RECORD(){

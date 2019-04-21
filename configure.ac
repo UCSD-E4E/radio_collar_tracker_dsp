@@ -33,9 +33,10 @@ AC_CHECK_PROG(MAKEGLOSSARIES, makeglossaries, makeglossaries)
 
 # Checks for libraries.
 PKG_CHECK_MODULES([uhd], [uhd])
-AX_BOOST_BASE([1.48])
+AX_BOOST_BASE([1.50])
 AX_BOOST_SYSTEM
 AX_BOOST_THREAD
+AX_BOOST_PROGRAM_OPTIONS
 
 # Checks for Python libraries
 AC_PYTHON_MODULE([pynmea2], [fatal])
