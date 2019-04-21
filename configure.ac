@@ -59,6 +59,7 @@ AC_CHECK_HEADERS([sys/time.h syslog.h signal.h error.h uhd.h getopt.h])
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
+LIBS="-lfftw3 -lfftw3_threads -lm"
 
 # Check for and configure dlib
 AC_ARG_VAR([DLIB_INCLUDEDIR], [contains the include path to the Seqan headers, typically here /home/ntlhui/workspace/dlib/dlib-19.16/dlib])

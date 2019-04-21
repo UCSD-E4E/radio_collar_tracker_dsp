@@ -46,11 +46,27 @@ void testSine(){
 	assert(std::abs(testSignal[2000].imag()) < 0.001);
 }
 
+void testVSine(){
+	std::vector<std::complex<double>>& testSignal = *RTT::generateVectorSinusoid(1000, 2000000, 
+		2000000);
+	assert(testSignal[0].real() == 1);
+	assert(testSignal[0].imag() == 0);
+	assert(std::abs(testSignal[500].real() - 0) < 0.001);
+	assert(std::abs(testSignal[500].imag() - 1) < 0.001);
+	assert(std::abs(testSignal[1000].real() - -1) < 0.001);
+	assert(std::abs(testSignal[1000].imag() - 0) < 0.001);
+	assert(std::abs(testSignal[1500].real() - 0) < 0.001);
+	assert(std::abs(testSignal[1500].imag() - -1) < 0.001);
+	assert(std::abs(testSignal[2000].real() - 1) < 0.001);
+	assert(std::abs(testSignal[2000].imag()) < 0.001);
+}
+
 
 int main(int argc, char const *argv[])
 {
 	testConvolve();
 	testDB();
 	testSine();
+	testVSine();
 	return 0;
 }

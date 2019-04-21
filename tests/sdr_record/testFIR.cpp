@@ -3,6 +3,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
+#include "tagged_signal.hpp"
 
 #define private public
 #define protected public
@@ -29,7 +30,7 @@ void test_throughput(){
 	std::mutex i_mux;
 	std::condition_variable i_cv;
 
-	std::queue<double> o_q;
+	std::queue<RTT::TaggedSignal*> o_q;
 	std::mutex o_mux;
 	std::condition_variable o_cv;
 
@@ -49,6 +50,16 @@ void test_throughput(){
 	assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count()) < (double) N / f_s);
 	i_cv.notify_all();
 	assert(i_q.empty());
+	assert(o_q.size() == N);
+	std::cout << "N: " << N << ", size: " << o_q.size() << std::endl;
+	for(std::size_t i = 0; i < N; i++){
+		RTT::TaggedSignal* tsig = o_q.front();
+		o_q.pop();
+		// std::cout << "Deleting vector " << tsig->sig << std::endl;
+		delete tsig->sig;
+		// std::cout << "Deleting TS " << tsig << std::endl;
+		delete tsig;
+	}
 }
 
 void test_threaded(){
@@ -60,7 +71,7 @@ void test_threaded(){
 	std::mutex i_mux;
 	std::condition_variable i_cv;
 
-	std::queue<double> o_q;
+	std::queue<RTT::TaggedSignal*> o_q;
 	std::mutex o_mux;
 	std::condition_variable o_cv;
 
@@ -81,6 +92,13 @@ void test_threaded(){
 	assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count()) < (double) N / f_s);
 	i_cv.notify_all();
 	assert(i_q.empty());
+	assert(o_q.size() == N);
+	for(std::size_t i = 0; i < N; i++){
+		auto tsig = o_q.front();
+		o_q.pop();
+		delete tsig->sig;
+		delete tsig;
+	}
 }
 
 void test_response(){
@@ -90,7 +108,7 @@ void test_response(){
 	std::mutex i_mux;
 	std::condition_variable i_cv;
 
-	std::queue<double> o_q;
+	std::queue<RTT::TaggedSignal*> o_q;
 	std::mutex o_mux;
 	std::condition_variable o_cv;
 
@@ -108,17 +126,25 @@ void test_response(){
 	test_obj._process(i_q, i_mux, i_cv, o_q, o_mux, o_cv);
 	i_cv.notify_all();
 	assert(i_q.empty());
-	for(std::size_t i = 0; i < test_obj._num_taps; i++){
+	std::size_t N = o_q.size();
+	for(std::size_t i = 0; i < N; i++){
 		// std::cout << std::abs(o_q.front() - test_obj._TAPS[i]) << std::endl;
-		assert(std::abs(o_q.front() - test_obj._TAPS[i]) < 0.001);
+		assert(std::abs(o_q.front()->val - test_obj._TAPS[i]) < 0.001);
+		auto tsig = o_q.front();
 		o_q.pop();
+		delete tsig->sig;
+		delete tsig;
 	}
 }
 
 int main(int argc, char const *argv[]){
+	std::cout << "Testing Constructor" << std::endl;
 	test_constructor();
+	std::cout << "Testing Throughput" << std::endl;
 	test_throughput();
+	std::cout << "Testing Response" << std::endl;
 	test_response();
+	std::cout << "Testing Threaded" << std::endl;
 	test_threaded();
 	return 0;
 }

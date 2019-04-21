@@ -9,9 +9,10 @@
 
 namespace RTT{
 	DSP_V3::DSP_V3(const std::size_t sampling_freq) : _iq_data_queue(), 
-		_iq_mux(), _iq_cv(), _fir(), _mag_data_queue(), _mag_mux(), _mag_cv(), 
-		_int(INT_FACTOR), _candidate_queue(), _can_mux(), _can_cv(),
-		_clfr(0, (double) sampling_freq / INT_FACTOR){
+		_iq_mux(), _iq_cv(), _fir(), _mag_data_queue(), _mag_mux(), _mag_cv(),
+		int_factor(int_time_s * sampling_freq), 
+		_int(int_factor), _candidate_queue(), _can_mux(), _can_cv(),
+		_clfr(0, (double) sampling_freq / int_factor, sampling_freq){
 		
 	}
 
@@ -106,5 +107,10 @@ namespace RTT{
 				_iq_cv.notify_all();
 			}
 		}
+	}
+
+	void DSP_V3::setStartTime(std::size_t start_time_ms){
+		time_start_ms = start_time_ms;
+		_clfr.setStartTime(time_start_ms);
 	}
 }

@@ -1,8 +1,9 @@
 #include "fir.hpp"
 #include <boost/circular_buffer.hpp>
+#include <vector>
 
 // #define DEBUG
-
+#include <iostream>
 #ifdef DEBUG
 #include <fstream>
 #endif
@@ -16,7 +17,7 @@ namespace RTT{
 
 	void FIR::start(std::queue<std::complex<double>>& input_queue, 
 		std::mutex& input_mutex, std::condition_variable& input_cv,
-		std::queue<double>& output_queue, std::mutex& output_mutex,
+		std::queue<TaggedSignal*>& output_queue, std::mutex& output_mutex,
 		std::condition_variable& output_cv){
 		// Store blocking condition variable to wake on later
 		_input_cv = &input_cv;
@@ -36,7 +37,7 @@ namespace RTT{
 
 	void FIR::_process(std::queue<std::complex<double>>& input_queue,
 		std::mutex& input_mutex, std::condition_variable& input_cv,
-		std::queue<double>& output_queue, std::mutex& output_mutex,
+		std::queue<TaggedSignal*>& output_queue, std::mutex& output_mutex,
 		std::condition_variable& output_cv){
 
 		#ifdef DEBUG
@@ -82,16 +83,23 @@ namespace RTT{
 				in_lock.unlock();
 
 				// process filter
+				auto sig = new std::vector<std::complex<double>>(_num_taps);
+				// std::cout << "Creating new vector " << sig << std::endl;
 				mac_output = 0;
 				for(std::size_t i = 0; i < _num_taps; i++){
 					mac_output += data[i] * _TAPS[i];
+					(*sig)[i] = data[i];
 				}
 				// mac_output /= std::complex<double>(_num_taps, 0);
-				filter_output = std::abs(mac_output);
+				filter_output = std::abs(mac_output) * std::abs(mac_output);
+
+
 
 				// output
+				TaggedSignal* output = new TaggedSignal(filter_output, *sig);
+				// std::cout << "Creating new TS " << output << std::endl;
 				std::unique_lock<std::mutex> out_lock(output_mutex);
-				output_queue.push(filter_output);
+				output_queue.push(output);
 				out_lock.unlock();
 				out_count++;
 				output_cv.notify_all();

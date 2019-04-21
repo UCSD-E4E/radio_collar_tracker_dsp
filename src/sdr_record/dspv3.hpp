@@ -7,6 +7,7 @@
 #include "classifier.hpp"
 #include <condition_variable>
 #include <thread>
+#include "tagged_signal.hpp"
 
 namespace RTT{
 	class DSP_V3 : public DSP{
@@ -19,6 +20,7 @@ namespace RTT{
 			std::queue<PingPtr>& outputQueue, std::mutex& outputMutex,
 			std::condition_variable& outputVar);
 		void stopProcessing();
+		void setStartTime(std::size_t time_start_ms);
 	private:
 		/**
 		 * Unpacks IQdataPtr objects and pushes them into the IQ data queue as a
@@ -51,18 +53,19 @@ namespace RTT{
 		/**
 		 * Magnitude Data queue from FIR to Integrator
 		 */
-		std::queue<double> _mag_data_queue;
+		std::queue<TaggedSignal*> _mag_data_queue;
 		std::mutex _mag_mux;
 		std::condition_variable _mag_cv;
 
-		const std::size_t INT_FACTOR = 800;
+		const float int_time_s = 3.2e-3;
+		std::size_t int_factor = 800;
 
 		Integrator _int;
 
 		/**
 		 * Candidate signal data queue from Integrator to Classifier
 		 */
-		std::queue<double> _candidate_queue;
+		std::queue<TaggedSignal*> _candidate_queue;
 		std::mutex _can_mux;
 		std::condition_variable _can_cv;
 

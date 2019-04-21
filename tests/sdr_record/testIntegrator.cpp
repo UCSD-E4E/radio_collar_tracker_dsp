@@ -2,6 +2,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
+#include <tagged_signal.hpp>
 
 #define private public
 #define protected public
@@ -13,6 +14,7 @@
 #include <iostream>
 #include <cmath>
 #include <utility.hpp>
+#include <stdlib.h>
 
 const std::size_t f_s = 250000;
 
@@ -26,17 +28,21 @@ void test_throughput(){
 
 	RTT::Integrator test_obj{6400};
 
-	std::queue<double> i_q;
+	std::queue<RTT::TaggedSignal*> i_q;
 	std::mutex i_mux;
 	std::condition_variable i_cv;
 
-	std::queue<double> o_q;
+	std::queue<RTT::TaggedSignal*> o_q;
 	std::mutex o_mux;
 	std::condition_variable o_cv;
 
+	srand(1);
 	for(std::size_t i = 0; i < N; i++){
 		std::unique_lock<std::mutex> lock(i_mux);
-		i_q.push(0.0001 * i);
+		auto vec = new std::vector<std::complex<double>>();
+		vec->push_back(std::complex<double>(double(rand() / RAND_MAX)));
+		auto sig = new RTT::TaggedSignal(0.0001*i, *vec);
+		i_q.push(sig);
 		lock.unlock();
 		i_cv.notify_all();
 	}
@@ -49,6 +55,14 @@ void test_throughput(){
 	std::cout << "Usage: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() / ((double)N/f_s) * 100 << "%" << std::endl;
 	assert((std::chrono::duration <double, std::ratio<1, 1>> (diff).count()) < (double) N / f_s);
 	assert(i_q.empty());
+
+	const std::size_t k = o_q.size();
+	for(std::size_t i = 0; i < k; i++){
+		auto tsig = o_q.front();
+		o_q.pop();
+		delete tsig->sig;
+		delete tsig;
+	}
 }
 
 void test_buffer_frame(){
@@ -57,18 +71,22 @@ void test_buffer_frame(){
 
 	RTT::Integrator test_obj{buffer_size};
 
-	std::queue<double> i_q;
+	std::queue<RTT::TaggedSignal*> i_q;
 	std::mutex i_mux;
 	std::condition_variable i_cv;
 
-	std::queue<double> o_q;
+	std::queue<RTT::TaggedSignal*> o_q;
 	std::mutex o_mux;
 	std::condition_variable o_cv;
 
+	srand(1);
 	for(std::size_t i = 0; i < N; i++){
 		for(std::size_t j = 0; j < buffer_size; j++){
 			std::unique_lock<std::mutex> lock(i_mux);
-			i_q.push((i+1) / (double)buffer_size);
+			auto vec = new std::vector<std::complex<double>>();
+			vec->push_back(std::complex<double>(rand()));
+			auto sig = new RTT::TaggedSignal((i + 1) / (double)buffer_size, *vec);
+			i_q.push(sig);
 			lock.unlock();
 			i_cv.notify_all();
 		}
@@ -84,10 +102,24 @@ void test_buffer_frame(){
 	i_cv.notify_all();
 	assert(i_q.empty());
 	assert(o_q.size() == N);
+	srand(1);
 	for(std::size_t i = 0; i < N; i++){
-		double test_val = o_q.front();
+		RTT::TaggedSignal* test_sig = o_q.front();
 		o_q.pop();
-		assert(std::fabs(test_val - RTT::amplitudeToDB(i+1)) < 0.01);
+		double test_val = test_sig->val;
+		// std::cout << test_val << ", " << RTT::powerToDB(i+1) / 10 << std::endl;
+		assert(std::fabs(test_val - RTT::powerToDB(i+1) / 10) < 0.01);
+		assert(test_sig->sig->size() == 6400);
+		std::vector<std::complex<double>>& sig = *test_sig->sig;
+		for(std::size_t j = 0; j < test_sig->sig->size(); j++){
+			// std::cout << i << ", " << j << std::endl;
+			auto expected_val = rand();
+			auto actual_val = sig[j].real();
+			// std::cout << std::abs(actual_val / expected_val) << std::endl;
+			assert(std::abs(actual_val / expected_val - 1) < 0.01);
+		}
+		delete test_sig->sig;
+		delete test_sig;
 	}
 }
 

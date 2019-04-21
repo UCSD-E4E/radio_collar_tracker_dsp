@@ -1,16 +1,16 @@
 check_PROGRAMS = testIQdata testUtility \
 	testSDRTest testGPStest \
-	testFIR testIntegrator testClassifier testDSPV3
+	testFIR testIntegrator testClassifier testDSPV3 testLocalization
 # testLocalization testRemixer
 
 TESTS = $(check_PROGRAMS)
 
-AM_CXXFLAGS=-std=gnu++14 -Wall $(BOOST_CPPFLAGS) -I../../src/sdr_record/
-# AM_CXXFLAGS=-std=gnu++14 -Wall $(BOOST_CPPFLAGS) -I../../src/sdr_record/ $(DLIB_CPPFLAGS)
+# AM_CXXFLAGS=-std=gnu++14 -Wall $(BOOST_CPPFLAGS) -I../../src/sdr_record/
+AM_CXXFLAGS=-std=gnu++14 -Wall $(BOOST_CPPFLAGS) -I../../src/sdr_record/ $(DLIB_CPPFLAGS)
 # LDADD=-lstdc++ $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
 LDADD=-lfftw3_threads -lfftw3 -lstdc++ $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
-AM_LDFLAGS=-pthread $(BOOST_LDFLAGS) 
-# AM_LDFLAGS=-pthread $(BOOST_LDFLAGS) $(DLIB_LDFLAGS)
+# AM_LDFLAGS=-pthread $(BOOST_LDFLAGS) 
+AM_LDFLAGS=-pthread $(BOOST_LDFLAGS) $(DLIB_LDFLAGS)
 
 test_src = ../../src/sdr_record
 
@@ -34,22 +34,19 @@ testSDRTest_LDADD=$(uhd_LIBS)
 testSDRTest_SOURCES = testSDRTest.cpp $(test_src)/sdr_test.cpp \
 	$(test_src)/iq_data.cpp $(test_src)/sdr.cpp 
 
-# testLocalization_SOURCES = testLocalization.cpp $(test_src)/localization.cpp \
-# 	$(test_src)/sdr_test.cpp $(test_src)/iq_data.cpp $(test_src)/sdr.cpp  \
-# 	$(test_src)/dspv2.cpp $(test_src)/mixer.cpp $(test_src)/resampler.cpp \
-# 	$(test_src)/ping_fir.cpp $(test_src)/utility.cpp \
-# 	$(test_src)/ping_classifier.cpp $(test_src)/Processor.cpp \
-# 	$(test_src)/gps_test.cpp $(test_src)/gps.cpp $(test_src)/timeblock.cpp \
-# 	$(test_src)/remixer.cpp
-
-testLocalization_LDADD = $(uhd_LIBS)
+testLocalization_SOURCES = testLocalization.cpp $(test_src)/localization.cpp \
+	$(test_src)/sdr_test.cpp $(test_src)/iq_data.cpp \
+	$(test_src)/dspv3.cpp $(test_src)/utility.cpp $(test_src)/fir.cpp \
+	$(test_src)/gps_test.cpp $(test_src)/gps.cpp $(test_src)/timeblock.cpp \
+	$(test_src)/integrator.cpp $(test_src)/classifier.cpp
 
 testFIR_SOURCES = testFIR.cpp $(test_src)/fir.cpp
 
 testIntegrator_SOURCES = testIntegrator.cpp $(test_src)/integrator.cpp \
 	$(test_src)/utility.cpp
 
-testClassifier_SOURCES = testClassifier.cpp $(test_src)/classifier.cpp
+testClassifier_SOURCES = testClassifier.cpp $(test_src)/classifier.cpp \
+	$(test_src)/utility.cpp
 
 testDSPV3_SOURCES = testDSPV3.cpp $(test_src)/dspv3.cpp $(test_src)/fir.cpp \
 	$(test_src)/integrator.cpp $(test_src)/utility.cpp \

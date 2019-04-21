@@ -2,6 +2,7 @@
 #include <queue>
 #include <complex>
 #include <list>
+#include <vector>
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
 #endif
@@ -20,6 +21,18 @@ namespace RTT{
 				M_PI * frequency * j / sampling_frequency));
 		}
 		return retval;
+	}
+
+	std::vector<std::complex<double>>* generateVectorSinusoid(std::int64_t frequency,
+		std::size_t sampling_frequency, std::size_t length, 
+		double amplitude){
+		auto v = new std::vector<std::complex<double>>(length);
+		std::vector<std::complex<double>>& retval = *v;
+		for(std::size_t j = 0; j < length; j++){
+			retval[j] = amplitude * std::exp(std::complex<double>(0, 2.0 * 
+				M_PI * frequency * j / sampling_frequency));
+		}
+		return v;
 	}
 
 	// void load_data(std::queue<std::complex<double>>& input_queue, 

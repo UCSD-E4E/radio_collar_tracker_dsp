@@ -4,6 +4,7 @@
 #include <queue>
 #include <complex>
 #include <list>
+#include <vector>
 
 namespace RTT{
 	/**
@@ -17,6 +18,9 @@ namespace RTT{
 	 */
 	std::complex<double>* generateSinusoid(std::int64_t frequency,
 		std::size_t sampling_frequency, std::size_t length, 
+		double amplitude = 1.0);
+	std::vector<std::complex<double>>* generateVectorSinusoid(std::int64_t frequency,
+		std::size_t sampling_frequency, std::size_t length,
 		double amplitude = 1.0);
 
 	// void load_data(std::queue<std::complex<double>>& input_queue, 
