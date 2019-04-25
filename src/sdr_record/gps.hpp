@@ -41,12 +41,17 @@ namespace RTT{
 
 		std::thread* _map_thread;
 
+		volatile bool _run = false;
+
+		std::size_t first_time = 0;
+		std::size_t last_time = 0;
+
 	protected:
 
 		/**
 		 * Execution thread function
 		 */
-		void _thread(const volatile bool* run);
+		void _thread();
 	public:
 		/**
 		 * Protocol definitions
@@ -72,11 +77,12 @@ namespace RTT{
 			 * hdg - heading in degrees from True North as an int
 			 */
 			TEST_FILE,
+			SERIAL,
 		};
 		GPS(GPS::Protocol, std::string);	
-		const Location& getPositionAt(uint64_t);
+		const Location* getPositionAt(uint64_t);
 
-		void start(const volatile bool* run);
+		void start();
 		void stop();
 	};
 }

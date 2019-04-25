@@ -43,8 +43,7 @@ namespace RTT{
 		 *                     not the signal die
 		 */
 		void start(std::queue<Location*>& output_queue, 
-			std::mutex& output_mutex, std::condition_variable& output_var,
-			const volatile bool* run);
+			std::mutex& output_mutex, std::condition_variable& output_var);
 
 		/**
 		 * Stops the data reading thread.

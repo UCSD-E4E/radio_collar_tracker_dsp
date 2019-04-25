@@ -45,32 +45,35 @@ void testReadAll(){
 	std::queue<RTT::Location*> out_queue;
 	std::mutex out_mutex;
 	std::condition_variable out_var;
-	bool run = true;
 
-	testCore->start(out_queue, out_mutex, out_var, &run);
-	run = false;
+	testCore->start(out_queue, out_mutex, out_var);
 	testCore->stop();
-	assert(out_queue.size() == 460);
+	std::cout << out_queue.size() << std::endl;
+	assert(out_queue.size() == 730);
 }
 
 void testComposition(){
 	RTT::GPS* newGPS = new RTT::GPS(RTT::GPS::Protocol::TEST_FILE, "/home/ntlhui"
 		"/workspace/tmp/testData/GPS_000001");
-	bool run = true;
-	newGPS->start(&run);
-	run = false;
+	newGPS->start();
 	newGPS->stop();
-	assert(newGPS->pointLookup.size() == 460);
+	assert(newGPS->pointLookup.size() == 730);
 }
 
 void testLookup(){
 	RTT::GPS* newGPS = new RTT::GPS(RTT::GPS::Protocol::TEST_FILE, "/home/ntlhui"
 		"/workspace/tmp/testData/GPS_000001");
-	bool run = true;
-	newGPS->start(&run);
-	const RTT::Location& point = newGPS->getPositionAt(1502770095000);
-	assert(point.lat == 328871181);
-	assert(point.lon == -1172355018);
+	newGPS->start();
+	const RTT::Location* point = newGPS->getPositionAt(1502770095000);
+	assert(point->lat == 328871181);
+	assert(point->lon == -1172355018);
+}
+
+void testUsage(){
+	RTT::GPS gps(RTT::GPS::Protocol::TEST_FILE, "/home/ntlhui/workspace/tmp/testData/GPS_000001");
+	gps.start();
+	gps.stop();
+	std::cout << "First location: " << gps.pointLookup.begin()->first.start << " to " << gps.pointLookup.begin()->first.stop << std::endl;
 }
 
 int main(int argc, char const *argv[]){
@@ -78,5 +81,6 @@ int main(int argc, char const *argv[]){
 	testParse();
 	testReadAll();
 	testComposition();
+	testUsage();
 	return 0;
 }

@@ -6,12 +6,14 @@
 
 namespace RTT{
 	void GPSTest::start(std::queue<Location*>& output_queue, 
-			std::mutex& output_mutex, std::condition_variable& output_var,
-			const volatile bool* run){
+			std::mutex& output_mutex, std::condition_variable& output_var){
 		size_t count = 0;
 		while(!data_source->eof()){
 			std::string line;
 			std::getline(*data_source, line);
+			if(line.length() < 9){
+				continue;
+			}
 			Location& point = parseLocation(line);
 
 			std::unique_lock<std::mutex> guard(output_mutex);

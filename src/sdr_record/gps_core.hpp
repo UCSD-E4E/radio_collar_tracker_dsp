@@ -18,12 +18,9 @@ namespace RTT{
 		 * @param output_queue Output queue of RTT::Location pointers.
 		 * @param output_mutex Mutex for the output queue
 		 * @param output_var   Conditition variable for the output queue
-		 * @param run         Non null pointer to the boolean variable that is
-		 *                     not the signal die
 		 */
 		virtual void start(std::queue<Location*>& output_queue, 
-			std::mutex& output_mutex, std::condition_variable& output_var,
-			const volatile bool* run) = 0;
+			std::mutex& output_mutex, std::condition_variable& output_var) = 0;
 
 		/**
 		 * Stops the data reading thread.

@@ -1,7 +1,7 @@
 check_PROGRAMS = testIQdata testUtility \
 	testSDRTest testGPStest \
-	testFIR testIntegrator testClassifier testDSPV3 testLocalization
-# testLocalization testRemixer
+	testFIR testIntegrator testClassifier testDSPV3 testLocalization \
+	testSerialGPS
 
 TESTS = $(check_PROGRAMS)
 
@@ -19,7 +19,7 @@ testIQdata_SOURCES = testIQdata.cpp $(test_src)/iq_data.cpp
 testUtility_SOURCES = testUtility.cpp $(test_src)/utility.cpp
 
 testGPStest_SOURCES = testGPStest.cpp $(test_src)/gps_test.cpp \
-	$(test_src)/gps.cpp $(test_src)/timeblock.cpp
+	$(test_src)/gps.cpp $(test_src)/timeblock.cpp $(test_src)/serial_gps.cpp
 
 maintainer-clean-local:
 	rm Makefile.in
@@ -38,7 +38,8 @@ testLocalization_SOURCES = testLocalization.cpp $(test_src)/localization.cpp \
 	$(test_src)/sdr_test.cpp $(test_src)/iq_data.cpp \
 	$(test_src)/dspv3.cpp $(test_src)/utility.cpp $(test_src)/fir.cpp \
 	$(test_src)/gps_test.cpp $(test_src)/gps.cpp $(test_src)/timeblock.cpp \
-	$(test_src)/integrator.cpp $(test_src)/classifier.cpp
+	$(test_src)/integrator.cpp $(test_src)/classifier.cpp \
+	$(test_src)/serial_gps.cpp
 
 testFIR_SOURCES = testFIR.cpp $(test_src)/fir.cpp
 
@@ -51,3 +52,5 @@ testClassifier_SOURCES = testClassifier.cpp $(test_src)/classifier.cpp \
 testDSPV3_SOURCES = testDSPV3.cpp $(test_src)/dspv3.cpp $(test_src)/fir.cpp \
 	$(test_src)/integrator.cpp $(test_src)/utility.cpp \
 	$(test_src)/classifier.cpp $(test_src)/iq_data.cpp
+
+testSerialGPS_SOURCES = testSerialGPS.cpp $(test_src)/serial_gps.cpp
