@@ -47,12 +47,13 @@ RUN ./configure DLIB_INCLUDEDIR=/root/dlib
 RUN make
 
 RUN mkdir /root/code
+RUN mkdir /host-dev/
 
 WORKDIR /root/
 RUN apt-get update && apt-get install -y wget
 RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz
 RUN tar -xzf fftw-3.3.8.tar.gz
 WORKDIR /root/fftw-3.3.8
-RUN ./bootstrap.sh && ./configure --enable-threads && make && make install
+RUN ./bootstrap.sh && ./configure --enable-threads && make -j7 && make install
 
 WORKDIR /root/code/
