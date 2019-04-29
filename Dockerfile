@@ -19,10 +19,11 @@ RUN git checkout v3.11.0.1
 RUN mkdir /root/uhd/host/build
 WORKDIR /root/uhd/host/build
 # RUN cmake ../
-RUN cmake -DENABLE_B100=FALSE -DENABLE_X300=FALSE -DENABLE_E320=FALSE \
-	-DENABLE_N320=FALSE -DENABLE_N300=FALSE -DENABLE_N230=FALSE \
-	-DENABLE_USRP1=FALSE -DENABLE_USRP2=FALSE -DENABLE_OCTOCLOCK=FALSE \
-	-DENABLE_RFNOC=FALSE -DENABLE_MPMD=FALSE ../
+RUN cmake -DENABLE_B100=OFF -DENABLE_X300=OFF \
+	-DENABLE_N320=OFF \
+	-DENABLE_USRP1=OFF -DENABLE_USRP2=OFF -DENABLE_OCTOCLOCK=OFF \
+	-DENABLE_RFNOC=OFF -DENABLE_MPMD=OFF -DENABLE_EXAMPLES=OFF \
+	-DENABLE_MANUAL=OFF -DENABLE_TESTS=OFF ../
 RUN make -j7
 RUN make install
 RUN ldconfig
@@ -39,6 +40,13 @@ RUN /usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*
 
 RUN git clone git://github.com/davisking/dlib.git /root/dlib
 
+WORKDIR /root/
+RUN apt-get update && apt-get install -y wget
+RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz
+RUN tar -xzf fftw-3.3.8.tar.gz
+WORKDIR /root/fftw-3.3.8
+RUN ./bootstrap.sh && ./configure --enable-threads && make -j7 && make install
+
 RUN git clone git://github.com/UCSD-E4E/radio_collar_tracker_drone.git /root/radio_collar_tracker_drone
 WORKDIR /root/radio_collar_tracker_drone
 RUN git checkout online_proc
@@ -49,11 +57,5 @@ RUN make
 RUN mkdir /root/code
 RUN mkdir /host-dev/
 
-WORKDIR /root/
-RUN apt-get update && apt-get install -y wget
-RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz
-RUN tar -xzf fftw-3.3.8.tar.gz
-WORKDIR /root/fftw-3.3.8
-RUN ./bootstrap.sh && ./configure --enable-threads && make -j7 && make install
 
 WORKDIR /root/code/

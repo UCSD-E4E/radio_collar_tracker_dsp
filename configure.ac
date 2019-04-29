@@ -80,7 +80,7 @@ AC_LINK_IFELSE([
         ]]
     )],
     [AC_MSG_RESULT([yes])],
-    [AC_MSG_ERROR([could not find/link dlib headers! If the dlib headers are not located within the compiler's default search path, specify them with the DLIB_INCLUDEDIR variable to the configure script.])]
+    [AC_MSG_WARN([could not find/link dlib headers! If the dlib headers are not located within the compiler's default search path, specify them with the DLIB_INCLUDEDIR variable to the configure script.])]
 )
 CPPFLAGS="$save_cppflags"
 
