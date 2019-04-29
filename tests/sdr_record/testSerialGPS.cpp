@@ -31,26 +31,26 @@ void testParsing(){
 	RTT::SerialGPS testObj{"."};
 
 	std::string line = "{\"lat\": 327054113, \"hdg\":270, \"lon\": -1171710165,"
-		" \"tme\": 1530025076, \"run\": true, \"fix\": 1, \"sat\": 14}";
+		" \"tme\": 170655, \"run\": true, \"fix\": 1, \"sat\": 14, \"dat\": 280419}";
 
 	auto parseTime = std::chrono::system_clock::now().time_since_epoch() / 
 		std::chrono::milliseconds(1);
 	RTT::Location& point = testObj.parseLocation(line);
 
 	assert(std::abs((std::int64_t)point.ltime - (std::int64_t)parseTime) < 100);
-	assert(point.gtime == 1530025076);
+	assert(point.gtime == 1556471215);
 	assert(point.lat == 327054113);
 	assert(point.lon == -1171710165);
 	assert(point.hdg == 270);
 
 	std::string line2 = "{\"lat\": 1024, \"hdg\": -90, \"lon\": -135468321, "
-	"\"tme\": 13546843, \"run\": true, \"fix\": 3, \"sat\": 2}";
+	"\"tme\": 164726, \"run\": true, \"fix\": 3, \"sat\": 2, \"dat\": 280419}";
 
 	parseTime = std::chrono::system_clock::now().time_since_epoch() / 
 		std::chrono::milliseconds(1);
 	RTT::Location& point2 = testObj.parseLocation(line2);
 	assert(std::abs((std::int64_t)point2.ltime - (std::int64_t)parseTime) < 100);
-	assert(point2.gtime == 13546843);
+	assert(point2.gtime == 1556470046);
 	assert(point2.lat == 1024);
 	assert(point2.lon == -135468321);
 	assert(point2.hdg == -90);
@@ -125,8 +125,8 @@ void testWrite(int master, const char* slave_device, int init_sleep_s, int sleep
 	std::condition_variable o_v{};
 
 	std::string testData = "{\"lat\": 327054113, \"hdg\":270, \"lon\": "
-		"-1171710165, \"tme\": 1530025076, \"run\": true, \"fix\": 1, \"sat\": "
-		"14}";
+		"-1171710165, \"tme\": 164753, \"run\": true, \"fix\": 1, \"sat\": "
+		"14, \"dat\": 280419}";
 
 	testObj.start(o_q, o_m, o_v);
 	sleep(init_sleep_s);

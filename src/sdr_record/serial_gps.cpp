@@ -5,8 +5,10 @@
 #include <chrono>
 #include <poll.h>
 #include <termios.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace pt = boost::property_tree;
+namespace ptme = boost::posix_time;
 
 // #define DEBUG
 
@@ -25,7 +27,29 @@ namespace RTT{
 
 		retval->ltime = std::chrono::system_clock::now().time_since_epoch() / 
 			std::chrono::milliseconds(1);
-		retval->gtime = root.get<uint64_t>("tme");
+		std::string tme = root.get<std::string>("tme");
+		std::size_t hr = std::stoi(tme.substr(0, 2));
+		std::size_t min = std::stoi(tme.substr(2, 2));
+		std::size_t sec = std::stoi(tme.substr(4, 2));
+		std::size_t dsec = 0;
+		if(tme.length() > 6){
+			dsec = std::stoi(tme.substr(5, 2));
+		}
+		std::string dat = root.get<std::string>("dat");
+		std::size_t day = std::stoi(dat.substr(0, 2));
+		std::size_t mon = std::stoi(dat.substr(2, 2));
+		std::size_t yr = std::stoi(dat.substr(4, 2));
+
+		std::stringstream datestream;
+		datestream << "20" << yr << "/" << mon << "/" << day << " " << hr << ":" << 
+			min << ":" << sec << "." << dsec;
+
+		ptme::ptime epoch = ptme::time_from_string("1970-01-01 00:00:00.000");
+		ptme::ptime timeObj = ptme::time_from_string(datestream.str());
+
+		ptme::time_duration const diff = timeObj - epoch;
+		
+		retval->gtime = diff.total_seconds();
 		retval->lat = root.get<int64_t>("lat");
 		retval->lon = root.get<int64_t>("lon");
 		retval->hdg = root.get<int16_t>("hdg");
