@@ -3,12 +3,12 @@
 \usegdlibrary{layered}
 \begin{document}
 	\tikz [every node/.style={draw}] \graph[layered layout]{
-		GCS/"Ground Control Station" <-> Platform/"Flight Platform";
-		Antenna -> RF;
-		SDR <- RF/"RF Frontend";
-		Sensors -> Joule;
+		% GCS/"Ground Control Station" <-> Platform/"Flight Platform";
+		Antenna -> RF/"LNA";
+		SDR <- RF;
+		Sensors/"GPS/Compass" -> Joule/"On Board Computer";
 		Joule <- SDR;
 		UI <-> Joule;
-		Storage/"Data Storage" <- Joule/"On Board Computer";
+		Storage/"Data Storage" <- Joule;
 	};
 \end{document}

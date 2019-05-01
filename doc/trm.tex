@@ -1,10 +1,10 @@
 \documentclass{report}
-\usepackage{draftwatermark}
-\usepackage{fullpage,bookmark,hyperref,lmodern,listings}
-\usepackage[toc,nonumberlist]{glossaries}
+% \usepackage{draftwatermark}
 \title{Radio Collar Tracker Technical Reference Manual}
 \author{Nathan Hui, Project Lead\\Engineers for Exploration, UC San Diego}
-\date{\today\\v0.1}
+\date{\today\\v0.3}
+\usepackage{fullpage,bookmark,hyperref,listings,lmodern,siunitx}
+\usepackage[toc,nonumberlist]{glossaries}
 \makeglossaries
 \hypersetup{
     colorlinks,
@@ -13,6 +13,7 @@
     linkcolor=black,
     urlcolor=blue
 }
+\renewcommand*{\chapterautorefname}{Chapter}
 \lstset{
 	basicstyle=\ttfamily,
 	breaklines=true
@@ -23,11 +24,238 @@
 	\tableofcontents
 	\listoffigures
 	\listoftables
+	\lstlistoflistings
 	\chapter{Overview}
 	\chapter{Signal Processing}
 		\section{Version 1}
-			
+
 	\chapter{Payload}
+		\section{UP Core}
+			\subsection{Locating the UP Core}
+				The UP Core is currently configured to automatically connect to either the Sealab or UCSD-Protected networks.  It has a hostname of e4e-UPCORE-1.
+
+				At current, the Sealab network is configured as a bridge to the UCSD network, so all devices can be accessed via hostname.dynamic.ucsd.edu.
+
+				The UP Core can always be accessed (on UCSD campus) at e4e-upcore-1.dynamic.ucsd.edu.
+
+				Due to this network configuration, the UP Core is accessible only via SSH public key authentication.  To add a public key, append the appropriate key to \lstinline[language=sh]{/home/e4e/.ssh/authorized_keys}.
+		\section{UI Board} \label{sec:ui}
+			\subsection{Flashing the UI Board} \label{ssec:flash_ui}
+				The UI Board currently uses an Atmel ATmega32u4.  The best way to flash this is to use the Dragon ISP (In System Programmer) to load the program into flash.  The recommended way to interact with the Dragon ISP for Atmel microcontrollers is by using \lstinline[language=sh]{avrdude}.  See Listing \ref{lst:avrdude_usage} for details on specific command line options.
+
+				For the UI Board, use the following options:
+
+				\begin{itemize}
+					\item \lstinline{partno}: \lstinline{m32u4}
+					\item \lstinline{bitclock}: \lstinline{10}
+					\item \lstinline{programmer}: \lstinline{dragon_isp}
+					\item \lstinline{port}: \lstinline{usb}
+					\item \lstinline{memtype}: \lstinline{flash}
+				\end{itemize}
+				
+				For example, if we were to flash the file \lstinline{foo.hex} to the UI Board, we would use the command in Listing \ref{lst:avrdude_example}.
+
+				\begin{lstlisting}[language=sh, caption={Example avrdude command}, label={lst:avrdude_example}]
+avrdude -p m32u4 -c dragon_isp -B 10 -P usb -U flash:w:foo.hex
+				\end{lstlisting}
+
+				\begin{lstlisting}[caption={\lstinline{avrdude} usage}, label={lst:avrdude_usage}]
+Usage: avrdude [options]
+Options:
+  -p <partno>                Required. Specify AVR device.
+  -b <baudrate>              Override RS-232 baud rate.
+  -B <bitclock>              Specify JTAG/STK500v2 bit clock period (us).
+  -C <config-file>           Specify location of configuration file.
+  -c <programmer>            Specify programmer type.
+  -D                         Disable auto erase for flash memory
+  -i <delay>                 ISP Clock Delay [in microseconds]
+  -P <port>                  Specify connection port.
+  -F                         Override invalid signature check.
+  -e                         Perform a chip erase.
+  -O                         Perform RC oscillator calibration (see 
+                             AVR053). 
+  -U <memtype>:r|w|v:<filename>[:format]
+                             Memory operation specification.
+                             Multiple -U options are allowed, each request
+                             is performed in the order specified.
+  -n                         Do not write anything to the device.
+  -V                         Do not verify.
+  -u                         Disable safemode, default when running from a
+                             script.
+  -s                         Silent safemode operation, will not ask you 
+                             if fuses should be changed back.
+  -t                         Enter terminal mode.
+  -E <exitspec>[,<exitspec>] List programmer exit specifications.
+  -x <extended_param>        Pass <extended_param> to programmer.
+  -y                         Count # erase cycles in EEPROM.
+  -Y <number>                Initialize erase cycle # in EEPROM.
+  -v                         Verbose output. -v -v for more.
+  -q                         Quell progress output. -q -q for less.
+  -l logfile                 Use logfile rather than stderr for 
+                             diagnostics.
+  -?                         Display this usage.
+				\end{lstlisting}
+
+			\subsection{Compiling Programs for the UI Board} \label{ssec:ui_compile}
+				\subsubsection{Arduino IDE} \label{sssec:ui_arduino_compile}
+					To use the Arduino IDE to compile programs, load the code into the Arduino IDE.  In the IDE, set the \lstinline{Board} option to \lstinline{Arduino Leonardo}, and enable verbose output for compilation.
+
+					Compile the code by clicking the \lstinline{Verify} button, or by selecting \lstinline{Verify/Compile} from the \lstinline{Sketch} menu.  In the output area, look for the line that invokes \lstinline{avr-objcopy} and outputs a file that hax the \lstinline{.hex} extension.  This is the file that needs to be uploaded to the UI Board using the instructions in Subsection \ref{ssec:flash_ui}.
+
+				\subsubsection{avr-gcc} \label{sssec:ui_make_compile}
+					If the Arduino IDE is not available, or not an option, we can use the AVR compilation toolchain.  This is a version of \lstinline{gcc} that compiles specifically to the AVR instruction set.
+
+					In general, use \lstinline{avr-g++} or \lstinline{avr-gcc} to compile the individual object files as appropriate.  Then use \lstinline{avr-g++} to link all the object files and libraries into an \lstinline{.elf} (Executable and Linkable Format).  Finally, use \lstinline{avr-objcopy} to copy the text and data portions of the program into the appropriate locations in the \lstinline{.hex} file (Intel Hexcode).
+
+					An example compilation may look like the following:
+
+					\begin{lstlisting}[language=sh, caption={Example avr-gcc compilation}, label={lst:avr-gcc_example}]
+avr-g++ -c test.cpp -o test.o
+avr-g++ -o test.elf test.o
+avr-objcopy -j .text -j .data -O ihex test.elf test.hex
+					\end{lstlisting}
+
+					See the \lstinline{ui_board} branch of the Radio Collar Tracker Github\footnote{\url{https://github.com/UCSD-E4E/radio_collar_tracker_drone/blob/ui_board/src/arduino/Makefile}} for a makefile containing the rules to compile, link, and format the program.
+			\subsection{UI Board Functionality}\label{ssec:ui_functional}
+				The UI Board shall gather data from the following sensors: GPS, compass, and user switch.  It must transmit the data and state information to the UP Core as specified in Section \ref{ssec:ui_obc_msg}.  Simultaneously, the UI Board shall also receive status messages from the UP Core as specified in Section \ref{ssec:obc_ui_msg}, and switch LEDs in the appropriate response.  See Tables \ref{tbl:led1_states}, \ref{tbl:led2_states}, \ref{tbl:led3_states}, and \ref{tbl:led4_states} for the state tables.
+
+				\begin{table}[htp]
+					\centering
+					\caption{LED 1 (System) State Table}
+					\label{tbl:led1_states}
+					\begin{tabular}{c|c}
+						System State & LED State \\ \hline
+						Init & Blinking (5 Hz)\\
+						Wait for Start & Off\\
+						Wait for End & Blinking (1 Hz)\\
+						Finish & Solid \\
+						Fail & Off
+					\end{tabular}
+				\end{table}
+
+				\begin{table}[htp]
+					\centering
+					\caption{LED 2 (Storage) State Table}
+					\label{tbl:led2_states}
+					\begin{tabular}{c|c}
+						Storage State & LED State \\\hline
+						Init & Blinking (5 Hz)\\
+						Ready & Solid \\
+						Fail & Off\\
+						Retry & Blinking (1 Hz)
+					\end{tabular}
+				\end{table}			
+
+				\begin{table}[htp]
+					\centering
+					\caption{LED 3 (SDR) State Table}
+					\label{tbl:led3_states}
+					\begin{tabular}{c|c}
+						SDR State & LED State \\\hline
+						Init & Blinking (5 Hz)\\
+						Ready & Solid\\
+						Fail & Off\\
+						Retry & Blinking (1 Hz)
+					\end{tabular}
+				\end{table}
+
+				\begin{table}[htp]
+					\centering
+					\caption{LED 4 (GPS) State Table}
+					\label{tbl:led4_states}
+					\begin{tabular}{c|c}
+						GPS State & LED State \\\hline
+						Init & Blinking (5 Hz)\\
+						Ready & Solid\\
+						Fail & Off\\
+						Retry & Blinking (1 Hz)
+					\end{tabular}
+				\end{table}
+
+				LED 5 shall be solid in and only in the following states: GPS is Ready, SDR is Ready, STR is Ready, and Sys is wait\_start.
+		\section{UI Board to GPS/Compass Protocol Specification}\label{sec:ui_gps_mag_comm_spec}
+			The GPS/Compass module is a DroTek Ublox GPS and Compass Module, configured with the XL patch antenna.
+			\subsection{GPS}
+				The GPS is a UBlox M8N.  This has a 5V TTL UART configured with 8N1 frames and 9600 baud.  Data is transmitted as a NMEA 0183 stream, with a nominal message rate of \SI{1}{\Hz}.
+			\subsection{Compass}
+				The compass is a Honeywell HMC5983 magnetometer\footnote{\url{https://aerocontent.honeywell.com/aero/common/documents/myaerospacecatalog-documents/Defense_Brochures-documents/HMC5983_3_Axis_Compass_IC.pdf}}.  This has an I2C bus, with an address of \lstinline{0x3C}.  Reference the datasheet for communication protocols.
+		\section{UI Board to UP Core Protocol Specification}\label{sec:obc_uibrd_comm_spec}
+			Data transmission shall take place as a software serial port over USB.  This connection shall go from the CN7 connector on the UP Core to the P2 connector on the UI Board.  This physical link shall comply with USB 2.0 standards.
+
+			The virtual serial port shall be configured as 8N1 with a baud rate of 9600.
+
+			Data shall be formatted as JSON dictionaries.
+
+			\subsection{UP Core to UI Board}\label{ssec:obc_ui_msg}
+				The UP Core shall transmit a status message at \SI{1}{\hertz} nominal frequency. This message shall be formatted as a JSON dictionary with the following keys: \lstinline{STR}, \lstinline{SDR}, \lstinline{SYS}.  See Listing \ref{lst:upcore_status_msg} for an example message.  See Table \ref{tbl:obc_status_vals} for the status values.  These keys are not guaranteed to come in any particular order.
+
+				\begin{lstlisting}[caption={UP Core Status Message}, label={lst:upcore_status_msg}]
+{"STR": 3, "SYS": 3, "SDR": 4}
+				\end{lstlisting}
+
+				\begin{table}[htp]
+					\centering
+					\caption{Status Message Lookup Tables}
+					\label{tbl:obc_status_vals}
+					\begin{tabular}{c|c|c}
+						Storage State & State Name & STR value \\\hline
+						Init & \lstinline!STR_INIT! & 0\\
+						Ready & \lstinline!STR_READY! & 1\\
+						Fail & \lstinline!STR_FAIL! & 2\\
+						Retry & \lstinline!STR_RETRY! & 3
+					\end{tabular}
+					
+					\begin{tabular}{c|c|c}
+						SDR State & State Name & SDR value \\\hline
+						Init & \lstinline!SDR_INIT! & 0\\
+						Ready & \lstinline!SDR_READY! & 1\\
+						Fail & \lstinline!SDR_FAIL! & 2\\
+						Retry & \lstinline!SDR_RETRY! & 3
+					\end{tabular}
+					
+					\begin{tabular}{c|c|c}
+						GPS State & State Name & GPS value\\\hline
+						Init & \lstinline!GPS_INIT! & 0\\
+						Ready & \lstinline!GPS_READY! & 1\\
+						Fail & \lstinline!GPS_FAIL! & 2\\
+						Retry & \lstinline!GPS_RETRY! & 3
+					\end{tabular}
+					
+					\begin{tabular}{c|c|c}
+						System State & State Name & SYS value\\\hline
+						Init & \lstinline!SYS_INIT! & 0\\
+						Wait for Start & \lstinline!SYS_WAIT_FOR_START! & 1\\
+						Wait for End & \lstinline!SYS_WAIT_FOR_END! & 2\\
+						Finish & \lstinline!SYS_FINISH! & 3\\
+						Fail & \lstinline!SYS_FAIL! & 4
+					\end{tabular}
+				\end{table}
+
+				Each module may enter any state at any time.
+			\subsection{UI Board to UP Core}\label{ssec:ui_obc_msg}
+				The UI Board shall act as a data aggregator for the UP Core, collecting telemetry and state information from the GPS, compass, and user switch.  The UI Board shall then pass these data on to the UP Core as a JSON dictionary with the following keys: \lstinline{lat}, \lstinline{lon}, \lstinline{hdg}, \lstinline{tme}, \lstinline{run}, \lstinline{fix}, \lstinline{sat}.  These keys are not guaranteed to come in any particular order.  See Table \ref{tbl:ui_board_sensor_fields} for a description of the individual fields, and Listing \ref{lst:ui_board_sensor_msg} for an example message.
+
+				\begin{lstlisting}[caption={UI Board Sensor Message}, label={lst:ui_board_sensor_msg}]
+{"lat": 327054113, "hdg": 270, "lon": -1171710165, "tme": 1530025076, "run": true, "fix": 1, "sat": 14}
+				\end{lstlisting}
+
+				\begin{table}[htp]
+					\centering
+					\caption{Sensor Message Field Descriptions}
+					\label{tbl:ui_board_sensor_fields}
+					\begin{tabular}{c|c|c|c}
+						Field & Key & Data Type & Description\\\hline
+						GPS Latitude & \lstinline'lat' & int & GPS Latitude in WGS84 datum, formatted as lat $\times$ 1e7\\
+						GPS Longitude & \lstinline'lon' & int & GPS Longitude in WGS84 datum, formatted as lon $\times$ 1e7\\
+						Vehicle Heading & \lstinline'hdg' & int & Vehicle Heading in degree East of Magnetic North\\
+						GPS Time & \lstinline'tme' & int & GPS Timestamp in seconds since GPS epoch (06 Jan 1980)\\
+						User Switch & \lstinline'run' & bool & True if the switch is in the ON position, False otherwise\\
+						GPS Fix Type & \lstinline'fix' & int & GPS Fix, Differential GPS Fix, RTK Fix\\% TODO Fix value assignments!
+						GPS Satellite Count & \lstinline'sat' & int & Number of satellites used in current fix
+					\end{tabular}
+				\end{table}
+
+				This sensor data shall be transmitted at a nominal rate of \SI{1}{\hertz}.
 		\section{Payload Configuration}
 			All configuration options are set in the file \lstinline[language=sh]{/usr/local/etc/rct_config}.  This file is owned by \lstinline[language=sh]{root}, and should have permissions set to \lstinline{644}.
 			\subsection{Center Frequency}
@@ -39,36 +267,36 @@
 			\subsection{Initializing the USRP B200-mini(-i)}
 				The USRP B200-mini and USRP B200-mini-i are not capable of retaining an FPGA image between boots.  This image needs to be flashed every boot.  This can be accomplished via command line.
 
-				\begin{lstlisting}[language=bash]
+				\begin{lstlisting}[language=sh]
 sudo uhd_usrp_probe --args="type=b200" --init-only
 				\end{lstlisting}
 
 				Images can be downloaded on Linux systems via command line.  This requires at least 200 MB of disk space.
 
-				\begin{lstlisting}[language=bash]
+				\begin{lstlisting}[language=sh]
 sudo uhd_images_downloader
 				\end{lstlisting}
 		\section{Payload Autostart}
 			The payload is configured to automatically initialize itself on boot, and conduct sanity checks of its internal environment.  In addition, the payload provides a simple switch interface to enable the user to start and stop recording data without needing to SSH into the payload.  This system is comprised of two components - the User Control Board, and the payload autostart software.
 			\subsection{User Control Board}
-					The User Control Board is located at the front of the aircraft, just below the fuselage.  The User Control Board has 5 LEDs.  From left to right (when looking at the aircraft), the LEDs are Payload Status (Green), SDR Status (Yellow), Directory Status (Orange), GPS Status (Red), and Payload Ready (Blue).  On the right of the board is the Payload Control Switch.
+				The User Control Board is located at the front of the aircraft, just below the fuselage.  The User Control Board has 5 LEDs.  From left to right (when looking at the aircraft), the LEDs are Payload Status (Green), SDR Status (Yellow), Directory Status (Orange), GPS Status (Red), and Payload Ready (Blue).  On the right of the board is the Payload Control Switch.
 
-						\subsubsection{Status LEDs}
-							The Status LEDs provide status information to the user.  On boot, the payload conducts an internal check of the connected hardware to ensure proper operation.  The status of these checks are denoted by the SDR Status LED, Directory Status LED, and GPS Status LED.
-								\paragraph{SDR Status LED}
-									The SDR Status LED denotes the initialization and standby status of the SDR.  Upon boot, the payload checks for the presence and state of a USRP B200 series SDR.  Upon detecting the SDR, the payload loads the firmware for the SDR.  During this time, the SDR Status LED will be blinking, approximately once a second.  Upon loading the firmware for the SDR, the payload will place the SDR in standby, whereupon the SDR Status LED will become solid.  Should the payload fail to detect an SDR, or fail to upload the firmware for the SDR, the LED will turn off.
-								\paragraph{Directory Status LED}
-									The Directory Status LED denotes the detection and status of the output directory for data for the payload.  Upon boot, the payload checks for the presence of the micro SD card.  Unfortunately, due to hardware issues, the payload cannot detect a micro SD card that has been left in during boot, so the micro SD card must be remounted after boot.  Upon detecting the micro SD card (device will enumerate as /dev/mmcblk0), the payload uses udev rules to mount the micro SD card to /mnt/RAW\_DATA.  After this, the payload will check the mounted filesystem for free space, to ensure that there is enough space for the next run.  The minimum required space is 9 GB, which is enough for a 20 minute run.  Should the payload fail to detect the micro SD card, or fail to detect enough free space, the LED will turn off.  The payload will attempt to detect the micro SD card again in 10 seconds, trying for 60 seconds.
-								\paragraph{GPS Status LED}
-									The GPS Status LED denotes the detection and state of the GPS.  Upon boot, the payload searches for and connects to the GPS serial device.  The GPS device is expected to supply NMEA data at a baud rate of 9600.  The payload then waits for the GPS device to gain a lock (defined as a 3D fix with greater than 6 satellites).  Should the payload fail to find the GPS device, or fail to receive a fix message, the LED will turn off.  If the payload is communicating with the GPS device and receiving fix messages, but the fix is not yet good enough, the LED will blink.  When the payload has found the GPS device and has determined that the GPS has a good GPS fix, then the LED will stay on.
-								\paragraph{Payload Status LED}
-									The Payload Status LED denotes the recording state of the payload.  The LED is blinking while the payload is actively recording data, and solid while the payload is finishing writing data to the SD card.  The LED is off during standby and initialization.
-								\paragraph{Payload Ready LED}
-									The Payload Ready LED denotes the ready state of the payload.  It is on only when all initialization checks have completed and the payload is standing by for the start command.
-						\subsubsection{Control Switch}
-							The Control Switch controls the recording state of the payload.  The switch must be in the OFF position during boot.  Flipping the switch to the ON position sets the payload to the recording state.  The payload will begin recording immediately if the initialization is complete, or as soon as the initialization completes if not complete already.  Flipping the switch to the OFF position stops the payload recording, at which point the payload finishes writing all recorded data to disk.  When the data is recorded, the payload reinitializes the system, then goes into standby mode waiting for the ON position.
-						\subsubsection{Payload Autostart Software}
-							The payload autostart is controlled by the rctstart Linux service, and the autostart flag in /usr/local/etc/rct\_config.  If the line in /usr/local/etc/rct\_config is autostart=false, then the payload service will not start.  The service can also be stopped once started by calling sudo service rctstart stop.
+				\subsubsection{Status LEDs}
+					The Status LEDs provide status information to the user.  On boot, the payload conducts an internal check of the connected hardware to ensure proper operation.  The status of these checks are denoted by the SDR Status LED, Directory Status LED, and GPS Status LED.
+					\paragraph{SDR Status LED}
+						The SDR Status LED denotes the initialization and standby status of the SDR.  Upon boot, the payload checks for the presence and state of a USRP B200 series SDR.  Upon detecting the SDR, the payload loads the firmware for the SDR.  During this time, the SDR Status LED will be blinking, approximately once a second.  Upon loading the firmware for the SDR, the payload will place the SDR in standby, whereupon the SDR Status LED will become solid.  Should the payload fail to detect an SDR, or fail to upload the firmware for the SDR, the LED will turn off.
+					\paragraph{Directory Status LED}
+						The Directory Status LED denotes the detection and status of the output directory for data for the payload.  Upon boot, the payload checks for the presence of the micro SD card.  Unfortunately, due to hardware issues, the payload cannot detect a micro SD card that has been left in during boot, so the micro SD card must be remounted after boot.  Upon detecting the micro SD card (device will enumerate as /dev/mmcblk0), the payload uses udev rules to mount the micro SD card to /mnt/RAW\_DATA.  After this, the payload will check the mounted filesystem for free space, to ensure that there is enough space for the next run.  The minimum required space is 9 GB, which is enough for a 20 minute run.  Should the payload fail to detect the micro SD card, or fail to detect enough free space, the LED will turn off.  The payload will attempt to detect the micro SD card again in 10 seconds, trying for 60 seconds.
+					\paragraph{GPS Status LED}
+						The GPS Status LED denotes the detection and state of the GPS.  Upon boot, the payload searches for and connects to the GPS serial device.  The GPS device is expected to supply NMEA data at a baud rate of 9600.  The payload then waits for the GPS device to gain a lock (defined as a 3D fix with greater than 6 satellites).  Should the payload fail to find the GPS device, or fail to receive a fix message, the LED will turn off.  If the payload is communicating with the GPS device and receiving fix messages, but the fix is not yet good enough, the LED will blink.  When the payload has found the GPS device and has determined that the GPS has a good GPS fix, then the LED will stay on.
+					\paragraph{Payload Status LED}
+						The Payload Status LED denotes the recording state of the payload.  The LED is blinking while the payload is actively recording data, and solid while the payload is finishing writing data to the SD card.  The LED is off during standby and initialization.
+					\paragraph{Payload Ready LED}
+						The Payload Ready LED denotes the ready state of the payload.  It is on only when all initialization checks have completed and the payload is standing by for the start command.
+				\subsubsection{Control Switch}
+					The Control Switch controls the recording state of the payload.  The switch must be in the OFF position during boot.  Flipping the switch to the ON position sets the payload to the recording state.  The payload will begin recording immediately if the initialization is complete, or as soon as the initialization completes if not complete already.  Flipping the switch to the OFF position stops the payload recording, at which point the payload finishes writing all recorded data to disk.  When the data is recorded, the payload reinitializes the system, then goes into standby mode waiting for the ON position.
+				\subsubsection{Payload Autostart Software}
+					The payload autostart is controlled by the rctstart Linux service, and the autostart flag in \lstinline{/usr/local/etc/rct\_config}.  If the line in \lstinline{/usr/local/etc/rct\_config} is autostart=false, then the payload service will not start.  The service can also be stopped once started by calling sudo service rctstart stop.
 	\appendix
 	\printglossaries
 \end{document}
