@@ -5,12 +5,12 @@
 #include <limits>
 #include "tagged_signal.hpp"
 #include <fftw3.h>
+#include <iostream>
 
 // #define DEBUG
 
 #ifdef DEBUG
 #include <fstream>
-#include <iostream>
 #endif
 
 namespace RTT{
@@ -337,12 +337,12 @@ namespace RTT{
 					out_lock.unlock();
 					output_cv.notify_all();
 
-					#ifdef DEBUG
-					std::cout << out_count << ", " << (ping_start_ms - _time_start_ms) / 1e3 << 
-						", " << amplitude << ", average: " <<  threshold << 
+					std::cout << "Ping " << out_count << " at " << (ping_start_ms - _time_start_ms) / 1e3 << "s " << 
+						", amplitude " << amplitude << ", threshold: " <<  threshold << 
 						", width: " << pulse_width * _ms_per_sample << 
 						", freq: " << sig_freq <<
 						std::endl;
+					#ifdef DEBUG
 					_ostr2 << out_count << ", " << (ping_start_ms - _time_start_ms) / 1e3 << 
 						", " << amplitude << ", average: " <<  threshold << 
 						", width: " << pulse_width * _ms_per_sample << 
@@ -360,10 +360,10 @@ namespace RTT{
 		fftw_cleanup();
 		fftw_cleanup_threads();
 
-		#ifdef DEBUG
 		std::cout << "Classifier consumed " << signal_idx << " samples" << 
 			std::endl;
 		std::cout << "Classifier output " << out_count << " pings" << std::endl;
+		#ifdef DEBUG
 		std::cout << "Threshold at " << threshold + MIN_SNR << std::endl;
 		_ostr1.close();
 		_ostr2.close();
