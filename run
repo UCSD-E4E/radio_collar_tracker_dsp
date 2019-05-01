@@ -1,7 +1,7 @@
 #!/bin/bash
 if [[ $1 == "debug" ]]
 then
-	docker run -it --rm --name rct -v /home/ntlhui/workspace/radio_collar_tracker_drone/:/root/code -v /home/ntlhui/workspace/tmp/testData/:/home/ntlhui/workspace/tmp/testData -v /media/ntlhui:/media/ntlhui -v /dev/:/host-dev/ --privileged rct
+	docker run -it --rm --name rct -v `pwd`:/root/code -v /home/ntlhui/workspace/tmp/testData/:/home/ntlhui/workspace/tmp/testData -v /media/:/media/ -v /dev/:/host-dev/ --privileged rct
 else
 	docker run -it --rm --name rct -v /dev/bus/usb/:/dev/bus/usb --privileged rct
 fi
