@@ -1,4 +1,5 @@
 #include "Status_Module.hpp"
+#include <Arduino.h>
 
 Status_Module::Status_Module() : state(CHECK_FOR_START){
 	status = &_status;

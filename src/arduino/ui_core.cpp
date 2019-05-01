@@ -154,4 +154,4 @@ void loop() {
 		}
 	}
 	yellow.ledstate = gps_map[status.gps];
-}
+	
