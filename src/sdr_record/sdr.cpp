@@ -241,7 +241,7 @@ namespace RTT{
 		stream_cmd.stream_mode =  UHD_STREAM_MODE_STOP_CONTINUOUS;
 		uhd_rx_streamer_issue_stream_cmd(rx_streamer, &stream_cmd);
 
-		syslog(LOG_INFO, "Received %zd samples, %.3f seconds of data", total_samples, (double)total_samples / rx_rate);
+		std::cout << "SDR Received "<< total_samples << " samples, " << (double)total_samples / rx_rate << " seconds of data" << std::endl;
 		uhd_rx_metadata_free(&md);
 
 		delete[] raw_buffer;
