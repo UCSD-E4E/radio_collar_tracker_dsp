@@ -29,6 +29,8 @@ namespace RTT{
 			std::size_t rx_freq = 0;
 			std::size_t run_num = 0;
 			std::string data_dir = "";
+			bool test_config = false;
+			std::string test_data = "";
 		} args;
 
 		static SDR_RECORD* m_pInstance;
@@ -42,11 +44,7 @@ namespace RTT{
 		std::mutex ping_queue_mutex;
 		std::condition_variable ping_var;
 
-		#ifdef TEST_SDR
-		RTT::SDR_TEST* sdr;
-		#else
-		RTT::SDR* sdr;
-		#endif
+		RTT::AbstractSDR* sdr;
 		RTT::DSP* dsp;
 		RTT::PingLocalizer* localizer;
 

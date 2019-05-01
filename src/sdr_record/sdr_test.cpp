@@ -36,6 +36,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <syslog.h>
+#include <boost/filesystem.hpp>
 
 // #define DEBUG
 
@@ -75,14 +76,12 @@ namespace RTT{
 	}
 
 	void SDR_TEST::startStreaming(std::queue<IQdataPtr>& input_queue, 
-		std::mutex& input_mutex, std::condition_variable& input_cv, 
-		const volatile bool* ndie){
+		std::mutex& input_mutex, std::condition_variable& input_cv){
 
 		syslog(LOG_INFO, "SDR Test starting threads");
 
 		_thread = new std::thread(&SDR_TEST::_process, this, 
-			std::ref(input_queue), std::ref(input_mutex), std::ref(input_cv),
-			ndie);
+			std::ref(input_queue), std::ref(input_mutex), std::ref(input_cv));
 	}
 	void SDR_TEST::stopStreaming(){
 		_thread->join();
@@ -90,8 +89,7 @@ namespace RTT{
 	}
 
 	void SDR_TEST::_process(std::queue<IQdataPtr>& data_queue, 
-		std::mutex& data_mutex, std::condition_variable& data_cv, 
-		const volatile bool* ndie){
+		std::mutex& data_mutex, std::condition_variable& data_cv){
 		std::size_t sample_count = 0;
 		std::size_t buffer_count = 0;
 		std::size_t ms_per_buffer = (std::size_t)((double)_buffer_size / 
@@ -105,7 +103,7 @@ namespace RTT{
 
 		auto start = std::chrono::steady_clock::now();
 
-		for(std::size_t i = 0; i < 1; i++){
+		for(std::size_t i = 0; i < _files.size(); i++){
 			_stream.open(_files[i].c_str(), std::ios::binary | std::ios::in);
 			if(!_stream){
 				std::cout << "Stream not ready!" << std::endl;
@@ -120,9 +118,9 @@ namespace RTT{
 				continue;
 			}
 			std::size_t file_size = sb.st_size;
-			std::cout << "Opening " << _files[i] << std::endl;
+			// std::cout << "Opening " << _files[i] << std::endl;
 			std::size_t num_samples = file_size / (sizeof(int16_t) * 2);
-			std::cout << "samples " << file_size << std::endl;
+			// std::cout << "samples " << file_size << std::endl;
 			for(std::size_t j = 0; j < num_samples / _buffer_size; j++){
 				// std::cout << "Reading frame " << j << " of " << num_samples / 
 				// 	_buffer_size << std::endl;
@@ -157,17 +155,17 @@ namespace RTT{
 				buffer_count++;
 				olock.unlock();
 				data_cv.notify_all();
-				syslog(LOG_NOTICE, "SDR output %d", _buffer_size);
+				// syslog(LOG_DEBUG, "SDR output %d", _buffer_size);
 				auto measure = std::chrono::steady_clock::now();
 				auto diff = measure - start;
-				syslog(LOG_NOTICE, "SDR sleeping");
+				syslog(LOG_DEBUG, "SDR sleeping");
 				usleep(ms_per_buffer * 1000);
 				// if(!*ndie){
 				// 	_stream.close();
 				// 	return;
 				// }
 			}
-			std::cout << "issued all samples for file" << std::endl;
+			// std::cout << "issued all samples for file" << std::endl;
 
 			_stream.close();
 		}
@@ -179,4 +177,26 @@ namespace RTT{
 		std::cout << "You can stop now" << std::endl;
 	}
 
+	const std::size_t SDR_TEST::getStartTime_ms(){
+		std::ostringstream filestream{};
+		filestream << _input_dir << "/" << "META*";
+
+		glob_t glob_output;
+		if(glob(filestream.str().c_str(), 0, nullptr, &glob_output)){
+			throw new std::invalid_argument("Could not execute glob");
+		}
+
+		std::string metafile{glob_output.gl_pathv[0]};
+		globfree(&glob_output);
+
+		std::ifstream metadata(metafile.c_str(), std::ios_base::in);
+		metadata.ignore(std::numeric_limits<std::streamsize>::max(),':');
+
+		double time_start_s;
+
+		metadata >> time_start_s;
+		metadata.close();
+
+		return time_start_s * 1e3;
+	}
 }

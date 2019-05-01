@@ -23,14 +23,9 @@
  */
 
 #include "sdr_record.hpp"
-#ifdef TEST_SDR
-	#include "sdr_test.hpp"
-	#ifndef SDR_TEST_DATA
-		#define SDR_TEST_DATA "/home/ntlhui/workspace/tmp/testData"
-	#endif
-#else
-	#include "sdr.hpp"
-#endif
+#include "sdr_test.hpp"
+#define SDR_TEST_DATA "/home/ntlhui/workspace/tmp/testData"
+#include "sdr.hpp"
 #include "dsp.hpp"
 // #include "dspv1.hpp"
 #include "dspv3.hpp"
@@ -97,6 +92,8 @@ namespace RTT{
 			("run,r", po::value(&args.run_num), "Run Number")
 			("output,o", po::value(&args.data_dir), "Output Directory")
 			("verbose,v", po::value(&verbosity), "Verbosity")
+			("test_config", "Test Configuration")
+			("test_data", po::value(&args.test_data), "Test Data")
 		;
 		po::variables_map vm;
 		po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -105,6 +102,10 @@ namespace RTT{
 		if(vm.count("help")){
 			std::cout << desc << std::endl;
 			exit(0);
+		}
+
+		if(vm.count("test_config")){
+			args.test_config = true;
 		}
 
 		setlogmask(LOG_UPTO(verbosity));
@@ -187,17 +188,18 @@ namespace RTT{
 
 		try{
 			syslog(LOG_INFO, "Initializing Radio");
-			#ifdef TEST_SDR
-			sdr = new RTT::SDR_TEST(std::string(SDR_TEST_DATA));
-			#else
-			sdr = new RTT::SDR(args.gain, args.rate, args.rx_freq);
-			#endif
+			if(args.test_config){
+				sdr = new RTT::SDR_TEST(args.test_data);
+			}else{
+				sdr = new RTT::SDR(args.gain, args.rate, args.rx_freq);
+			}
 		}catch(std::runtime_error e){
 			syslog(LOG_CRIT, "No devices found!");
 			exit(1);
 		}
 
 		dsp = new RTT::DSP_V3{args.rate};
+
 		localizer = new RTT::PingLocalizer();
 	}
 
@@ -243,7 +245,7 @@ namespace RTT{
 		syslog(LOG_INFO, "Starting threads");
 		dsp->startProcessing(sdr_queue, sdr_queue_mutex, sdr_var, ping_queue, 
 			ping_queue_mutex, ping_var);
-		sdr->startStreaming(sdr_queue, sdr_queue_mutex, sdr_var, &program_on);
+		sdr->startStreaming(sdr_queue, sdr_queue_mutex, sdr_var);
 		while(true){
 			std::unique_lock<std::mutex> run_lock(run_mutex);
 			if(program_on){
@@ -258,7 +260,11 @@ namespace RTT{
 	}
 
 	SDR_RECORD::~SDR_RECORD(){
-		delete sdr;
+		if(args.test_config){
+			delete (RTT::SDR_TEST*) sdr;
+		}else{
+			delete (RTT::SDR*) sdr;
+		}
 		delete dsp;
 		delete localizer;
 	}

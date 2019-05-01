@@ -64,14 +64,16 @@ namespace RTT{
 	}
 
 	void SDR::startStreaming(std::queue<IQdataPtr>& queue, std::mutex& mutex, 
-		std::condition_variable& var, const volatile bool* ndie){
+		std::condition_variable& var){
 		output_queue = &queue;
 		output_mutex = &mutex;
 		output_var = &var;
-		stream_thread = new std::thread(&SDR::streamer, this, ndie);
+		run = true;
+		stream_thread = new std::thread(&SDR::streamer, this);
 	}
 
 	void SDR::stopStreaming(){
+		run = false;
 		stream_thread->join();
 		delete stream_thread;
 	}
@@ -120,7 +122,7 @@ namespace RTT{
 		}
 	}
 
-	void SDR::streamer(const volatile bool* ndie){
+	void SDR::streamer(){
 		syslog(LOG_DEBUG, "sdr streamer starting");
 		uhd_error retval;
 		uhd_stream_args_t stream_args{};
@@ -160,7 +162,7 @@ namespace RTT{
 		uhd_rx_metadata_make(&md);
 		size_t total_samples = 0;
 
-		assert(ndie);
+		assert(run);
 
 		struct timeval starttime;
 		struct timeval stoptime;
@@ -170,7 +172,7 @@ namespace RTT{
 		uhd_rx_metadata_error_code_t error_code;
 		int16_t* raw_buffer = new int16_t[rx_buffer_size * 2];
 		syslog(LOG_DEBUG, "Starting main loop");
-		while(*ndie){
+		while(run){
 
 			IQdataPtr databuf (new IQdata(rx_buffer_size));
 			gettimeofday(&starttime, NULL);
@@ -266,4 +268,5 @@ namespace RTT{
 
 
 	}
+
 }

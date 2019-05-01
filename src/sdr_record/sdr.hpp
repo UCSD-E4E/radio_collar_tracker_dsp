@@ -2,6 +2,7 @@
 #define __SDR_H__
 
 #include "iq_data.hpp"
+#include "AbstractSDR.hpp"
 #include <uhd.h>
 #include <string>
 #include <queue>
@@ -10,7 +11,8 @@
 #include <condition_variable>
 
 namespace RTT{
-	class SDR{
+	class SDR final : public AbstractSDR{
+	private:
 
 		uhd_usrp_handle usrp;
 
@@ -24,7 +26,7 @@ namespace RTT{
 		double if_gain;
 		long int rx_rate;
 		long int rx_freq;
-		void streamer(const volatile bool* die);
+		void streamer();
 		std::queue<IQdataPtr>* output_queue;
 		std::mutex* output_mutex;
 		std::condition_variable* output_var;
@@ -32,16 +34,18 @@ namespace RTT{
 
 		uhd_rx_streamer_handle rx_streamer;
 		std::string uhd_strerror(uhd_error err);
+
+		volatile bool run = false;
+
 	protected:
 		SDR();
 	public:
-		const size_t rx_buffer_size = 16384;
 		SDR(double gain, long int rate, long int freq);
 		~SDR();
 		void setBufferSize(size_t buff_size);
 		int getBufferSize();
 		void startStreaming(std::queue<IQdataPtr>&, std::mutex&, 
-			std::condition_variable&, const volatile bool* ndie);
+			std::condition_variable&);
 		void stopStreaming();
 	};
 }

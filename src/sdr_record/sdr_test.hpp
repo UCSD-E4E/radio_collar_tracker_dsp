@@ -2,6 +2,7 @@
 #define __SDR_TEST_H__
 
 #include "iq_data.hpp"
+#include "AbstractSDR.hpp"
 // #include "sdr.hpp"
 #include <string>
 #include <queue>
@@ -11,7 +12,7 @@
 #include <fstream>
 #include <thread>
 namespace RTT{
-	class SDR_TEST{
+	class SDR_TEST final : public AbstractSDR{
 	private:
 		std::string _input_dir;
 		std::fstream _stream;
@@ -22,12 +23,10 @@ namespace RTT{
 		std::condition_variable* _input_cv;
 
 		std::size_t _sampling_freq;
-		
-		void _process(std::queue<IQdataPtr>&, std::mutex&, 
-			std::condition_variable&, const volatile bool* ndie);
 
 	public:
-		const size_t rx_buffer_size = 16384;
+		void _process(std::queue<IQdataPtr>&, std::mutex&, 
+			std::condition_variable&);
 		SDR_TEST(std::string input_dir);
 		~SDR_TEST();
 
@@ -35,8 +34,10 @@ namespace RTT{
 		int getBufferSize();
 
 		void startStreaming(std::queue<IQdataPtr>&, std::mutex&, 
-			std::condition_variable&, const volatile bool* ndie);
+			std::condition_variable&);
 		void stopStreaming();
+
+		const std::size_t getStartTime_ms();
 	};
 }
 
