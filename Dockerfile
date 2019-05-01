@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y wget
 RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz
 RUN tar -xzf fftw-3.3.8.tar.gz
 WORKDIR /root/fftw-3.3.8
-RUN ./bootstrap.sh && ./configure --enable-threads && make -j7 && make install
+RUN ./bootstrap.sh && ./configure --enable-threads --enable-generic-simd128 --enable-generic-simd256 && make -j7 && make install
 
 RUN git clone git://github.com/UCSD-E4E/radio_collar_tracker_drone.git /root/radio_collar_tracker_drone
 WORKDIR /root/radio_collar_tracker_drone
