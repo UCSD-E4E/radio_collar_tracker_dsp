@@ -8,7 +8,7 @@
 FROM ubuntu:16.04
 RUN apt-get update && apt-get install -y git vim htop gdb valgrind cmake \
 	build-essential python libboost-all-dev python-mako python-pip \
-	libusb-1.0-0-dev autoconf pkg-config
+	libusb-1.0-0-dev autoconf pkg-config picocom
 RUN pip install --upgrade pip
 RUN pip install six requests pynmea2 serial enum
 #  exfat-fuse exfat-utils autoconf
@@ -53,6 +53,7 @@ RUN git checkout online_proc
 RUN ./autogen.sh
 RUN ./configure DLIB_INCLUDEDIR=/root/dlib
 RUN make
+RUN make install
 
 RUN mkdir /root/code
 RUN mkdir /host-dev/
