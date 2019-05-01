@@ -21,7 +21,7 @@
 #include "Arduino.h"
 #include "nmea.hpp"
 
-#define _GPRMC_TERM   "$GPRMC,"		// GPRMC datatype identifier
+#define _GPRMC_TERM   "$GNRMC,"		// GPRMC datatype identifier
 #define _LIB_VERSION	1						// software version of this library
 
 //
@@ -31,7 +31,7 @@
 NMEA::NMEA(int connect)
 {
 	// private properties
-	_gprmc_only = connect;
+	_gprmc_only = 1;
 	_gprmc_utc = 0.0;
 	_gprmc_status = 'V';
 	_gprmc_lat = 0.0;

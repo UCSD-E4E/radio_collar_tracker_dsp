@@ -7,8 +7,8 @@ LIBRARY_DIR	=	$(ARDUINO_DIR)/hardware/arduino/avr/cores/arduino/
 WIRE_LIBDIR	=	$(LIBRARY_DIR)../../libraries/Wire/
 INC			=	-I$(LIBRARY_DIR) -I$(LIBRARY_DIR)/../../variants/leonardo -I${WIRE_LIBDIR} -I${WIRE_LIBDIR}/utility
 MACRO_DEFS	=	-DF_CPU=$(CLOCK) -DUSB_VID=0x2341 -DUSB_PID=0x8036 -DARDUINO=105 -D__PROG_TYPES_COMPAT__
-CFLAGS		=	-c -g -Wall -ffunction-sections -fdata-sections -mmcu=$(DEVICE) $(INC) $(MACRO_DEFS)
-CXXFLAGS	=	-c -g -Wall -ffunction-sections -fdata-sections -fno-exceptions -mmcu=$(DEVICE) $(INC) $(MACRO_DEFS)
+CFLAGS		=	-std=gnu++11 -c -g -Wall -ffunction-sections -fdata-sections -mmcu=$(DEVICE) $(INC) $(MACRO_DEFS)
+CXXFLAGS	=	-std=gnu++11 -c -g -Wall -ffunction-sections -fdata-sections -fno-exceptions -mmcu=$(DEVICE) $(INC) $(MACRO_DEFS)
 LDFLAGS		=	-Os -Wl,--gc-sections -mmcu=$(DEVICE) -lm
 
 CC			=	avr-gcc
@@ -30,7 +30,7 @@ BIT_RATE	=	4
 # OBC_HOST	=	e4e-upcore-1.dynamic.ucsd.edu
 OBC_HOST	=	100.80.229.30
 
-.PHONY: all install clean
+.PHONY: all install clean install-dragon install-upcore
 
 $(HEX): $(ELF)
 	${OBJCOPY} -j .text -j .data -O ihex $< $@
@@ -97,3 +97,7 @@ test_status_module: Status_Module.cpp Status_Module.hpp gps_status.hpp test_stat
 	g++ -c -g -Wall -ffunction-sections -fdata-sections -fno-exceptions Status_Module.cpp
 	g++ -c -g -Wall -ffunction-sections -fdata-sections -fno-exceptions test_status_module.cpp
 	g++ -o test_status_module Status_Module.o test_status_module.o -Os -Wl,--gc-sections -lm
+
+dragon_burn_bootloader:
+	avrdude -p m32u4 -c dragon_isp -P usb -B 4 -e -Uefuse:w:0xcb:m -Uhfuse:w:0xd8:m -Ulfuse:w:0xff:m
+	avrdude -p m32u4 -c dragon_isp -P usb -B 4 -U flash:w:Caterina-Leonardo.hex
