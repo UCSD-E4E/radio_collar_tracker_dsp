@@ -31,6 +31,7 @@ namespace RTT{
 			std::string data_dir = "";
 			bool test_config = false;
 			std::string test_data = "";
+			std::string gps_target = "";
 		} args;
 
 		static SDR_RECORD* m_pInstance;
@@ -47,6 +48,7 @@ namespace RTT{
 		RTT::AbstractSDR* sdr;
 		RTT::DSP* dsp;
 		RTT::PingLocalizer* localizer;
+		RTT::GPS* gps;
 
 		std::condition_variable run_var;
 		std::mutex run_mutex;

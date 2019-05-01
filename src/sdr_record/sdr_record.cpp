@@ -94,6 +94,7 @@ namespace RTT{
 			("verbose,v", po::value(&verbosity), "Verbosity")
 			("test_config", "Test Configuration")
 			("test_data", po::value(&args.test_data), "Test Data")
+			("gps_target", po::value(&args.gps_target), "GPS Target")
 		;
 		po::variables_map vm;
 		po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -110,75 +111,46 @@ namespace RTT{
 
 		setlogmask(LOG_UPTO(verbosity));
 
-		// int option = 0;
-		// while((option = getopt(argc, argv, "hg:s:c:r:o:v:f:")) != -1){
-		// 	switch(option)
-		// 	{
-		// 		case 'h':
-		// 			syslog(LOG_INFO, "Got help flag");
-		// 			print_help();
-		// 			break;
-		// 		case 'g':
-		// 			args.gain = std::stod(optarg);
-		// 			syslog(LOG_INFO, "Got gain setting of %.2f", args.gain);
-		// 			break;
-		// 		case 's':
-		// 			args.rate = std::stol(optarg);
-		// 			syslog(LOG_INFO, "Got sampling rate setting of %ld", args.rate);
-		// 			break;
-		// 		case 'f':
-		// 			args.rx_freq = std::stod(optarg);
-		// 			syslog(LOG_INFO, "Got collar/center frequency target of %ld", args.rx_freq);
-		// 			break;
-		// 		case 'r':
-		// 			args.run_num = std::stoi(optarg);
-		// 			syslog(LOG_INFO, "Got run number of %ld", args.run_num);
-		// 			break;
-		// 		case 'o':
-		// 			args.data_dir = std::string(optarg);
-		// 			syslog(LOG_INFO, "Got an output directory of %s", args.data_dir.c_str());
-		// 			break;
-		// 		case 'v':
-		// 			syslog(LOG_INFO, "Setting log output to %d", std::stoi(optarg));
-		// 			setlogmask(LOG_UPTO(std::stoi(optarg)));
-		// 			break;
-		// 	}
-		// }
-
 		syslog(LOG_INFO, "Sanity checking args");
+
+		if(args.gps_target.empty()){
+			syslog(LOG_ERR, "Must set GPS target!\n");
+			std::cout << desc << std::endl;
+			exit(1);
+		}
 
 		if (!args.run_num) {
 			syslog(LOG_ERR, "Must set run number\n");
 			std::cout << desc << std::endl;
-			exit(0);
+			exit(1);
 		}
 		syslog(LOG_DEBUG, "Got run_num as %lu\n", args.run_num);
 
 		if (args.gain < 0){
 			syslog(LOG_ERR, "Must set gain\n");
 			std::cout << desc << std::endl;
-			exit(0);
+			exit(1);
 		}
 		syslog(LOG_DEBUG, "Got gain as %.2f\n", args.gain);
 
 		if (args.data_dir.empty()){
 			syslog(LOG_ERR, "Must set directory\n");
 			std::cout << desc << std::endl;
-			exit(0);
+			exit(1);
 		}
 		syslog(LOG_DEBUG, "Got data_dir as %s\n", args.data_dir.c_str());
 
 		if (!args.rx_freq){
 			syslog(LOG_ERR, "Must set freq\n");
 			std::cout << desc << std::endl;
-			exit(0);
+			exit(1);
 		}
 		syslog(LOG_DEBUG, "Got rx_freq as %lu\n", args.rx_freq);
 
 		if (!args.rate){
 			syslog(LOG_ERR, "Must set rate\n");
 			std::cout << desc << std::endl;
-			exit(0);
+			exit(1);
 		}
 		syslog(LOG_DEBUG, "Got rate as %lu\n", args.rate);
 	}
@@ -196,6 +168,12 @@ namespace RTT{
 		}catch(std::runtime_error e){
 			syslog(LOG_CRIT, "No devices found!");
 			exit(1);
+		}
+
+		if(args.test_config){
+			gps = new RTT::GPS(RTT::GPS::TEST_FILE, args.gps_target);
+		}else{
+			gps = new RTT::GPS(RTT::GPS::SERIAL, args.gps_target);
 		}
 
 		dsp = new RTT::DSP_V3{args.rate};
