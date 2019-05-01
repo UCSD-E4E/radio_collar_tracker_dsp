@@ -32,10 +32,8 @@ void testThroughput(){
 	std::mutex input_mutex;
 	std::condition_variable input_cv;
 
-	volatile bool run = true;
-
 	auto start = std::chrono::steady_clock::now();
-	testObj._process(input_queue, input_mutex, input_cv, &run);
+	testObj._process(input_queue, input_mutex, input_cv);
 	auto end = std::chrono::steady_clock::now();
 	auto diff = end - start;
 	std::cout << "Duration: " << std::chrono::duration <double, std::ratio<1, 1>> (diff).count() << "s" << std::endl;
@@ -45,9 +43,16 @@ void testThroughput(){
 	assert(!input_queue.empty());
 }
 
+
+void testTime(){
+	RTT::SDR_TEST testObj("/home/ntlhui/workspace/tmp/testData/");
+	std::cout << testObj.getStartTime_ms() << std::endl;
+	assert(testObj.getStartTime_ms() == 1502770079180);
+}
 int main(int argc, char const *argv[])
 {
 	testConstructor();
 	testThroughput();
+	testTime();
 	return 0;
 }
