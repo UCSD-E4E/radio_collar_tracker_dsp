@@ -1,5 +1,6 @@
 #include "Sensor_Module.hpp"
 #include "HMC5983.hpp"
+#include <Wire.h>
 
 #define RUN_SWITCH_PIN 10
 
@@ -46,9 +47,15 @@ int Sensor_Module::decode(const char c){
 }
 
 void Sensor_Module::start(){
-	compass.begin(NULL);
-	compass.setMeasurementMode(HMC5983_CONTINOUS);
-	
+	// Check if compass device is present first
+	Wire.begin();
+	Wire.beginTransmission(0x1E);
+	if(Wire.endTransmission() == 0){
+		compass.begin(NULL);
+		compass.setMeasurementMode(HMC5983_CONTINOUS);
+	}else{
+		*state_var = GPS_FAIL;
+	}
 }
 
 int Sensor_Module::getPacket(char* buf, size_t len){
