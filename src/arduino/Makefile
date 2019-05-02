@@ -99,5 +99,5 @@ test_status_module: Status_Module.cpp Status_Module.hpp gps_status.hpp test_stat
 	g++ -o test_status_module Status_Module.o test_status_module.o -Os -Wl,--gc-sections -lm
 
 dragon_burn_bootloader:
-	avrdude -p m32u4 -c dragon_isp -P usb -B 4 -e -Uefuse:w:0xcb:m -Uhfuse:w:0xd8:m -Ulfuse:w:0xff:m
-	avrdude -p m32u4 -c dragon_isp -P usb -B 4 -U flash:w:Caterina-Leonardo.hex
+	avrdude -p m32u4 -c dragon_isp -P usb -B 4 -e -Uefuse:w:0xc8:m -Uhfuse:w:0xd9:m -Ulfuse:w:0xde:m
+# 	avrdude -p m32u4 -c dragon_isp -P usb -B 4 -e -Uefuse:w:0xfb:m -Uhfuse:w:0x9f:m -Ulfuse:w:0xde:m
