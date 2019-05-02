@@ -6,8 +6,9 @@
 #include "tagged_signal.hpp"
 #include <fftw3.h>
 #include <iostream>
+#include <float.h>
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #include <fstream>
@@ -22,7 +23,19 @@ namespace RTT{
 		_ms_per_sample(1/input_freq * 1000.0),
 		threshold(100),
 		_average_len(0.25*input_freq),
-		ping_width_samp(ping_width_ms / _ms_per_sample){
+		ping_width_samp(ping_width_ms * input_freq / 1000.){
+		#ifdef DEBUG
+		std::ofstream cfg_str{"classifier_config.log"};
+		cfg_str << "_time_start_ms, " << _time_start_ms << std::endl;
+		cfg_str << "_input_freq, " << _input_freq << std::endl;
+		cfg_str << "_signal_freq, " << _signal_freq << std::endl;
+		cfg_str << "_ms_per_sample, " << _ms_per_sample << std::endl;
+		cfg_str << "threshold, " << threshold << std::endl;
+		cfg_str << "_average_len, " << _average_len << std::endl;
+		cfg_str << "ping_width_samp, " << ping_width_samp << std::endl;
+		cfg_str.close();
+
+		#endif
 	}
 
 	Classifier::~Classifier(){
@@ -114,7 +127,7 @@ namespace RTT{
 	}
 
 	const double max(boost::circular_buffer<double>& sig){
-		double maxVal = 0;
+		double maxVal = -DBL_MAX;
 		for(auto it = sig.begin(); it != sig.end(); it++){
 			maxVal = std::max(*it, maxVal);
 		}
@@ -165,6 +178,7 @@ namespace RTT{
 		std::ofstream _ostr3{"classifier_threshold.log"};
 		std::ofstream _ostr4{"classifier_sig_fft.log"};
 		std::ofstream _ostr5{"classifier_sig_in.log"};
+		std::ofstream _ostr6{"classifier_test.log"};
 		#endif
 
 		// Local vars
@@ -224,10 +238,16 @@ namespace RTT{
 			if(!input_queue.empty()){
 				// Update threshold
 				tsig = input_queue.front();
-				data.push_back(tsig->val);
-				pk_hist.push_back(tsig->val);
-				peaks.push_back(max(pk_hist));
 				if(threshold != 100){
+					data.push_back(tsig->val);
+					pk_hist.push_back(tsig->val);
+					peaks.push_back(max(pk_hist));
+					#ifdef DEBUG
+					for(auto it = pk_hist.begin(); it != pk_hist.end(); it++){
+						_ostr6 << *it << ", ";
+					}
+					_ostr6 << std::endl;
+					#endif
 					threshold = sig_median(peaks);
 				}else{
 					for(std::size_t i = 0; i < _average_len; i++){
@@ -245,11 +265,11 @@ namespace RTT{
 					for(std::size_t i = 0; i < sig.size(); i++){
 						cplx_hist.push_back(sig[i]);
 						#ifdef DEBUG
-						// _ostr5 << sig[i].real();
-						// if(sig[i].imag() >= 0){
-						// 	_ostr5 << "+";
-						// }
-						// _ostr5 << sig[i].imag() << "i" << std::endl;
+						_ostr5 << sig[i].real();
+						if(sig[i].imag() >= 0){
+							_ostr5 << "+";
+						}
+						_ostr5 << sig[i].imag() << "i" << std::endl;
 						#endif
 					}
 				}
@@ -276,15 +296,15 @@ namespace RTT{
 				if(is_falling_edge(id_signal.end() - 1)){
 					const std::size_t pulse_width = 
 						get_pulse_width(id_signal.end() - 1, id_signal.begin());
-					if(pulse_width < 0.75 * ping_width_samp){
-						#ifdef DEBUG
+					if(pulse_width < 0.5 * ping_width_samp){
 						std::cout << "Ping rejected as too short!" << std::endl;
+						#ifdef DEBUG
 						#endif
 						continue;
 					}
 					if(pulse_width > 2 * ping_width_samp){
-						#ifdef DEBUG
 						std::cout << "Ping rejected as too long!" << std::endl;
+						#ifdef DEBUG
 						#endif
 						continue;
 					}
@@ -370,6 +390,7 @@ namespace RTT{
 		_ostr3.close();
 		_ostr4.close();
 		_ostr5.close();
+		_ostr6.close();
 		#endif
 	}
 

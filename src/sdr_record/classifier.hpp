@@ -30,7 +30,7 @@ namespace RTT{
 		std::thread* _thread = nullptr;
 		std::condition_variable* _input_cv = nullptr;
 		std::size_t _average_len = 2000;
-		const double MIN_SNR = 1.0;
+		const double MIN_SNR = 0.2;
 
 		const static std::size_t ping_width_ms = 18;
 		std::size_t ping_width_samp;
