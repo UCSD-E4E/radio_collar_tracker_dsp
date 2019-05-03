@@ -20,7 +20,7 @@ RUN mkdir /root/uhd/host/build
 WORKDIR /root/uhd/host/build
 # RUN cmake ../
 RUN cmake -DENABLE_B100=OFF -DENABLE_X300=OFF \
-	-DENABLE_N320=OFF \
+	-DENABLE_N230=OFF \
 	-DENABLE_USRP1=OFF -DENABLE_USRP2=OFF -DENABLE_OCTOCLOCK=OFF \
 	-DENABLE_RFNOC=OFF -DENABLE_MPMD=OFF -DENABLE_EXAMPLES=OFF \
 	-DENABLE_MANUAL=OFF -DENABLE_TESTS=OFF ../
@@ -39,6 +39,8 @@ RUN ldconfig
 RUN /usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*
 
 RUN git clone git://github.com/davisking/dlib.git /root/dlib
+WORKDIR /root/dlib/
+RUN git checkout v19.16
 
 WORKDIR /root/
 RUN apt-get update && apt-get install -y wget
