@@ -168,10 +168,10 @@ namespace RTT{
 								packet.lat != 0){
 								std::unique_lock<std::mutex> guard{o_m};
 								o_q.push(&packet);
-								std::cout << "Pushed, size is " << o_q.size() << std::endl;
 								guard.unlock();
 								o_v.notify_all();
 								#ifdef DEBUG
+								std::cout << "Pushed point at  " << packet.ltime << std::endl;
 								_ostr2 << "Got packet at " << packet.ltime << std::endl;
 								#endif
 							}
