@@ -56,7 +56,7 @@ namespace RTT{
 		PingLocalizer::estimate_result* result = new PingLocalizer::estimate_result ;
 		result->params = params;
 		result->mse = dlib::solve_least_squares_lm(
-			dlib::objective_delta_stop_strategy(1e-7).be_verbose(),
+			dlib::objective_delta_stop_strategy(1e-7),
 			residual, 
 			dlib::derivative(residual),
 			data,
@@ -92,7 +92,7 @@ namespace RTT{
 				const Location* loc = gps_module.getPositionAt(ping.time_ms);
 				if(loc == nullptr){
 					#ifdef DEBUG
-					std::cout << "No GPS data!" << std::endl;
+					std::cout << "No GPS data at " << ping.time_ms << "!" << std::endl;
 					_bad_gps << ping.time_ms << std::endl;
 					#endif
 					continue;
@@ -140,8 +140,11 @@ namespace RTT{
 					PingLocalizer::estimate_result& result = estimate(data_samples);
 					params = result.params;
 					#ifdef DEBUG
-					std::cout << "Estimate run, estimate at: " << result.params(3) 
-						<< ", " << result.params(2) << " with " << data_samples.size() << " data" << std::endl;
+					double lat;
+					double lon;
+					UTM::UTMtoLL(result.params(3), result.params(2), zone, lat, lon);
+					std::cout << "Estimate run, estimate at: " << lat 
+						<< ", " << lon << " with " << data_samples.size() << " data" << std::endl;
 					_estimates << result.params(0) << ", " << result.params(1) << ", " 
 						<< (long long)result.params(2) << ", " << (long long)result.params(3) << ", " 
 						<< (long long)result.params(4) << ", " << result.mse << std::endl;
