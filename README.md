@@ -8,29 +8,38 @@ Installing the payload software
 ===============================
 1.	Install the required dependencies
 	1.	python
-	2.	pynmea2
+		1.	`apt-get install python`
+	2.  boost
+		1.	`apt-get install libboost-all-dev`
+	3.  pythom-mako
+		1.	`apt-get instlal python-mako`
+	4.  six
+		1.	`pip install six`
+	5.  requests
+		1.	`pip install requests`
+	6.  pynmea2
 		1.	`pip install pynmea2`
-	3.  pyserial
-		1.  `sudo apt-get install python-serial`
-	4.	mraa
-		1.	`sudo add-apt-repository ppa:mraa/mraa`
-		2.	`sudo apt-get update`
-		3.	`sudo apt-get install libmraa1 libmraa-dev mraa-tools python-mraa python3-mraa`
-	5.	libuhd
-		1.	`sudo apt-get install libboost-all-dev libusb-1.0-0-dev python-mako`
-		2.	`sudo apt-get install doxygen python-docutils cmake build-essential`
+	7.  enum
+		1.	`pip install enum`
+	8.  pyserial
+		1.  `apt-get install python-serial`
+	9.	libuhd 3.11.01
+		1.	`apt-get install libboost-all-dev libusb-1.0-0-dev python-mako`
+		2.	`apt-get install cmake build-essential`
 		2.	`git clone git://github.com/EttusResearch/uhd.git`
 		3.	`cd <uhd_repo>/host`
+		4.	`git checkout v3.11.0.1`
 		4.	`mkdir build`
 		5.	`cd build`
-		6.	`cmake ../`
+		6.	`cmake -DENABLE_B100=OFF -DENABLE_X300=OFF -DENABLE_N230=OFF -DENABLE_USRP1=OFF -DENABLE_USRP2=OFF -DENABLE_OCTOCLOCK=OFF -DENABLE_RFNOC=OFF -DENABLE_MPMD=OFF -DENABLE_EXAMPLES=OFF -DENABLE_MANUAL=OFF -DENABLE_TESTS=OFF ../`
 		7.	`make`
-		8.	`sudo make install`
-		9.	`sudo ldconfig`
-	6.	exfat
-		1.	`sudo apt-get install exfat-fuse exfat-utils`
-	7.	enum34
-		1.	`sudo pip install enum34`
+		8.	`make install`
+		9.	`ldconfig`
+		10.	`/usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*`
+	10.	dlib v19.16
+		1.	`git clone git://github.com/davisking/dlib.git`
+		2.	`cd <dlib_repo>/`
+		3.	`git checkout v19.16`
 2.	Install the software
 	1.	`cd <radio_collar_tracker_drone>`
 	2.  `./autogen.sh`
