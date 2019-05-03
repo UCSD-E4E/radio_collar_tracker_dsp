@@ -176,7 +176,7 @@ namespace RTT{
 			gps = new RTT::GPS(RTT::GPS::SERIAL, args.gps_target);
 		}
 
-		dsp = new RTT::DSP_V3{args.rate};
+		dsp = new RTT::DSP_V3{args.rate, args.rx_freq};
 
 		localizer = new RTT::PingLocalizer();
 	}
@@ -219,11 +219,18 @@ namespace RTT{
 	void SDR_RECORD::run(){
 		syslog(LOG_DEBUG, "Printing metadata to file");
 		this->print_meta_data();
+		struct timespec start_time;
+
 
 		syslog(LOG_INFO, "Starting threads");
 		dsp->startProcessing(sdr_queue, sdr_queue_mutex, sdr_var, ping_queue, 
 			ping_queue_mutex, ping_var);
+		clock_gettime(CLOCK_REALTIME, &start_time);
 		sdr->startStreaming(sdr_queue, sdr_queue_mutex, sdr_var);
+		std::size_t start_time_ms = start_time.tv_sec * 1e3 + (float)start_time.tv_nsec / 1.e6;
+		dsp->setStartTime(start_time_ms);
+		gps->start();
+		localizer->start(ping_queue, ping_queue_mutex, ping_var, *gps);
 		while(true){
 			std::unique_lock<std::mutex> run_lock(run_mutex);
 			if(program_on){
@@ -232,9 +239,10 @@ namespace RTT{
 				break;
 			}
 		}
+		localizer->stop();
+		gps->stop();
 		sdr->stopStreaming();
 		dsp->stopProcessing();
-		
 	}
 
 	SDR_RECORD::~SDR_RECORD(){
