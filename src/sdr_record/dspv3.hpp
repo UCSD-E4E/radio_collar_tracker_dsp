@@ -13,7 +13,7 @@ namespace RTT{
 	class DSP_V3 : public DSP{
 
 	public:
-		DSP_V3(const std::size_t sampling_freq);
+		DSP_V3(const std::size_t sampling_freq, const std::size_t center_freq);
 		~DSP_V3();
 		void startProcessing(std::queue<IQdataPtr>& inputQueue,
 			std::mutex& inputMutex, std::condition_variable& inputVar,

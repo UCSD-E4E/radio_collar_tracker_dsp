@@ -8,11 +8,13 @@
 #endif
 
 namespace RTT{
-	DSP_V3::DSP_V3(const std::size_t sampling_freq) : _iq_data_queue(), 
-		_iq_mux(), _iq_cv(), _fir(), _mag_data_queue(), _mag_mux(), _mag_cv(),
+	DSP_V3::DSP_V3(const std::size_t sampling_freq, 
+		const std::size_t center_freq) : _iq_data_queue(), _iq_mux(), _iq_cv(),
+		_fir(), _mag_data_queue(), _mag_mux(), _mag_cv(),
 		int_factor(int_time_s * sampling_freq), 
 		_int(int_factor), _candidate_queue(), _can_mux(), _can_cv(),
-		_clfr(0, (double) sampling_freq / int_factor, sampling_freq){
+		_clfr(0, (double) sampling_freq / int_factor, sampling_freq, 
+			center_freq){
 		
 	}
 
