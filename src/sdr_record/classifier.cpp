@@ -8,7 +8,7 @@
 #include <iostream>
 #include <float.h>
 
-#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 #include <fstream>
@@ -17,9 +17,9 @@
 namespace RTT{
 	Classifier::Classifier(const std::size_t time_start_ms, 
 		const double input_freq, const double signal_freq, 
-		const double initial_threshold) : 
+		const double center_freq, const double initial_threshold) : 
 		_time_start_ms(time_start_ms), _input_freq(input_freq), 
-		_signal_freq(signal_freq),
+		_signal_freq(signal_freq), _center_freq(center_freq),
 		_ms_per_sample(1/input_freq * 1000.0),
 		threshold(100),
 		_average_len(0.25*input_freq),
@@ -296,15 +296,15 @@ namespace RTT{
 				if(is_falling_edge(id_signal.end() - 1)){
 					const std::size_t pulse_width = 
 						get_pulse_width(id_signal.end() - 1, id_signal.begin());
-					if(pulse_width < 0.5 * ping_width_samp){
-						std::cout << "Ping rejected as too short!" << std::endl;
+					if(pulse_width < 0.75 * ping_width_samp){
 						#ifdef DEBUG
+						std::cout << "Ping rejected as too short!" << std::endl;
 						#endif
 						continue;
 					}
-					if(pulse_width > 2 * ping_width_samp){
-						std::cout << "Ping rejected as too long!" << std::endl;
+					if(pulse_width > 1.5 * ping_width_samp){
 						#ifdef DEBUG
+						std::cout << "Ping rejected as too long!" << std::endl;
 						#endif
 						continue;
 					}
@@ -332,7 +332,7 @@ namespace RTT{
 					// _ostr4 << std::endl;
 					#endif
 					fftw_execute(fft_plan);
-					std::size_t max_idx = 0;
+					int max_idx = 0;
 					double max_amp = -100;
 					for(std::size_t i = 0; i < FFT_LEN; i++){
 						if(std::abs(std::complex<double>(fft_out[i][0], fft_out[i][1])) > max_amp){
@@ -341,16 +341,18 @@ namespace RTT{
 						}
 					}
 					int sig_freq = 0;
-					if(max_idx > FFT_LEN / 2){
-						sig_freq = (max_idx - FFT_LEN) / (double)FFT_LEN * _signal_freq;
+					if(max_idx > (int)FFT_LEN / 2){
+						sig_freq = ((int)max_idx - (int)FFT_LEN) / (double)FFT_LEN * _signal_freq;
+						std::cout << max_idx << std::endl;
+						std::cout << (int)max_idx - (int)FFT_LEN << std::endl;
 					}else{
-						sig_freq = max_idx / (double)FFT_LEN * _signal_freq;
+						sig_freq = (int)max_idx / (double)FFT_LEN * _signal_freq;
 					}
 
 
 					
 					PingPtr ping = std::make_shared<Ping>(ping_start_ms, 
-						amplitude, sig_freq);
+						amplitude, sig_freq + _center_freq );
 					std::unique_lock<std::mutex> out_lock(output_mutex);
 					output_queue.push(ping);
 					out_count++;
@@ -360,13 +362,13 @@ namespace RTT{
 					std::cout << "Ping " << out_count << " at " << (ping_start_ms - _time_start_ms) / 1e3 << "s " << 
 						", amplitude " << amplitude << ", threshold: " <<  threshold << 
 						", width: " << pulse_width * _ms_per_sample << 
-						", freq: " << sig_freq <<
+						", freq: " << sig_freq + _center_freq <<
 						std::endl;
 					#ifdef DEBUG
 					_ostr2 << out_count << ", " << (ping_start_ms - _time_start_ms) / 1e3 << 
 						", " << amplitude << ", average: " <<  threshold << 
 						", width: " << pulse_width * _ms_per_sample << 
-						", freq: " << sig_freq <<
+						", freq: " << sig_freq + _center_freq  <<
 						std::endl;
 					#endif
 				}
