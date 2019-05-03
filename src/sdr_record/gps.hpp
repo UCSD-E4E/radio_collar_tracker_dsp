@@ -46,6 +46,8 @@ namespace RTT{
 		std::size_t first_time = 0;
 		std::size_t last_time = 0;
 
+		Location* lastLocation;
+
 	protected:
 
 		/**

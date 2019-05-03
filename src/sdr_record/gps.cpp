@@ -23,15 +23,18 @@ namespace RTT{
 	}
 
 	void GPS::stop(){
-		_core->stop();
 		_run = false;
+		_core->stop();
+		std::unique_lock<std::mutex> lock(pointMutex);
+		pointVar.notify_all();
+		lock.unlock();
 		_map_thread->join();
 	}
 
 	void GPS::_thread(){
 		uint64_t prev_time = 0;
 		size_t count = 0;
-		while(_run || !pointQueue.empty()){
+		while(_run){
 			std::unique_lock<std::mutex> lock(pointMutex);
 			if(pointQueue.empty()){
 				pointVar.wait(lock);
@@ -53,13 +56,18 @@ namespace RTT{
 				TimeBlock tblock(prev_time + 1, point->ltime);
 				prev_time = point->ltime;
 				pointLookup[tblock] = point;
+				lastLocation = point;
 			}
 		}
 	}
 
 	const Location* GPS::getPositionAt(uint64_t t){
 		TimeBlock tblock(t);
+		if(t > last_time && t < last_time + 1000){
+			return lastLocation;
+		}
 		if(t < first_time || t > last_time){
+			std::cout << "First time: " << first_time << ", Last time: " << last_time << std::endl;
 			return nullptr;
 		}
 		return pointLookup[tblock];
