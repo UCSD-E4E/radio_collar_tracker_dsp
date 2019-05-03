@@ -139,12 +139,12 @@ namespace RTT{
 				if(data_samples.size() >= 5){
 					PingLocalizer::estimate_result& result = estimate(data_samples);
 					params = result.params;
-					#ifdef DEBUG
 					double lat;
 					double lon;
 					UTM::UTMtoLL(result.params(3), result.params(2), zone, lat, lon);
 					std::cout << "Estimate run, estimate at: " << lat 
 						<< ", " << lon << " with " << data_samples.size() << " data" << std::endl;
+					#ifdef DEBUG
 					_estimates << result.params(0) << ", " << result.params(1) << ", " 
 						<< (long long)result.params(2) << ", " << (long long)result.params(3) << ", " 
 						<< (long long)result.params(4) << ", " << result.mse << std::endl;
