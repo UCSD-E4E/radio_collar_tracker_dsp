@@ -24,8 +24,11 @@ WIRE_CXX_OBJ=	Wire.o
 AVRCXX_OBJ	=	CDC.o HardwareSerial.o HID.o IPAddress.o main.o Print.o Stream.o Tone.o USBCore.o WMath.o WString.o new.o
 AVR_AR		=	core.a
 HEX			=	ui_core.hex
+TEST_HEX	=	test_hw.hex
 ELF			=	ui_core.elf
+TEST_ELF	=	test_hw.elf
 OBJ			=	ui_core.o nmea.o HMC5983.o Status_Module.o Sensor_Module.o
+TEST_OBJ	=	test_hw.o
 BIT_RATE	=	4
 # OBC_HOST	=	e4e-upcore-1.dynamic.ucsd.edu
 OBC_HOST	=	100.80.229.30
@@ -35,7 +38,13 @@ OBC_HOST	=	100.80.229.30
 $(HEX): $(ELF)
 	${OBJCOPY} -j .text -j .data -O ihex $< $@
 
+$(TEST_HEX): $(TEST_ELF)
+	${OBJCOPY} -j .text -j .data -O ihex $< $@
+
 $(ELF): $(OBJ) core.a
+	${LD} -o $@ $^ $(LDFLAGS)
+
+$(TEST_ELF): $(TEST_OBJ) core.a
 	${LD} -o $@ $^ $(LDFLAGS)
 
 ui_core.o: ui_core.cpp ui_core.hpp nmea.hpp HMC5983.hpp
@@ -101,3 +110,7 @@ test_status_module: Status_Module.cpp Status_Module.hpp gps_status.hpp test_stat
 dragon_burn_bootloader:
 	avrdude -p m32u4 -c dragon_isp -P usb -B 4 -e -Uefuse:w:0xc8:m -Uhfuse:w:0xd9:m -Ulfuse:w:0xde:m
 # 	avrdude -p m32u4 -c dragon_isp -P usb -B 4 -e -Uefuse:w:0xfb:m -Uhfuse:w:0x9f:m -Ulfuse:w:0xde:m
+
+
+install-dragon-test: $(TEST_HEX)
+	avrdude -p m32u4 -c dragon_isp -B ${BIT_RATE} -P usb -U flash:w:$<
