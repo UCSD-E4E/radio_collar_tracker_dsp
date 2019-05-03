@@ -116,4 +116,8 @@ namespace RTT{
 		output_stream->write(reinterpret_cast<char*>(buffer), len).flush();
 		return len;
 	}
+
+	void DSP_V1::setStartTime(std::size_t t){
+		
+	}
 }

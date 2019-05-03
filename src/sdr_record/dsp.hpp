@@ -46,6 +46,8 @@ namespace RTT{
 		 * Waits for the processing thread to stop.
 		 */
 		virtual void stopProcessing() = 0;
+
+		virtual void setStartTime(std::size_t) = 0;
 	};
 }
 

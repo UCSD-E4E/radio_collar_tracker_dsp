@@ -30,6 +30,7 @@ namespace RTT{
 			std::queue<PingPtr>& outputQueue, std::mutex& outputMutex, 
 			std::condition_variable& outputVar, const volatile bool* ndie);
 		void stopProcessing();
+		void setStartTime(std::size_t);
 	};
 
 	class StorageEngine{
