@@ -11,6 +11,9 @@ class Sensor_Module{
 		const static char* RUN_FALSE;
 		unsigned long previous_fix;
 		HMC5983 compass;
+		uint32_t utc_offset_ms;
+		uint32_t offset_timestamp_ms;
+		bool compass_ready;
 
 	protected:
 		enum GPSFix{
@@ -25,7 +28,8 @@ class Sensor_Module{
 			char date[7];
 			bool run;
 			GPSFix fix;
-			int sat;
+			uint8_t sat;
+			uint16_t rail;
 		} SensorPacket;
 		GPSState* state_var;
 		NMEA gps{1};
