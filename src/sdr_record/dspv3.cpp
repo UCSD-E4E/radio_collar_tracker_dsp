@@ -90,7 +90,7 @@ namespace RTT{
 		std::ofstream data_str;
 		if(!_output_dir.empty()){
 			data_str.open(fname, std::ofstream::binary);
-			std::cout << "Opening " << fname << std::endl;
+			// std::cout << "Opening " << fname << std::endl;
 		}
 
 		int16_t buffer[2];
@@ -120,7 +120,7 @@ namespace RTT{
 							data_str.close();
 							file_counter++;
 							sprintf(fname, _output_fmt, file_counter + 1);
-							std::cout << "Opening " << fname << std::endl;
+							// std::cout << "Opening " << fname << std::endl;
 							data_str.open(fname, std::ofstream::binary);
 							sample_counter = 0;
 						}
