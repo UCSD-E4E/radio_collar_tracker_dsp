@@ -31,7 +31,7 @@
 NMEA::NMEA(int connect)
 {
 	// private properties
-	_gprmc_only = 1;
+	_gprmc_only = 0;
 	_gprmc_utc = 0.0;
 	_gprmc_status = 'V';
 	_gprmc_lat = 0.0;
