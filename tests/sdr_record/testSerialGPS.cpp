@@ -124,6 +124,8 @@ void testWrite(int master, const char* slave_device, int init_sleep_s, int sleep
 	std::mutex o_m{};
 	std::condition_variable o_v{};
 
+	// testObj.setOutputFile("./GPS_TEST");
+
 	// std::string testData = "{\"lat\": 327054113, \"hdg\":270, \"lon\": "
 	// 	"-1171710165, \"tme\": 164753.25, \"run\": true, \"fix\": 1, \"sat\": "
 	// 	"14, \"dat\": 280419}";
@@ -140,7 +142,7 @@ void testWrite(int master, const char* slave_device, int init_sleep_s, int sleep
 			return;
 		}
 		sleep(1);
-		assert(o_q.size() == i + 1);
+		assert(o_q.size() == (std::size_t)i + 1);
 	}
 	testObj.stop();
 }
