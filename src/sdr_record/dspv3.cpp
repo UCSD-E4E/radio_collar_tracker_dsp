@@ -1,9 +1,11 @@
 #include "dspv3.hpp"
 #include "tagged_signal.hpp"
+#include <fstream>
+#include <iostream>
+#include <cstdio>
 // #define DEBUG
 
 #ifdef DEBUG
-#include <fstream>
 #include <iostream>
 #endif
 
@@ -14,12 +16,14 @@ namespace RTT{
 		int_factor(int_time_s * sampling_freq), 
 		_int(int_factor), _candidate_queue(), _can_mux(), _can_cv(),
 		_clfr(0, (double) sampling_freq / int_factor, sampling_freq, 
-			center_freq){
+			center_freq), _output_fmt{nullptr}{
 		
 	}
 
 	DSP_V3::~DSP_V3(){
-
+		if(_output_fmt != nullptr){
+			delete[] _output_fmt;
+		}
 	}
 
 	void DSP_V3::startProcessing(std::queue<IQdataPtr>& i_q, std::mutex& i_m,
@@ -78,6 +82,18 @@ namespace RTT{
 		
 		// Local vars
 		std::vector<std::complex<double>> double_data{};
+		
+		std::size_t file_counter = 0;
+		std::size_t sample_counter = 0;
+		char fname[1024];
+		sprintf(fname, _output_fmt, file_counter + 1);
+		std::ofstream data_str;
+		if(!_output_dir.empty()){
+			data_str.open(fname, std::ofstream::binary);
+			std::cout << "Opening " << fname << std::endl;
+		}
+
+		int16_t buffer[2];
 
 		// Loop
 		while(_run || !i_q.empty()){
@@ -92,6 +108,25 @@ namespace RTT{
 				inputLock.unlock();
 
 				IQdataToDouble(dataObj, double_data);
+
+				if(!_output_dir.empty()){
+					for(std::size_t i = 0; i < dataObj->size(); i++){
+						buffer[0] = (*(dataObj->data))[i].real();
+						buffer[1] = (*(dataObj->data))[i].imag();
+						data_str.write((char*)buffer, 2*sizeof(int16_t));
+						sample_counter++;
+
+						if(sample_counter >= SAMPLES_PER_FILE){
+							data_str.close();
+							file_counter++;
+							sprintf(fname, _output_fmt, file_counter + 1);
+							std::cout << "Opening " << fname << std::endl;
+							data_str.open(fname, std::ofstream::binary);
+							sample_counter = 0;
+						}
+					}
+					data_str.flush();
+				}
 
 				// update time_start_ms
 				if(time_start_ms == 0){
@@ -112,11 +147,32 @@ namespace RTT{
 				dataLock.unlock();
 				_mag_cv.notify_all();
 			}
+
+			// if(!_output_dir.empty()){
+			// 	data_str.write((char*)raw_buffer, rx_buffer_size * 2 * sizeof(int16_t));
+			// 	data_str.flush();
+			// 	if(frame_counter++ == FRAMES_PER_FILE){
+			// 		data_str.close();
+			// 		sprintf(fname, _output_fmt, file_counter++);
+			// 		std::cout << "Opening " << fname << std::endl;
+			// 		data_str.open(fname, std::ofstream::binary);
+			// 		frame_counter = 0;
+			// 	}
+			// }
+		}
+		if(!_output_dir.empty()){
+			data_str.close();
 		}
 	}
 
 	void DSP_V3::setStartTime(std::size_t start_time_ms){
 		time_start_ms = start_time_ms;
 		_clfr.setStartTime(time_start_ms);
+	}
+
+	void DSP_V3::setOutputDir(const std::string dir, const std::string fmt){
+		_output_dir = dir;
+		_output_fmt = new char[fmt.length() + dir.length() + 1];
+		sprintf(_output_fmt, "%s/%s", dir.c_str(), fmt.c_str());
 	}
 }

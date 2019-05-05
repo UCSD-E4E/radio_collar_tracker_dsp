@@ -177,6 +177,12 @@ namespace RTT{
 		}
 
 		dsp = new RTT::DSP_V3{args.rate, args.rx_freq};
+		std::ostringstream buffer;
+		buffer << "RAW_DATA_";
+		buffer << std::setw(6) << std::setfill('0') << args.run_num;
+		buffer << std::setw(1) << "_";
+		buffer << std::setw(4) << "%06d";
+		dsp->setOutputDir(args.data_dir, buffer.str());
 
 		localizer = new RTT::PingLocalizer();
 	}
@@ -207,6 +213,7 @@ namespace RTT{
 		timing_stream << "center_freq: " << args.rx_freq << std::endl;
 		timing_stream << "sampling_freq: " << args.rate << std::endl;
 		timing_stream << "gain: " << args.gain << std::endl;
+		timing_stream << "width: " << sizeof(int16_t) << std::endl;
 
 		timing_stream.close();		
 	}

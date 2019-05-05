@@ -21,6 +21,7 @@ namespace RTT{
 			std::condition_variable& outputVar);
 		void stopProcessing();
 		void setStartTime(std::size_t time_start_ms);
+		void setOutputDir(const std::string dir, const std::string fmt);
 	private:
 		/**
 		 * Unpacks IQdataPtr objects and pushes them into the IQ data queue as a
@@ -70,6 +71,12 @@ namespace RTT{
 		std::condition_variable _can_cv;
 
 		Classifier _clfr;
+
+		std::string _output_dir;
+		char* _output_fmt;
+
+		const std::size_t SAMPLES_PER_FILE = 64*1024*1024/sizeof(int16_t) / 2;
+
 	};
 }
 #endif
