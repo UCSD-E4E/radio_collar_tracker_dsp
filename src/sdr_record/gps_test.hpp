@@ -56,6 +56,8 @@ namespace RTT{
 		GPSTest(const std::string path);
 		GPSTest(const char* path);
 
+		void setOutputFile(const std::string);
+
 	};
 }
 

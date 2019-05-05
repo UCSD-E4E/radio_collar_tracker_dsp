@@ -27,6 +27,8 @@ namespace RTT{
 		 */
 		virtual void stop() = 0;
 
+		virtual void setOutputFile(const std::string) = 0;
+
 	};
 }
 

@@ -72,4 +72,8 @@ namespace RTT{
 		}
 		return pointLookup[tblock];
 	}
+
+	void GPS::setOutputFile(const std::string file){
+		_core->setOutputFile(file);
+	}
 }

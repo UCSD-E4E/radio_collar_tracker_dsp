@@ -157,6 +157,7 @@ namespace RTT{
 
 	void SDR_RECORD::init(int argc, char * const*argv){
 		this->process_args(argc, argv);
+		std::ostringstream buffer;
 
 		try{
 			syslog(LOG_INFO, "Initializing Radio");
@@ -176,8 +177,16 @@ namespace RTT{
 			gps = new RTT::GPS(RTT::GPS::SERIAL, args.gps_target);
 		}
 
+		buffer.str("");
+		buffer.clear();
+		buffer << args.data_dir << "/";
+		buffer << "GPS_";
+		buffer << std::setw(6) << std::setfill('0') << args.run_num;
+		gps->setOutputFile(buffer.str());
+
 		dsp = new RTT::DSP_V3{args.rate, args.rx_freq};
-		std::ostringstream buffer;
+		buffer.str("");
+		buffer.clear();
 		buffer << "RAW_DATA_";
 		buffer << std::setw(6) << std::setfill('0') << args.run_num;
 		buffer << std::setw(1) << "_";

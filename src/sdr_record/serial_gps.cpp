@@ -11,9 +11,9 @@ namespace pt = boost::property_tree;
 namespace ptme = boost::posix_time;
 
 // #define DEBUG
+#include <fstream>
 
 #ifdef DEBUG
-#include <fstream>
 #include <iostream>
 #endif
 
@@ -127,6 +127,8 @@ namespace RTT{
 		bool gotMessage = false;
 		bool gotLine = false;
 
+		std::ofstream _logfile{_outputFile};
+
 		#ifdef DEBUG
 		std::ofstream _ostr1{"serial_gps_rx.log"};
 		std::ofstream _ostr2{"serial_gps_out.log"};
@@ -174,6 +176,18 @@ namespace RTT{
 								std::cout << "Pushed point at  " << packet.ltime << std::endl;
 								_ostr2 << "Got packet at " << packet.ltime << std::endl;
 								#endif
+								_logfile << std::fixed << std::showpoint << std::setprecision(3) << packet.ltime;
+								_logfile << ", " << std::dec << packet.lat;
+								_logfile << ", " << std::dec << packet.lon;
+								_logfile << ", " << std::fixed << std::showpoint << std::setprecision(3) << packet.gtime;
+								_logfile << ", " << std::fixed << packet.alt;
+								_logfile << ", " << std::fixed << packet.rel_alt;
+								_logfile << ", " << std::fixed << packet.vx;
+								_logfile << ", " << std::fixed << packet.vy;
+								_logfile << ", " << std::fixed << packet.vz << std::endl;
+								// logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (local_timestamp,
+        //         lat*1e7, lon*1e7, global_timestamp, alt, rel_alt, vx, vy, vz, hdg))
+
 							}
 							message_buf = "";
 							gotLine = false;
@@ -189,6 +203,11 @@ namespace RTT{
 		_ostr1.close();
 		_ostr2.close();
 		#endif
+		_logfile.close();
 		close(serial_device);
+	}
+	
+	void SerialGPS::setOutputFile(const std::string file){
+		_outputFile = file;
 	}
 }

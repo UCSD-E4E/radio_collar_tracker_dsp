@@ -86,6 +86,8 @@ namespace RTT{
 
 		void start();
 		void stop();
+
+		void setOutputFile(const std::string);
 	};
 }
 

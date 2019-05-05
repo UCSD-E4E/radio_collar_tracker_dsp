@@ -66,4 +66,8 @@ namespace RTT{
 	GPSTest::GPSTest(const char* path){
 		data_source = new std::ifstream(path, std::ios_base::in);
 	}
+	void GPSTest::setOutputFile(const std::string){
+		
+	}
+	
 }

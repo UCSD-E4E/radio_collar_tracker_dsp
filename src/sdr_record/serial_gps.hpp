@@ -24,6 +24,8 @@ namespace RTT{
 
 		void _process(std::queue<Location*>& o_q, std::mutex& o_m,
 			std::condition_variable& o_v);
+
+		std::string _outputFile;
 	protected:
 	public:
 		/**
@@ -43,6 +45,7 @@ namespace RTT{
 
 		SerialGPS(const char* path);
 		SerialGPS(const std::string path);
+		void setOutputFile(const std::string);
 	};
 }
 
