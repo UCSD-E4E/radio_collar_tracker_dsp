@@ -31,7 +31,7 @@ void testParsing(){
 	RTT::SerialGPS testObj{"."};
 
 	std::string line = "{\"lat\": 327054113, \"hdg\":270, \"lon\": -1171710165,"
-		" \"tme\": 170655, \"run\": true, \"fix\": 1, \"sat\": 14, \"dat\": 280419}";
+		" \"tme\": 170655.25, \"run\": true, \"fix\": 1, \"sat\": 14, \"dat\": 280419}";
 
 	auto parseTime = std::chrono::system_clock::now().time_since_epoch() / 
 		std::chrono::milliseconds(1);
@@ -44,7 +44,7 @@ void testParsing(){
 	assert(point.hdg == 270);
 
 	std::string line2 = "{\"lat\": 1024, \"hdg\": -90, \"lon\": -135468321, "
-	"\"tme\": 164726, \"run\": true, \"fix\": 3, \"sat\": 2, \"dat\": 280419}";
+	"\"tme\": 164726.25, \"run\": true, \"fix\": 3, \"sat\": 2, \"dat\": 280419}";
 
 	parseTime = std::chrono::system_clock::now().time_since_epoch() / 
 		std::chrono::milliseconds(1);
@@ -113,7 +113,7 @@ void testTimingPTY(){
 			strerror(errno) << std::endl;
 	}
 
-	testWrite(fdm, name, 5, 1, 5);
+	testWrite(fdm, name, 1, 1, 5);
 
 	close(fdm);
 }
@@ -124,9 +124,12 @@ void testWrite(int master, const char* slave_device, int init_sleep_s, int sleep
 	std::mutex o_m{};
 	std::condition_variable o_v{};
 
-	std::string testData = "{\"lat\": 327054113, \"hdg\":270, \"lon\": "
-		"-1171710165, \"tme\": 164753, \"run\": true, \"fix\": 1, \"sat\": "
-		"14, \"dat\": 280419}";
+	// std::string testData = "{\"lat\": 327054113, \"hdg\":270, \"lon\": "
+	// 	"-1171710165, \"tme\": 164753.25, \"run\": true, \"fix\": 1, \"sat\": "
+	// 	"14, \"dat\": 280419}";
+
+	std::string testData = "{\"lat\": 327054113, \"hdg\":270, \"lon\": -1171710165, \"tme\": 164753.25, \"run\": true, \"fix\": 1, \"sat\": 14, \"dat\": \"050519\"}";
+	std::cout << "Writing " << testData << std::endl;
 
 	testObj.start(o_q, o_m, o_v);
 	sleep(init_sleep_s);
@@ -197,6 +200,19 @@ void testTimingSerial(){
 	close(master);
 }
 
+void testReceiveSerial(){
+	RTT::SerialGPS testObj{"/dev/ttyACM0"};
+	std::queue<RTT::Location*> o_q{};
+	std::mutex o_m{};
+	std::condition_variable o_v{};
+
+	testObj.start(o_q, o_m, o_v);
+	sleep(10);
+	testObj.stop();
+	assert(o_q.size() != 0);
+	std::cout << "Received " << o_q.size() << " positions" << std::endl;
+}
+
 int main(int argc, char const *argv[]){
 	std::cout << "Testing constructor" << std::endl;
 	testConstructor();
@@ -204,5 +220,7 @@ int main(int argc, char const *argv[]){
 	testParsing();
 	std::cout << "Testing timing" << std::endl;
 	testTimingPTY();
+	// std::cout << "Testing received" << std::endl;
+	// testReceiveSerial();
 	return 0;
 }
