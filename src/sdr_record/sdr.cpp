@@ -259,7 +259,7 @@ namespace RTT{
 	SDR::SDR(): device_args(""), 
 			subdev("A:A"), ant("RX2"), ref("internal"), cpu_format("sc16"), 
 			wire_format("sc16"), channel{0}, if_gain(0), rx_rate(2000000), 
-			rx_freq(0){
+			rx_freq{0}{
 		uhd_error error = uhd_usrp_make(&usrp, device_args.c_str());
 		if(error != UHD_ERROR_NONE){
 			syslog(LOG_ERR, "UHD Error: %s", uhd_strerror(error).c_str());
@@ -268,5 +268,4 @@ namespace RTT{
 
 
 	}
-
 }
