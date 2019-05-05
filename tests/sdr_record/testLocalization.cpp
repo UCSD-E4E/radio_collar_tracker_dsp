@@ -47,7 +47,7 @@ void testData(){
 
 	std::vector<uint32_t> freqs;
 	freqs.push_back(172017000);
-	RTT::DSP_V3 dsp(2000000);
+	RTT::DSP_V3 dsp(2000000, 173000000);
 	std::queue<RTT::PingPtr> pingQueue{};
 	std::mutex pingMutex{};
 	std::condition_variable pingVar{};

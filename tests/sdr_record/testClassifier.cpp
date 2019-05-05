@@ -21,13 +21,13 @@
 const std::size_t f_s = 250000;
 
 void testConstructor(){
-	RTT::Classifier test_obj{0, f_s / 800.0, f_s};
+	RTT::Classifier test_obj{0, f_s / 800.0, f_s, 173000000};
 }
 
 void test_throughput(){
 	const std::size_t N = 312;
 
-	RTT::Classifier test_obj{0, f_s / 800.0, f_s, 0};
+	RTT::Classifier test_obj{0, f_s / 800.0, f_s, 173000000, 0};
 
 	std::queue<RTT::TaggedSignal*> i_q;
 	std::mutex i_mux;
@@ -73,7 +73,7 @@ void test_response(){
 	const double ping_amplitude = 5;
 	const std::int64_t ping_freq = 1500;
 
-	RTT::Classifier test_obj{0, f_s / 800.0, f_s, 0};
+	RTT::Classifier test_obj{0, f_s / 800.0, f_s, 173000000, 0};
 
 	std::queue<RTT::TaggedSignal*> i_q;
 	std::mutex i_mux;

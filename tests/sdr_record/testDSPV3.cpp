@@ -29,7 +29,7 @@ void test_throughput(){
 	std::complex<double>* ping = RTT::generateSinusoid(f1, f_s, samples_per_ping);
 	std::complex<double>* test_signal = new std::complex<double>[N];
 
-	RTT::DSP_V3 test_obj{f_s};
+	RTT::DSP_V3 test_obj{f_s, 173000000};
 
 	std::queue<RTT::IQdataPtr> dataQueue{};
 	std::mutex dataMutex{};
@@ -101,13 +101,13 @@ void test_throughput(){
 }
 
 void test_constructor(){
-	RTT::DSP_V3 test_obj{f_s};
+	RTT::DSP_V3 test_obj{f_s, 173000000};
 }
 
 void test_unpack(){
 	std::size_t N = 4096;
 
-	RTT::DSP_V3 test_obj{f_s};
+	RTT::DSP_V3 test_obj{f_s, 173000000};
 
 	std::queue<RTT::IQdataPtr> dataQueue;
 	std::mutex dataMutex;
