@@ -67,7 +67,7 @@ namespace RTT{
 			return lastLocation;
 		}
 		if(t < first_time || t > last_time){
-			std::cout << "First time: " << first_time << ", Last time: " << last_time << std::endl;
+			// std::cout << "First time: " << first_time << ", Last time: " << last_time << std::endl;
 			return nullptr;
 		}
 		return pointLookup[tblock];
