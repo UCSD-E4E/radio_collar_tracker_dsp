@@ -17,3 +17,8 @@ testUtility
 testIQdata
 testRemixer
 .deps/
+testClassifier
+testDSPV3
+testFIR
+testIntegrator
+testSerialGPS
