@@ -4,6 +4,9 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define private public
 #define protected public
@@ -49,10 +52,89 @@ void testTime(){
 	std::cout << testObj.getStartTime_ms() << std::endl;
 	assert(testObj.getStartTime_ms() == 1502770079180);
 }
+
+void testGetRunNum(){
+	std::string dirname{"/tmp/test"};
+	int check = mkdir(dirname.c_str(), 0777);
+	if(check == -1){
+		std::cout << "Failed to create directory!" << std::endl;
+		return;
+	}
+	std::ofstream ostr1{"/tmp/test/META_000001"};
+	ostr1.close();
+
+	int retval = RTT::SDR_TEST::getRunNum(dirname);
+
+	if(unlink("/tmp/test/META_000001") == -1){
+		std::cout << "Failed to remove file" << std::endl;
+	}
+	if(rmdir(dirname.c_str()) == -1){
+		std::cout << "Failed to remove directory" << std::endl;
+	}
+	assert(retval == 1);
+}
+
+void testGetRxFreq(){
+	std::string dirname{"/tmp/test"};
+	int check = mkdir(dirname.c_str(), 0777);
+	if(check == -1){
+		std::cout << "Failed to create directory!" << std::endl;
+		return;
+	}
+	std::ofstream ostr1{"/tmp/test/META_000001"};
+	ostr1 << "start_time: 1.55707e+09" << std::endl;
+	ostr1 << "center_freq: 173000000" << std::endl;
+	ostr1 << "sampling_freq: 250000" << std::endl;
+	ostr1 << "gain: 22" << std::endl;
+	ostr1 << "width: 2" << std::endl;
+	ostr1.close();
+
+	// check here
+	uint64_t retval = RTT::SDR_TEST::getRxFreq(dirname);
+
+	if(unlink("/tmp/test/META_000001") == -1){
+		std::cout << "Failed to remove file" << std::endl;
+	}
+	if(rmdir(dirname.c_str()) == -1){
+		std::cout << "Failed to remove directory" << std::endl;
+	}
+	assert(retval == 173000000);
+}
+
+void testGetRate(){
+	std::string dirname{"/tmp/test"};
+	int check = mkdir(dirname.c_str(), 0777);
+	if(check == -1){
+		std::cout << "Failed to create directory!" << std::endl;
+		return;
+	}
+	std::ofstream ostr1{"/tmp/test/META_000001"};
+	ostr1 << "start_time: 1.55707e+09" << std::endl;
+	ostr1 << "center_freq: 173000000" << std::endl;
+	ostr1 << "sampling_freq: 250000" << std::endl;
+	ostr1 << "gain: 22" << std::endl;
+	ostr1 << "width: 2" << std::endl;
+	ostr1.close();
+
+	// check here
+	uint64_t retval = RTT::SDR_TEST::getRate(dirname);
+
+	if(unlink("/tmp/test/META_000001") == -1){
+		std::cout << "Failed to remove file" << std::endl;
+	}
+	if(rmdir(dirname.c_str()) == -1){
+		std::cout << "Failed to remove directory" << std::endl;
+	}
+	assert(retval == 250000);
+}
+
 int main(int argc, char const *argv[])
 {
-	testConstructor();
-	testThroughput();
-	testTime();
+	// testConstructor();
+	// testThroughput();
+	// testTime();
+	testGetRunNum();
+	testGetRxFreq();
+	testGetRate();
 	return 0;
 }
