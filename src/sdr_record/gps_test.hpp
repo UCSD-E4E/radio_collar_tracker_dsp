@@ -10,6 +10,7 @@
 #include <fstream>
 #include <mutex>
 #include <condition_variable>
+#include <thread>
 
 namespace RTT{
 
@@ -29,6 +30,10 @@ namespace RTT{
 		 *                     object.
 		 */
 		Location& parseLocation(const std::string);
+
+		void _process(std::queue<Location*>&, std::mutex&, std::condition_variable&);
+
+		std::thread* _thread;
 
 	protected:
 	public:

@@ -22,6 +22,15 @@ namespace RTT{
 		_map_thread = new std::thread(&GPS::_thread, this);
 	}
 
+	void GPS::waitForLoad(){
+		_core->stop();
+		_run = false;
+		std::unique_lock<std::mutex> lock(pointMutex);
+		pointVar.notify_all();
+		lock.unlock();
+		_map_thread->join();
+	}
+
 	void GPS::stop(){
 		_run = false;
 		_core->stop();
@@ -59,6 +68,7 @@ namespace RTT{
 				lastLocation = point;
 			}
 		}
+		// std::cout << "Got " << count << " points" << std::endl;
 	}
 
 	const Location* GPS::getPositionAt(uint64_t t){
@@ -67,7 +77,7 @@ namespace RTT{
 			return lastLocation;
 		}
 		if(t < first_time || t > last_time){
-			// std::cout << "First time: " << first_time << ", Last time: " << last_time << std::endl;
+			std::cout << "First time: " << first_time << ", Last time: " << last_time << ", Requested " << t << std::endl;
 			return nullptr;
 		}
 		return pointLookup[tblock];

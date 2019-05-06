@@ -7,12 +7,18 @@
 namespace RTT{
 	void GPSTest::start(std::queue<Location*>& output_queue, 
 			std::mutex& output_mutex, std::condition_variable& output_var){
+		_thread = new std::thread(&GPSTest::_process, this, 
+			std::ref(output_queue), std::ref(output_mutex), std::ref(output_var));
+	}
+
+	void GPSTest::_process(std::queue<Location*>& output_queue, std::mutex& output_mutex,
+		std::condition_variable& output_var){
 		size_t count = 0;
 		while(!data_source->eof()){
 			std::string line;
 			std::getline(*data_source, line);
 			if(line.length() < 9){
-				continue;
+				break;
 			}
 			Location& point = parseLocation(line);
 
@@ -25,6 +31,8 @@ namespace RTT{
 	}
 
 	void GPSTest::stop(){
+		_thread->join();
+		delete _thread;
 	}
 
 	Location& GPSTest::parseLocation(const std::string line){
