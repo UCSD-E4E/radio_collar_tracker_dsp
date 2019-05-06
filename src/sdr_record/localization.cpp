@@ -142,7 +142,7 @@ namespace RTT{
 					double lat;
 					double lon;
 					UTM::UTMtoLL(result.params(3), result.params(2), zone, lat, lon);
-					std::cout << "Estimate run, estimate at: " << lat 
+					std::cout << "Estimate run, estimate at: " << std::setprecision(10) << lat 
 						<< ", " << lon << " with " << data_samples.size() << " data" << std::endl;
 					#ifdef DEBUG
 					_estimates << result.params(0) << ", " << result.params(1) << ", " 
