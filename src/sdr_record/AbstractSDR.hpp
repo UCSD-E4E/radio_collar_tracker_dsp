@@ -14,6 +14,7 @@ namespace RTT{
 			std::condition_variable&) = 0;
 		virtual void stopStreaming() = 0;
 		virtual ~AbstractSDR() = default;
+		virtual const size_t getStartTime_ms() const = 0;
 	};
 }
 #endif

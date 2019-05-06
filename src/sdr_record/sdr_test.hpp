@@ -24,6 +24,8 @@ namespace RTT{
 
 		std::size_t _sampling_freq;
 
+		volatile bool _run;
+
 	public:
 		void _process(std::queue<IQdataPtr>&, std::mutex&, 
 			std::condition_variable&);
@@ -37,7 +39,11 @@ namespace RTT{
 			std::condition_variable&);
 		void stopStreaming();
 
-		const std::size_t getStartTime_ms();
+		const std::size_t getStartTime_ms() const;
+
+		static int getRunNum(const std::string input_dir);
+		static uint64_t getRxFreq(const std::string input_dir);
+		static uint64_t getRate(const std::string input_dir);
 	};
 }
 

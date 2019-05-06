@@ -79,11 +79,13 @@ namespace RTT{
 		std::mutex& input_mutex, std::condition_variable& input_cv){
 
 		syslog(LOG_INFO, "SDR Test starting threads");
+		_run = true;
 
 		_thread = new std::thread(&SDR_TEST::_process, this, 
 			std::ref(input_queue), std::ref(input_mutex), std::ref(input_cv));
 	}
 	void SDR_TEST::stopStreaming(){
+		_run = false;
 		_thread->join();
 		delete _thread;
 	}
@@ -103,7 +105,7 @@ namespace RTT{
 
 		auto start = std::chrono::steady_clock::now();
 
-		for(std::size_t i = 0; i < _files.size(); i++){
+		for(std::size_t i = 0; i < _files.size() && _run; i++){
 			_stream.open(_files[i].c_str(), std::ios::binary | std::ios::in);
 			if(!_stream){
 				std::cout << "Stream not ready!" << std::endl;
@@ -121,7 +123,7 @@ namespace RTT{
 			// std::cout << "Opening " << _files[i] << std::endl;
 			std::size_t num_samples = file_size / (sizeof(int16_t) * 2);
 			// std::cout << "samples " << file_size << std::endl;
-			for(std::size_t j = 0; j < num_samples / _buffer_size; j++){
+			for(std::size_t j = 0; j < num_samples / _buffer_size  && _run; j++){
 				// std::cout << "Reading frame " << j << " of " << num_samples / 
 				// 	_buffer_size << std::endl;
 				IQdataPtr databuf (new IQdata(_buffer_size));
@@ -137,7 +139,7 @@ namespace RTT{
 				}
 				_stream.read((char*) buffer, sizeof(std::int16_t) * 2 * 
 					_buffer_size);
-				for(std::size_t k = 0; k < _buffer_size; k++){
+				for(std::size_t k = 0; k < _buffer_size  && _run; k++){
 					databuf->data->at(k) = std::complex<short>(buffer[2 * k], 
 						buffer[2 * k + 1]);
 					// std::cout << buffer[2 * k] << ", " << buffer[2 * k + 1] << std::endl;
@@ -177,7 +179,7 @@ namespace RTT{
 		std::cout << "You can stop now" << std::endl;
 	}
 
-	const std::size_t SDR_TEST::getStartTime_ms(){
+	const std::size_t SDR_TEST::getStartTime_ms() const{
 		std::ostringstream filestream{};
 		filestream << _input_dir << "/" << "META*";
 
@@ -198,5 +200,86 @@ namespace RTT{
 		metadata.close();
 
 		return time_start_s * 1e3;
+	}
+
+	int SDR_TEST::getRunNum(const std::string input_dir){
+		std::ostringstream filestream{};
+		filestream << input_dir << "/META_*";
+
+		glob_t glob_output;
+
+		if(glob(filestream.str().c_str(), 0, nullptr, &glob_output)){
+			throw new std::invalid_argument("Could not execute glob");
+		}
+
+		std::string metafile{glob_output.gl_pathv[0]};
+
+		std::size_t underscore_index = metafile.find_last_of('_');
+		std::string run_num_str = metafile.substr(underscore_index + 1);
+
+		globfree(&glob_output);
+		return std::stoi(run_num_str);
+	}
+
+	uint64_t SDR_TEST::getRxFreq(const std::string input_dir){
+		std::ostringstream filestream{};
+		filestream << input_dir << "/META_*";
+
+		glob_t glob_output;
+
+		if(glob(filestream.str().c_str(), 0, nullptr, &glob_output)){
+			throw new std::invalid_argument("Could not execute glob");
+		}
+
+		std::string metafile{glob_output.gl_pathv[0]};
+
+		std::ifstream m_str{metafile};
+		std::string tag;
+		m_str >> tag;
+		double value;
+		while(tag.compare("center_freq:") != 0){
+			m_str >> value;
+			// std::cout << "Ignoring " << value << std::endl;
+			m_str >> tag;
+			// std::cout << "Ignoring " << tag << std::endl;
+		}
+		// at center_freq
+		uint64_t retval;
+		m_str >> retval;
+		std::cout << retval << std::endl;
+
+		globfree(&glob_output);
+		return retval;
+	}
+
+	uint64_t SDR_TEST::getRate(const std::string input_dir){
+		std::ostringstream filestream{};
+		filestream << input_dir << "/META_*";
+
+		glob_t glob_output;
+
+		if(glob(filestream.str().c_str(), 0, nullptr, &glob_output)){
+			throw new std::invalid_argument("Could not execute glob");
+		}
+
+		std::string metafile{glob_output.gl_pathv[0]};
+
+		std::ifstream m_str{metafile};
+		std::string tag;
+		m_str >> tag;
+		double value;
+		while(tag.compare("sampling_freq:") != 0){
+			m_str >> value;
+			// std::cout << "Ignoring " << value << std::endl;
+			m_str >> tag;
+			// std::cout << "Ignoring " << tag << std::endl;
+		}
+		// at center_freq
+		uint64_t retval;
+		m_str >> retval;
+		std::cout << retval << std::endl;
+
+		globfree(&glob_output);
+		return retval;
 	}
 }

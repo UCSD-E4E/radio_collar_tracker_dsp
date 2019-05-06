@@ -37,6 +37,8 @@ namespace RTT{
 
 		volatile bool run = false;
 
+		std::size_t _start_ms;
+
 	protected:
 		SDR();
 	public:
@@ -47,6 +49,7 @@ namespace RTT{
 		void startStreaming(std::queue<IQdataPtr>&, std::mutex&, 
 			std::condition_variable&);
 		void stopStreaming();
+		const size_t getStartTime_ms() const;
 	};
 }
 

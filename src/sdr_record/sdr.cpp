@@ -11,6 +11,7 @@
 #include <thread>
 #include <memory>
 #include <condition_variable>
+#include <sys/time.h>
 
 namespace RTT{
 	SDR::SDR(double gain, long int rate, long int freq) : device_args(""), 
@@ -183,6 +184,9 @@ namespace RTT{
 				(*(databuf->data))[i] = std::complex<short>(raw_buffer[2 * i], raw_buffer[2 * i + 1]);
 			}
 			databuf->time_ms = (uint64_t)(md->rx_metadata_cpp.time_spec.get_real_secs() * 1e3);
+			if(_start_ms == 0){
+				_start_ms = databuf->time_ms;
+			}
 
 
 			uhd_rx_metadata_error_code(md, &error_code);
@@ -267,5 +271,9 @@ namespace RTT{
 		uhd_rx_streamer_make(&rx_streamer);
 
 
+	}
+
+	const size_t SDR::getStartTime_ms() const{
+		return _start_ms;
 	}
 }
