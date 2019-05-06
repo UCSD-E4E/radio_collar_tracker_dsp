@@ -107,33 +107,43 @@ namespace RTT{
 
 		if(vm.count("test_config")){
 			args.test_config = true;
+			if(args.test_data.empty()){
+				syslog(LOG_ERR, "Test Data location not specified!");
+				std::cout << desc << std::endl;
+				exit(1);
+			}
+
 		}
 
 		setlogmask(LOG_UPTO(verbosity));
 
 		syslog(LOG_INFO, "Sanity checking args");
 
-		if(args.gps_target.empty()){
+		if(!args.test_config && args.gps_target.empty()){
 			syslog(LOG_ERR, "Must set GPS target!\n");
 			std::cout << desc << std::endl;
 			exit(1);
 		}
 
 		if (!args.run_num) {
-			syslog(LOG_ERR, "Must set run number\n");
-			std::cout << desc << std::endl;
-			exit(1);
+			if(args.test_config){
+				args.run_num = SDR_TEST::getRunNum(args.test_data);
+			}else{
+				syslog(LOG_ERR, "Must set run number\n");
+				std::cout << desc << std::endl;
+				exit(1);
+			}
 		}
 		syslog(LOG_DEBUG, "Got run_num as %lu\n", args.run_num);
 
-		if (args.gain < 0){
+		if (!args.test_config && args.gain < 0){
 			syslog(LOG_ERR, "Must set gain\n");
 			std::cout << desc << std::endl;
 			exit(1);
 		}
 		syslog(LOG_DEBUG, "Got gain as %.2f\n", args.gain);
 
-		if (args.data_dir.empty()){
+		if (!args.test_config && args.data_dir.empty()){
 			syslog(LOG_ERR, "Must set directory\n");
 			std::cout << desc << std::endl;
 			exit(1);
@@ -141,16 +151,24 @@ namespace RTT{
 		syslog(LOG_DEBUG, "Got data_dir as %s\n", args.data_dir.c_str());
 
 		if (!args.rx_freq){
-			syslog(LOG_ERR, "Must set freq\n");
-			std::cout << desc << std::endl;
-			exit(1);
+			if(args.test_config){
+				args.rx_freq = SDR_TEST::getRxFreq(args.test_data);
+			}else{
+				syslog(LOG_ERR, "Must set freq\n");
+				std::cout << desc << std::endl;
+				exit(1);
+			}
 		}
 		syslog(LOG_DEBUG, "Got rx_freq as %lu\n", args.rx_freq);
 
 		if (!args.rate){
-			syslog(LOG_ERR, "Must set rate\n");
-			std::cout << desc << std::endl;
-			exit(1);
+			if(args.test_config){
+				args.rate = SDR_TEST::getRate(args.test_data);
+			}else{
+				syslog(LOG_ERR, "Must set rate\n");
+				std::cout << desc << std::endl;
+				exit(1);
+			}
 		}
 		syslog(LOG_DEBUG, "Got rate as %lu\n", args.rate);
 	}
@@ -172,7 +190,12 @@ namespace RTT{
 		}
 
 		if(args.test_config){
-			gps = new RTT::GPS(RTT::GPS::TEST_FILE, args.gps_target);
+			buffer.str("");
+			buffer.clear();
+			buffer << args.test_data << "/";
+			buffer << "GPS_";
+			buffer << std::setw(6) << std::setfill('0') << args.run_num;
+			gps = new RTT::GPS(RTT::GPS::TEST_FILE, buffer.str());
 		}else{
 			gps = new RTT::GPS(RTT::GPS::SERIAL, args.gps_target);
 		}
@@ -198,9 +221,10 @@ namespace RTT{
 
 	void SDR_RECORD::sig_handler(int sig){
 		std::unique_lock<std::mutex> run_lock(SDR_RECORD::instance()->run_mutex);
-		SDR_RECORD::instance()->program_on = 0;
+		SDR_RECORD::instance()->program_on = false;
 		run_lock.unlock();
 		SDR_RECORD::instance()->run_var.notify_all();
+		std::cout << "Caught termination signal" << std::endl;
 		syslog(LOG_WARNING, "Caught termination signal");
 	}
 
@@ -218,7 +242,7 @@ namespace RTT{
 
 		timing_stream.open(buffer.str());		
 
-		timing_stream << "start_time: " << start_time.tv_sec + (float)start_time.tv_nsec / 1.e9 << std::endl;
+		timing_stream << "start_time: " << std::fixed << std::setprecision(3) << start_time.tv_sec + (float)start_time.tv_nsec / 1.e9 << std::endl;
 		timing_stream << "center_freq: " << args.rx_freq << std::endl;
 		timing_stream << "sampling_freq: " << args.rate << std::endl;
 		timing_stream << "gain: " << args.gain << std::endl;
@@ -235,29 +259,37 @@ namespace RTT{
 	void SDR_RECORD::run(){
 		syslog(LOG_DEBUG, "Printing metadata to file");
 		this->print_meta_data();
-		struct timespec start_time;
 
 
 		syslog(LOG_INFO, "Starting threads");
 		dsp->startProcessing(sdr_queue, sdr_queue_mutex, sdr_var, ping_queue, 
 			ping_queue_mutex, ping_var);
-		clock_gettime(CLOCK_REALTIME, &start_time);
 		sdr->startStreaming(sdr_queue, sdr_queue_mutex, sdr_var);
-		std::size_t start_time_ms = start_time.tv_sec * 1e3 + (float)start_time.tv_nsec / 1.e6;
-		dsp->setStartTime(start_time_ms);
+		dsp->setStartTime(sdr->getStartTime_ms());
 		gps->start();
+		if(args.test_config){
+			// wait for GPS to finish loading!
+			gps->waitForLoad();
+		}
 		localizer->start(ping_queue, ping_queue_mutex, ping_var, *gps);
 		while(true){
 			std::unique_lock<std::mutex> run_lock(run_mutex);
 			if(program_on){
 				run_var.wait_for(run_lock, std::chrono::milliseconds{100});
-			}else{
+			}
+			if(!program_on){
 				break;
 			}
 		}
+		std::cout << "Stopping localizer" << std::endl;
 		localizer->stop();
-		gps->stop();
+		if(!args.test_config){
+			std::cout << "Stopping GPS" << std::endl;
+			gps->stop();
+		}
+		std::cout << "Stopping sdr" << std::endl;
 		sdr->stopStreaming();
+		std::cout << "Stopping dsp" << std::endl;
 		dsp->stopProcessing();
 	}
 
