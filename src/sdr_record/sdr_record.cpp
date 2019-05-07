@@ -232,6 +232,7 @@ namespace RTT{
 		buffer << std::setw(6) << std::setfill('0') << args.run_num;
 		std::cout << "Esimtate to " << buffer.str() << std::endl;
 		_estimate_str = new std::ofstream{buffer.str()};
+		*_estimate_str << "{}" << std::endl; // to write to disk!
 
 		localizer = new RTT::PingLocalizer(*_estimate_str);
 	}
@@ -311,6 +312,7 @@ namespace RTT{
 	}
 
 	SDR_RECORD::~SDR_RECORD(){
+		*_estimate_str << std::endl << "{\"stop\": 1}" << std::endl;
 		_estimate_str->close();
 		delete _estimate_str;
 		if(args.test_config){
