@@ -50,7 +50,7 @@ namespace RTT{
 		_stream(),
 		_files(),
 		_buffer_size(16384),
-		_sampling_freq(2000000){
+		_sampling_freq(4000000){
 		glob_t glob_output;
 		std::ostringstream globfilestream{};
 		globfilestream << _input_dir << "/" << "RAW_DATA*";
