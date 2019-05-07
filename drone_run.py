@@ -43,9 +43,9 @@ if __name__ == '__main__':
 
 	sdr_record_cmd = ('src/sdr_record/sdr_record -g 22.0 -s 250000 -c 17300000'
 		' -r %d -o %s --gps_target /dev/ttyACM0' % (run_num, run_dir))
-	tcp_server_cmd = 'src/python/tcp_server.py %s %d' % (run_dir, run_num)
+	# tcp_server_cmd = 'src/python/tcp_server.py %s %d' % (run_dir, run_num)
 
-	tcp_server = subprocess.Popen(shlex.split(tcp_server_cmd))
+	# tcp_server = subprocess.Popen(shlex.split(tcp_server_cmd))
 	sdr_record = subprocess.Popen(shlex.split(sdr_record_cmd))
 
 	signal.signal(signal.SIGINT, sigint_handler)
