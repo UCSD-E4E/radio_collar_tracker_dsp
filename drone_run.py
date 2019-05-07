@@ -52,6 +52,6 @@ if __name__ == '__main__':
 
 	signal.pause()
 
-	sdr_record.send_signal(9)
+	sdr_record.send_signal(2)
 	sdr_record.wait()
 
