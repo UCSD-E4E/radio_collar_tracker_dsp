@@ -25,6 +25,8 @@ if __name__ == '__main__':
 	sock.bind((TCP_IP, TCP_PORT))
 	sock.listen(1)
 
+	print("Waiting for connection on port %d" % (TCP_PORT))
+
 	conn, addr = sock.accept()
 
 
