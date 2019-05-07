@@ -32,12 +32,23 @@ namespace RTT{
 		std::thread* _thread = nullptr;
 		std::condition_variable* _input_cv = nullptr;
 		std::size_t _average_len = 2000;
-		const double MIN_SNR = 0.5;
 
+		// 2017 data
+		// const static std::size_t ping_width_ms = 15;
+		// const double MIN_SNR = 0.15;
+		// const double HIGH_THRESHOLD = 1.5;
+		// const double LOW_THRESHOLD = 0.75;
+
+		// 2019 test data
 		const static std::size_t ping_width_ms = 22;
+		const double MIN_SNR = 0.4;
+		const double HIGH_THRESHOLD = 1.5;
+		const double LOW_THRESHOLD = 0.75;
+
+
 		std::size_t ping_width_samp;
 
-		const std::size_t FFT_LEN = 1024;
+		std::size_t FFT_LEN = 1024;
 
 		/**
 		 * Takes in a queue of doubles representing the amplitude of the signal
