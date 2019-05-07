@@ -19,7 +19,7 @@ namespace RTT{
 	public:
 		typedef dlib::matrix<double, 5, 1> parameter_vector;
 		typedef dlib::matrix<double, 3, 1> input_vector;
-		PingLocalizer();
+		PingLocalizer(std::ostream& out);
 		~PingLocalizer();
 		void start(std::queue<PingPtr>&, std::mutex&, std::condition_variable&, 
 			GPS&);
@@ -45,6 +45,8 @@ namespace RTT{
 		estimate_result _estimate;
 
 		estimate_result& estimate(std::vector<std::pair<input_vector, double>> data);
+
+		std::ostream& _out;
 	};
 }
 

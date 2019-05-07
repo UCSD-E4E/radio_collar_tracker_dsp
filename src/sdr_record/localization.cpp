@@ -7,8 +7,9 @@
 #include <math.h>
 #include <iostream>
 #include "UTM.h"
+#include <iomanip>
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #include <fstream>
@@ -116,6 +117,12 @@ namespace RTT{
 					<< (long long)northing << ", " << (long long)easting << ", " << loc->alt 
 					<< std::endl;
 				#endif
+				_out << "{\"ping\": {\"time\": " << ping.time_ms << ", ";
+				_out << 		"\"lat\": " << std::setprecision(10) << loc->lat << ", ";
+				_out << 		"\"lon\": " << std::setprecision(10) << loc->lon << ", ";
+				_out <<			"\"alt\": " << std::setprecision(10) << loc->alt << ", ";
+				_out << 		"\"amp\": " << std::setprecision(5) << ping.amplitude << ", ";
+				_out << 		"\"txf\": " << std::setprecision(5) << ping.frequency << "}}" << std::endl;;
 
 				if(params(2) == 0){
 					params(2) = easting + 1;
@@ -144,6 +151,10 @@ namespace RTT{
 					UTM::UTMtoLL(result.params(3), result.params(2), zone, lat, lon);
 					std::cout << "Estimate run, estimate at: " << std::setprecision(10) << lat 
 						<< ", " << lon << " with " << data_samples.size() << " data" << std::endl;
+					_out << "{\"estimate\": {\"lat\": " << std::setprecision(10) << lat << ", ";
+					_out << 				"\"lon\": " << std::setprecision(10) << lon << ", ";
+					_out << 				"\"alt\": " << std::setprecision(5) << 0 << "}}";
+					_out << std::endl;
 					#ifdef DEBUG
 					_estimates << result.params(0) << ", " << result.params(1) << ", " 
 						<< (long long)result.params(2) << ", " << (long long)result.params(3) << ", " 
@@ -175,7 +186,7 @@ namespace RTT{
 		delete localizer_thread;
 	}
 
-	PingLocalizer::PingLocalizer(){
+	PingLocalizer::PingLocalizer(std::ostream& out) : _out{out}{
 		
 	}
 	PingLocalizer::~PingLocalizer(){
