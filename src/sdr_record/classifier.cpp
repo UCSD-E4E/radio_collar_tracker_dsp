@@ -7,8 +7,9 @@
 #include <fftw3.h>
 #include <iostream>
 #include <float.h>
+#include <iomanip>
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #include <fstream>
@@ -23,16 +24,19 @@ namespace RTT{
 		_ms_per_sample(1/input_freq * 1000.0),
 		threshold(100),
 		_average_len(0.25*input_freq),
-		ping_width_samp(ping_width_ms * input_freq / 1000.){
+		ping_width_samp(ping_width_ms * input_freq / 1000.),
+		FFT_LEN(signal_freq / 1000){
 		#ifdef DEBUG
 		std::ofstream cfg_str{"classifier_config.log"};
 		cfg_str << "_time_start_ms, " << _time_start_ms << std::endl;
-		cfg_str << "_input_freq, " << _input_freq << std::endl;
-		cfg_str << "_signal_freq, " << _signal_freq << std::endl;
+		cfg_str << "_input_freq, " << std::fixed << std::setprecision(3) <<_input_freq << std::endl;
+		cfg_str << "_signal_freq, " << std::fixed << std::setprecision(0) << _signal_freq << std::endl;
 		cfg_str << "_ms_per_sample, " << _ms_per_sample << std::endl;
 		cfg_str << "threshold, " << threshold << std::endl;
 		cfg_str << "_average_len, " << _average_len << std::endl;
 		cfg_str << "ping_width_samp, " << ping_width_samp << std::endl;
+		cfg_str << "min_snr, " << std::setprecision(3) << MIN_SNR << std::endl;
+		cfg_str << "fft_len, " << FFT_LEN << std::endl;
 		cfg_str.close();
 
 		#endif
@@ -243,10 +247,10 @@ namespace RTT{
 					pk_hist.push_back(tsig->val);
 					peaks.push_back(max(pk_hist));
 					#ifdef DEBUG
-					for(auto it = pk_hist.begin(); it != pk_hist.end(); it++){
-						_ostr6 << *it << ", ";
-					}
-					_ostr6 << std::endl;
+					// for(auto it = pk_hist.begin(); it != pk_hist.end(); it++){
+					// 	_ostr6 << *it << ", ";
+					// }
+					// _ostr6 << std::endl;
 					#endif
 					threshold = sig_median(peaks);
 				}else{
@@ -265,11 +269,11 @@ namespace RTT{
 					for(std::size_t i = 0; i < sig.size(); i++){
 						cplx_hist.push_back(sig[i]);
 						#ifdef DEBUG
-						_ostr5 << sig[i].real();
-						if(sig[i].imag() >= 0){
-							_ostr5 << "+";
-						}
-						_ostr5 << sig[i].imag() << "i" << std::endl;
+						// _ostr5 << sig[i].real();
+						// if(sig[i].imag() >= 0){
+						// 	_ostr5 << "+";
+						// }
+						// _ostr5 << sig[i].imag() << "i" << std::endl;
 						#endif
 					}
 				}
@@ -296,25 +300,29 @@ namespace RTT{
 				if(is_falling_edge(id_signal.end() - 1)){
 					const std::size_t pulse_width = 
 						get_pulse_width(id_signal.end() - 1, id_signal.begin());
-					if(pulse_width < 0.75 * ping_width_samp){
+					auto ping_start = data.end() - 1 - pulse_width;
+					auto ping_end = data.end() - 1;
+					std::size_t ping_start_ms = (std::size_t)((signal_idx - 
+						pulse_width) * _ms_per_sample + _time_start_ms);
+					if(pulse_width < LOW_THRESHOLD * ping_width_samp){
 						#ifdef DEBUG
-						std::cout << "Ping rejected as too short!" << std::endl;
+						// std::cout << "Ping at " << std::setprecision(3) << 
+						// 	(ping_start_ms - _time_start_ms) / 1e3 << 
+						// 	" rejected as too short: " << pulse_width * _ms_per_sample << std::endl;
 						#endif
 						continue;
 					}
-					if(pulse_width > 1.5 * ping_width_samp){
+					if(pulse_width > HIGH_THRESHOLD * ping_width_samp){
 						#ifdef DEBUG
-						std::cout << "Ping rejected as too long!" << std::endl;
+						// std::cout << "Ping at " << std::setprecision(3) << 
+						// 	(ping_start_ms - _time_start_ms) / 1e3 << 
+						// 	" rejected as too long: " << pulse_width * _ms_per_sample << std::endl;
 						#endif
 						continue;
 					}
 
-					auto ping_start = data.end() - 1 - pulse_width;
-					auto ping_end = data.end() - 1;
 					const double amplitude = get_pulse_magnitude(ping_start, 
 						ping_end);
-					std::size_t ping_start_ms = (std::size_t)((signal_idx - 
-						pulse_width) * _ms_per_sample + _time_start_ms);
 					for(std::size_t i = 0; i < FFT_LEN; i++){
 						fft_in[i][0] = cplx_hist[i + fft_offset].real();
 						fft_in[i][1] = cplx_hist[i + fft_offset].imag();
@@ -343,8 +351,8 @@ namespace RTT{
 					int sig_freq = 0;
 					if(max_idx > (int)FFT_LEN / 2){
 						sig_freq = ((int)max_idx - (int)FFT_LEN) / (double)FFT_LEN * _signal_freq;
-						std::cout << max_idx << std::endl;
-						std::cout << (int)max_idx - (int)FFT_LEN << std::endl;
+						// std::cout << max_idx << std::endl;
+						// std::cout << (int)max_idx - (int)FFT_LEN << std::endl;
 					}else{
 						sig_freq = (int)max_idx / (double)FFT_LEN * _signal_freq;
 					}
@@ -359,16 +367,19 @@ namespace RTT{
 					out_lock.unlock();
 					output_cv.notify_all();
 
-					std::cout << "Ping " << out_count << " at " << (ping_start_ms - _time_start_ms) / 1e3 << "s " << 
-						", amplitude " << amplitude << ", threshold: " <<  threshold << 
+					std::cout << "Ping " << out_count << 
+						" at " << std::setprecision(3) << 
+						(ping_start_ms - _time_start_ms) / 1e3 << "s " << 
+						", amplitude " << amplitude << 
+						", threshold: " << threshold << 
 						", width: " << pulse_width * _ms_per_sample << 
-						", freq: " << sig_freq + _center_freq <<
-						std::endl;
+						", freq: " << std::fixed << std::setprecision(0) << 
+						sig_freq + _center_freq << std::endl;
 					#ifdef DEBUG
-					_ostr2 << out_count << ", " << (ping_start_ms - _time_start_ms) / 1e3 << 
-						", " << amplitude << ", average: " <<  threshold << 
-						", width: " << pulse_width * _ms_per_sample << 
-						", freq: " << sig_freq + _center_freq  <<
+					_ostr2 << out_count << ", " << std::setprecision(3) << (ping_start_ms - _time_start_ms) / 1e3 << 
+						", " << amplitude << ", " <<  threshold << 
+						", " << pulse_width * _ms_per_sample << 
+						", " << std::fixed << std::setprecision(0) << sig_freq + _center_freq  <<
 						std::endl;
 					#endif
 				}
