@@ -200,23 +200,40 @@ namespace RTT{
 			gps = new RTT::GPS(RTT::GPS::SERIAL, args.gps_target);
 		}
 
-		buffer.str("");
-		buffer.clear();
-		buffer << args.data_dir << "/";
-		buffer << "GPS_";
-		buffer << std::setw(6) << std::setfill('0') << args.run_num;
-		gps->setOutputFile(buffer.str());
+		if(!args.test_config){
+			buffer.str("");
+			buffer.clear();
+			buffer << args.data_dir << "/";
+			buffer << "GPS_";
+			buffer << std::setw(6) << std::setfill('0') << args.run_num;
+			gps->setOutputFile(buffer.str());
+		}
 
 		dsp = new RTT::DSP_V3{args.rate, args.rx_freq};
+		if(!args.test_config){
+			buffer.str("");
+			buffer.clear();
+			buffer << "RAW_DATA_";
+			buffer << std::setw(6) << std::setfill('0') << args.run_num;
+			buffer << std::setw(1) << "_";
+			buffer << std::setw(4) << "%06d";
+			dsp->setOutputDir(args.data_dir, buffer.str());
+		}
+
+
 		buffer.str("");
 		buffer.clear();
-		buffer << "RAW_DATA_";
+		if(args.test_config){
+			buffer << args.test_data;
+		}else{
+			buffer << args.data_dir;
+		}
+		buffer << "/LOCALIZE_";
 		buffer << std::setw(6) << std::setfill('0') << args.run_num;
-		buffer << std::setw(1) << "_";
-		buffer << std::setw(4) << "%06d";
-		dsp->setOutputDir(args.data_dir, buffer.str());
+		std::cout << "Esimtate to " << buffer.str() << std::endl;
+		_estimate_str = new std::ofstream{buffer.str()};
 
-		localizer = new RTT::PingLocalizer();
+		localizer = new RTT::PingLocalizer(*_estimate_str);
 	}
 
 	void SDR_RECORD::sig_handler(int sig){
@@ -294,6 +311,8 @@ namespace RTT{
 	}
 
 	SDR_RECORD::~SDR_RECORD(){
+		_estimate_str->close();
+		delete _estimate_str;
 		if(args.test_config){
 			delete (RTT::SDR_TEST*) sdr;
 		}else{

@@ -52,6 +52,8 @@ namespace RTT{
 
 		std::condition_variable run_var;
 		std::mutex run_mutex;
+
+		std::ofstream* _estimate_str;
 	protected:
 		void receiver();
 	public:
