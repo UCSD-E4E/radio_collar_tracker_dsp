@@ -180,7 +180,7 @@ namespace RTT{
 		try{
 			syslog(LOG_INFO, "Initializing Radio");
 			if(args.test_config){
-				sdr = new RTT::SDR_TEST(args.test_data);
+				sdr = new RTT::SDR_TEST(args.test_data, program_on);
 			}else{
 				sdr = new RTT::SDR(args.gain, args.rate, args.rx_freq);
 			}

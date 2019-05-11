@@ -25,11 +25,12 @@ namespace RTT{
 		std::size_t _sampling_freq;
 
 		volatile bool _run;
+		volatile bool& _p_run;
 
 	public:
 		void _process(std::queue<IQdataPtr>&, std::mutex&, 
 			std::condition_variable&);
-		SDR_TEST(std::string input_dir);
+		SDR_TEST(std::string input_dir, volatile bool& program_run);
 		~SDR_TEST();
 
 		void setBufferSize(size_t buff_size);

@@ -45,12 +45,13 @@
 #endif
 
 namespace RTT{
-	SDR_TEST::SDR_TEST(std::string input_dir) : 
+	SDR_TEST::SDR_TEST(std::string input_dir, volatile bool& program_run) : 
 		_input_dir(input_dir),
 		_stream(),
 		_files(),
 		_buffer_size(16384),
-		_sampling_freq(4000000){
+		_sampling_freq(4000000),
+		_p_run(program_run){
 		glob_t glob_output;
 		std::ostringstream globfilestream{};
 		globfilestream << _input_dir << "/" << "RAW_DATA*";
@@ -177,6 +178,7 @@ namespace RTT{
 		std::cout << "TEST SDR issued " << buffer_count << " data packets" << std::endl;
 		std::cout << "Test SDR output " << sample_count << " samples" << std::endl;
 		std::cout << "You can stop now" << std::endl;
+		_p_run = false;
 	}
 
 	const std::size_t SDR_TEST::getStartTime_ms() const{
