@@ -15,7 +15,7 @@ namespace RTT{
 	public:
 		DSP_V3(const std::size_t sampling_freq, const std::size_t center_freq);
 		~DSP_V3();
-		void startProcessing(std::queue<IQdataPtr>& inputQueue,
+		void startProcessing(std::queue<std::complex<double>*>& inputQueue,
 			std::mutex& inputMutex, std::condition_variable& inputVar,
 			std::queue<PingPtr>& outputQueue, std::mutex& outputMutex,
 			std::condition_variable& outputVar);
@@ -24,14 +24,14 @@ namespace RTT{
 		void setOutputDir(const std::string dir, const std::string fmt);
 	private:
 		/**
-		 * Unpacks IQdataPtr objects and pushes them into the IQ data queue as a
+		 * Unpacks std::complex<double> objects and pushes them into the IQ data queue as a
 		 * sequence of std::complex<double>
 		 * @param i_q Input Queue
 		 * @param i_m Input Mutex
 		 * @param i_v Input Condition Variable
 		 * @param run Run flag
 		 */
-		void _unpack(std::queue<IQdataPtr>& i_q, std::mutex& i_m, 
+		void _unpack(std::queue<std::complex<double>*>& i_q, std::mutex& i_m, 
 			std::condition_variable& i_v);
 		std::condition_variable* _in_v;
 		std::thread* _thread;

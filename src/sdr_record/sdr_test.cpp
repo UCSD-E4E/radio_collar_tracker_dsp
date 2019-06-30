@@ -76,7 +76,7 @@ namespace RTT{
 		return _buffer_size;
 	}
 
-	void SDR_TEST::startStreaming(std::queue<IQdataPtr>& input_queue, 
+	void SDR_TEST::startStreaming(std::queue<std::complex<double>*>& input_queue, 
 		std::mutex& input_mutex, std::condition_variable& input_cv){
 
 		syslog(LOG_INFO, "SDR Test starting threads");
@@ -91,7 +91,7 @@ namespace RTT{
 		delete _thread;
 	}
 
-	void SDR_TEST::_process(std::queue<IQdataPtr>& data_queue, 
+	void SDR_TEST::_process(std::queue<std::complex<double>*>& data_queue, 
 		std::mutex& data_mutex, std::condition_variable& data_cv){
 		std::size_t sample_count = 0;
 		std::size_t buffer_count = 0;
@@ -154,7 +154,8 @@ namespace RTT{
 					#endif
 				}
 				std::unique_lock<std::mutex> olock(data_mutex);
-				data_queue.push(databuf);
+				// data_queue.push(databuf);
+				#warning NOT IMPLEMENTED
 				buffer_count++;
 				olock.unlock();
 				data_cv.notify_all();

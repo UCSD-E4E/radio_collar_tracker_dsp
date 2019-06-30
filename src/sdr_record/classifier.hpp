@@ -34,16 +34,16 @@ namespace RTT{
 		std::size_t _average_len = 2000;
 
 		// 2017 data
-		// const static std::size_t ping_width_ms = 15;
-		// const double MIN_SNR = 0.15;
-		// const double HIGH_THRESHOLD = 1.5;
-		// const double LOW_THRESHOLD = 0.75;
+		const static std::size_t ping_width_ms = 15;
+		const double MIN_SNR = 0.07;
+		const double HIGH_THRESHOLD = 2;
+		const double LOW_THRESHOLD = 0.75;
 
 		// 2019 test data
-		const static std::size_t ping_width_ms = 22;
-		const double MIN_SNR = 0.4;
-		const double HIGH_THRESHOLD = 1.5;
-		const double LOW_THRESHOLD = 0.75;
+		// const static std::size_t ping_width_ms = 22;
+		// const double MIN_SNR = 0.4;
+		// const double HIGH_THRESHOLD = 1.5;
+		// const double LOW_THRESHOLD = 0.75;
 
 
 		std::size_t ping_width_samp;

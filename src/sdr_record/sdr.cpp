@@ -12,9 +12,11 @@
 #include <memory>
 #include <condition_variable>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <sys/syscall.h>
 
 namespace RTT{
-	SDR::SDR(double gain, long int rate, long int freq) : device_args(""), 
+	SDR::SDR(double gain, long int rate, long int freq) : device_args("recv_frame_size=8192"), 
 			subdev("A:A"), ant("RX2"), ref("internal"), cpu_format("sc16"), 
 			wire_format("sc16"), channel{0}, if_gain(gain), rx_rate(rate), 
 			rx_freq(freq){
@@ -64,7 +66,7 @@ namespace RTT{
 
 	}
 
-	void SDR::startStreaming(std::queue<IQdataPtr>& queue, std::mutex& mutex, 
+	void SDR::startStreaming(std::queue<std::complex<double>*>& queue, std::mutex& mutex, 
 		std::condition_variable& var){
 		output_queue = &queue;
 		output_mutex = &mutex;
@@ -124,6 +126,9 @@ namespace RTT{
 	}
 
 	void SDR::streamer(){
+		std::cout << "SDR Thread: " << syscall(__NR_gettid) << std::endl;
+
+		// Configure streamer
 		syslog(LOG_DEBUG, "sdr streamer starting");
 		uhd_error retval;
 		uhd_stream_args_t stream_args{};
@@ -153,12 +158,6 @@ namespace RTT{
 		stream_cmd.stream_mode = UHD_STREAM_MODE_START_CONTINUOUS;
 		stream_cmd.stream_now = true;
 		
-		syslog(LOG_DEBUG, "sdr streamer issuing stream command");
-		uhd_rx_streamer_issue_stream_cmd(rx_streamer, &stream_cmd);
-		struct timeval reftime;
-		gettimeofday(&reftime, NULL);
-		uhd_usrp_set_time_now(usrp, reftime.tv_sec, (double) reftime.tv_usec / 1e6, 0);
-
 		uhd_rx_metadata_handle md{};
 		uhd_rx_metadata_make(&md);
 		size_t total_samples = 0;
@@ -172,22 +171,27 @@ namespace RTT{
 		size_t num_samps = 0;
 		uhd_rx_metadata_error_code_t error_code;
 		int16_t* raw_buffer = new int16_t[rx_buffer_size * 2];
-		syslog(LOG_DEBUG, "Starting main loop");
-		while(run){
 
-			IQdataPtr databuf (new IQdata(rx_buffer_size));
+		syslog(LOG_DEBUG, "sdr streamer issuing stream command");
+		uhd_rx_streamer_issue_stream_cmd(rx_streamer, &stream_cmd);
+		struct timeval reftime;
+		gettimeofday(&reftime, NULL);
+		uhd_usrp_set_time_now(usrp, reftime.tv_sec, (double) reftime.tv_usec / 1e6, 0);
+
+		syslog(LOG_DEBUG, "Starting main loop");
+
+
+		double time_inc = 0;
+		double time_inc1 = 0;
+		uint64_t time_count = 0;
+		
+		while(run){
+			
 			gettimeofday(&starttime, NULL);
+
+			// get a buffer of data from rx_streamer and put in raw_buffer
 			uhd_rx_streamer_recv(rx_streamer, (void**) &raw_buffer, rx_buffer_size, &md, 1.0, false, &num_samps);
 			gettimeofday(&stoptime, NULL);
-
-			for(size_t i = 0; i < rx_buffer_size; i++){
-				(*(databuf->data))[i] = std::complex<short>(raw_buffer[2 * i], raw_buffer[2 * i + 1]);
-			}
-			databuf->time_ms = (uint64_t)(md->rx_metadata_cpp.time_spec.get_real_secs() * 1e3);
-			if(_start_ms == 0){
-				_start_ms = databuf->time_ms;
-			}
-
 
 			uhd_rx_metadata_error_code(md, &error_code);
 
@@ -196,8 +200,9 @@ namespace RTT{
 			}
 			if(error_code == UHD_RX_METADATA_ERROR_CODE_OVERFLOW){
 				syslog(LOG_EMERG, "Overflow indicator");
-				raise(SIGTERM);
-				return;
+				// raise(SIGTERM);
+				// return;
+				break;
 			}
 			if(error_code != UHD_RX_METADATA_ERROR_CODE_NONE){
 				char* strbuf = new char[1024];
@@ -205,10 +210,22 @@ namespace RTT{
 				syslog(LOG_ERR, "Receiver error: %s", strbuf);
 				delete[] strbuf;
 			}
+			
+			// std::vector<std::complex<double>>& double_data = *(new std::vector<std::complex<double>>());
+			// double_data.resize(rx_buffer_size);
+			std::complex<double>* double_data = new std::complex<double>[rx_buffer_size];
+
+			for(size_t i = 0; i < rx_buffer_size; i++){
+				double_data[i] = std::complex<double>(raw_buffer[2 * i] / 4096.0, raw_buffer[2 * i + 1] / 4096.0);
+			}
+			if(_start_ms == 0){
+				_start_ms = (uint64_t)(md->rx_metadata_cpp.time_spec.get_real_secs() * 1e3);
+			}
+
 			total_samples += num_samps;
 
 			std::unique_lock<std::mutex> guard(*output_mutex);
-			output_queue->push(databuf);
+			output_queue->push(double_data);
 			guard.unlock();
 			output_var->notify_all();
 			gettimeofday(&finishtime, NULL);
@@ -217,30 +234,16 @@ namespace RTT{
 			uint64_t stoptimeus = stoptime.tv_sec * 1e6 + stoptime.tv_usec;
 			uint64_t finishtimeus = finishtime.tv_sec * 1e6 + finishtime.tv_usec;
 
-			syslog(LOG_DEBUG, "%lu us for record, %lu us for queue\n", stoptimeus - starttimeus, finishtimeus - stoptimeus);
+			// syslog(LOG_DEBUG, "%lu us for record, %lu us for queue\n", stoptimeus - starttimeus, finishtimeus - stoptimeus);
+			time_inc += stoptimeus - starttimeus;
+			time_inc1 += finishtimeus - stoptimeus;
+			time_count++; 
 
 		}
+		std::cout << time_inc / time_count << " us for recording " << rx_buffer_size << " samples" << std::endl;
+		std::cout << time_inc / time_count * 1e6 / (rx_buffer_size / rx_freq) << std::endl;
+		std::cout << time_inc1 / time_count << " us for queue" << std::endl;
 		syslog(LOG_DEBUG, "Stopping loop");
-		IQdataPtr databuf(new IQdata(rx_buffer_size));
-		uhd_rx_streamer_recv(rx_streamer, (void**) &raw_buffer, rx_buffer_size, &md, 1.0, false, &num_samps);
-
-		for(size_t i = 0; i < rx_buffer_size; i++){
-			(*(databuf->data))[i] = std::complex<short>(raw_buffer[2 * i], raw_buffer[2 * i + 1]);
-		}
-
-		uhd_rx_metadata_error_code(md, &error_code);
-		if(error_code != UHD_RX_METADATA_ERROR_CODE_NONE){
-			char* strbuf = new char[1024];
-			uhd_rx_metadata_strerror(md, strbuf, 1024);
-			syslog(LOG_ERR, "Receiver error: %s", strbuf);
-			delete[] strbuf;
-		}
-		total_samples += num_samps;
-
-		std::lock_guard<std::mutex>* guard = new std::lock_guard<std::mutex>(*output_mutex);
-		output_queue->push(databuf);
-		delete guard;
-		output_var->notify_all();
 
 		stream_cmd.stream_mode =  UHD_STREAM_MODE_STOP_CONTINUOUS;
 		uhd_rx_streamer_issue_stream_cmd(rx_streamer, &stream_cmd);
@@ -260,7 +263,7 @@ namespace RTT{
 		uhd_rx_streamer_free(&rx_streamer);
 	}
 
-	SDR::SDR(): device_args(""), 
+	SDR::SDR(): device_args("num_recv_frames=512"), 
 			subdev("A:A"), ant("RX2"), ref("internal"), cpu_format("sc16"), 
 			wire_format("sc16"), channel{0}, if_gain(0), rx_rate(2000000), 
 			rx_freq{0}{

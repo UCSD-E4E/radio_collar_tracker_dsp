@@ -27,7 +27,7 @@ namespace RTT{
 		long int rx_rate;
 		long int rx_freq;
 		void streamer();
-		std::queue<IQdataPtr>* output_queue;
+		std::queue<std::complex<double>*>* output_queue;
 		std::mutex* output_mutex;
 		std::condition_variable* output_var;
 		std::thread* stream_thread;
@@ -46,7 +46,7 @@ namespace RTT{
 		~SDR();
 		void setBufferSize(size_t buff_size);
 		int getBufferSize();
-		void startStreaming(std::queue<IQdataPtr>&, std::mutex&, 
+		void startStreaming(std::queue<std::complex<double>*>&, std::mutex&, 
 			std::condition_variable&);
 		void stopStreaming();
 		const size_t getStartTime_ms() const;

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstdio>
+#include <fftw3.h>
 // #define DEBUG
 
 #ifdef DEBUG
@@ -26,7 +27,7 @@ namespace RTT{
 		}
 	}
 
-	void DSP_V3::startProcessing(std::queue<IQdataPtr>& i_q, std::mutex& i_m,
+	void DSP_V3::startProcessing(std::queue<std::complex<double>*>& i_q, std::mutex& i_m,
 		std::condition_variable& i_v, std::queue<PingPtr>& o_q, std::mutex& o_m,
 		std::condition_variable& o_v){
 		_in_v = &i_v;
@@ -35,9 +36,9 @@ namespace RTT{
 			std::ref(i_m), std::ref(i_v));
 		// _fir.start(_iq_data_queue, _iq_mux, _iq_cv, _mag_data_queue, _mag_mux,
 		// 	_mag_cv);
-		_int.start(_mag_data_queue, _mag_mux, _mag_cv, _candidate_queue, 
-			_can_mux, _can_cv);
-		_clfr.start(_candidate_queue, _can_mux, _can_cv, o_q, o_m, o_v);
+		// _int.start(_mag_data_queue, _mag_mux, _mag_cv, _candidate_queue, 
+		// 	_can_mux, _can_cv);
+		// _clfr.start(_candidate_queue, _can_mux, _can_cv, o_q, o_m, o_v);
 	}
 
 	void DSP_V3::stopProcessing(){
@@ -54,30 +55,30 @@ namespace RTT{
 		// std::cout << "_fir has " << _iq_data_queue.size() << " waiting after being stopped" << std::endl;
 		std::cout << "_int has " << _mag_data_queue.size() << " data waiting, stopping" << std::endl;
 		#endif
-		_int.stop();
+		// _int.stop();
 		#ifdef DEBUG
 		std::cout << "_int has " << _mag_data_queue.size() << " waiting after being stopped" << std::endl;
-		std::cout << "_clfr has " << _candidate_queue.size() << " data waiting, stopping" << std::endl;
+		// std::cout << "_clfr has " << _candidate_queue.size() << " data waiting, stopping" << std::endl;
 		#endif
-		_clfr.stop();
-		#ifdef DEBUG
-		std::cout << "_clfr has " << _candidate_queue.size() << " waiting after being stopped" << std::endl;
-		#endif
+		// _clfr.stop();
+		// #ifdef DEBUG
+		// std::cout << "_clfr has " << _candidate_queue.size() << " waiting after being stopped" << std::endl;
+		// #endif
 
 		delete _thread;
 	}
 
-	std::size_t IQdataToDouble(IQdataPtr dataObj, std::vector<std::complex<double>>& data){
-		std::vector<short_cpx>& short_vec = *dataObj->data;
-		data.resize(short_vec.size());
+	std::size_t IQdataToDouble(std::complex<double> dataObj, std::vector<std::complex<double>>& data){
+		// std::vector<short_cpx>& short_vec = *dataObj->data;
+		// data.resize(short_vec.size());
 		std::size_t i = 0;
-		for(; i < short_vec.size(); i++){
-			data[i] = std::complex<double>(short_vec[i].real() / 4096.0, short_vec[i].imag() / 4096.0);
-		}
+		// for(; i < short_vec.size(); i++){
+			// data[i] = std::complex<double>(short_vec[i].real() / 4096.0, short_vec[i].imag() / 4096.0);
+		// }
 		return i;
 	}
 
-	void DSP_V3::_unpack(std::queue<IQdataPtr>& i_q, std::mutex& i_m, 
+	void DSP_V3::_unpack(std::queue<std::complex<double>*>& i_q, std::mutex& i_m, 
 		std::condition_variable& i_v){
 		
 		// Local vars
@@ -85,15 +86,41 @@ namespace RTT{
 		
 		std::size_t file_counter = 0;
 		std::size_t sample_counter = 0;
+		std::size_t integrate_counter = 0;
 		char fname[1024];
 		sprintf(fname, _output_fmt, file_counter + 1);
 		std::ofstream data_str;
+
+		std::size_t FFT_LEN = 2048;
+
 		if(!_output_dir.empty()){
 			data_str.open(fname, std::ofstream::binary);
 			// std::cout << "Opening " << fname << std::endl;
 		}
 
-		int16_t buffer[2];
+		fftw_complex* fft_in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * FFT_LEN);
+		if(fft_in == nullptr){
+			std::cout << "Failed to allocate fft_in!" << std::endl;
+			return;
+		}
+
+
+		fftw_complex* fft_out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * FFT_LEN);
+		if(fft_out == nullptr){
+			std::cout << "Failed to allocation fft_out!" << std::endl;
+			return;
+		}
+
+		if(!fftw_init_threads()){
+			std::cout << "Failed to initialize FFTW threads!" << std::endl;
+			return;
+		}
+		fftw_plan_with_nthreads(4);
+		fftw_plan fft_plan = fftw_plan_dft_1d(FFT_LEN, fft_in, fft_out,
+			FFTW_FORWARD, FFTW_MEASURE);
+
+		std::vector<double> integrator{};
+		integrator.resize(FFT_LEN);
 
 		// Loop
 		while(_run || !i_q.empty()){
@@ -103,49 +130,66 @@ namespace RTT{
 				i_v.wait(inputLock);
 			}
 			if(!i_q.empty()){
-				IQdataPtr dataObj = i_q.front();
+				std::complex<double>* dataObj = i_q.front();
 				i_q.pop();
 				inputLock.unlock();
 
-				IQdataToDouble(dataObj, double_data);
-
-				if(!_output_dir.empty()){
-					for(std::size_t i = 0; i < dataObj->size(); i++){
-						buffer[0] = (*(dataObj->data))[i].real();
-						buffer[1] = (*(dataObj->data))[i].imag();
-						data_str.write((char*)buffer, 2*sizeof(int16_t));
-						sample_counter++;
-
-						if(sample_counter >= SAMPLES_PER_FILE){
-							data_str.close();
-							file_counter++;
-							sprintf(fname, _output_fmt, file_counter + 1);
-							// std::cout << "Opening " << fname << std::endl;
-							data_str.open(fname, std::ofstream::binary);
-							sample_counter = 0;
-						}
+				if(integrate_counter > int_factor){
+					for(size_t i = 0; i < FFT_LEN; i++){
+						integrator[i] = 0;
 					}
-					data_str.flush();
+					integrate_counter = 0;
+				}
+				integrate_counter += FFT_LEN;
+				sample_counter += FFT_LEN;
+
+				for(size_t i = 0; i < FFT_LEN; i++){
+					fft_in[i][0] = dataObj[i].real();
+					fft_in[i][1] = dataObj[i].imag();
+				}
+				fftw_execute(fft_plan);
+				for(size_t i = 0; i < FFT_LEN; i++){
+					integrator[i] += std::abs(std::complex<double>(fft_out[i][0], fft_out[i][1])) * std::abs(std::complex<double>(fft_out[i][0], fft_out[i][1]));
 				}
 
-				// update time_start_ms
-				if(time_start_ms == 0){
-					// hasn't been set
-					time_start_ms = dataObj->time_ms;
-					// TODO: update classifier!
-					_clfr.setStartTime(dataObj->time_ms);
-				}
+				// if(!_output_dir.empty()){
+				// 	for(std::size_t i = 0; i < dataObj->size(); i++){
+				// 		buffer[0] = (*(dataObj->data))[i].real();
+				// 		buffer[1] = (*(dataObj->data))[i].imag();
+				// 		data_str.write((char*)buffer, 2*sizeof(int16_t));
+				// 		sample_counter++;
 
-				std::unique_lock<std::mutex> dataLock(_mag_mux);
-				for(std::size_t j = 0; j < double_data.size(); j++){
-					double data = std::abs(double_data[j]) * std::abs(double_data[j]);
-					auto sig = new std::vector<std::complex<double>>();
-					sig->push_back(double_data[j]);
-					auto tsig = new TaggedSignal(data, *sig);
-					_mag_data_queue.push(tsig);
-				}
-				dataLock.unlock();
-				_mag_cv.notify_all();
+				// 		if(sample_counter >= SAMPLES_PER_FILE){
+				// 			data_str.close();
+				// 			file_counter++;
+				// 			sprintf(fname, _output_fmt, file_counter + 1);
+				// 			// std::cout << "Opening " << fname << std::endl;
+				// 			data_str.open(fname, std::ofstream::binary);
+				// 			sample_counter = 0;
+				// 		}
+				// 	}
+				// 	data_str.flush();
+				// }
+
+				// // update time_start_ms
+				// if(time_start_ms == 0){
+				// 	// hasn't been set
+				// 	time_start_ms = dataObj->time_ms;
+				// 	// TODO: update classifier!
+				// 	_clfr.setStartTime(dataObj->time_ms);
+				// }
+
+				// std::unique_lock<std::mutex> dataLock(_mag_mux);
+				// for(std::size_t j = 0; j < double_data.size(); j++){
+				// 	double data = std::abs(double_data[j]) * std::abs(double_data[j]);
+				// 	auto sig = new std::vector<std::complex<double>>();
+				// 	sig->push_back(double_data[j]);
+				// 	auto tsig = new TaggedSignal(data, *sig);
+				// 	_mag_data_queue.push(tsig);
+				// }
+				// dataLock.unlock();
+				// _mag_cv.notify_all();
+				delete[] dataObj;
 			}
 
 			// if(!_output_dir.empty()){

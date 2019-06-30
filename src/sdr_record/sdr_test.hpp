@@ -28,7 +28,7 @@ namespace RTT{
 		volatile bool& _p_run;
 
 	public:
-		void _process(std::queue<IQdataPtr>&, std::mutex&, 
+		void _process(std::queue<std::complex<double>*>&, std::mutex&, 
 			std::condition_variable&);
 		SDR_TEST(std::string input_dir, volatile bool& program_run);
 		~SDR_TEST();
@@ -36,7 +36,7 @@ namespace RTT{
 		void setBufferSize(size_t buff_size);
 		int getBufferSize();
 
-		void startStreaming(std::queue<IQdataPtr>&, std::mutex&, 
+		void startStreaming(std::queue<std::complex<double>*>&, std::mutex&, 
 			std::condition_variable&);
 		void stopStreaming();
 

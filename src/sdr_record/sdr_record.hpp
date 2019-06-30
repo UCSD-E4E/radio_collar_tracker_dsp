@@ -37,7 +37,7 @@ namespace RTT{
 		static SDR_RECORD* m_pInstance;
 		volatile bool program_on = true;
 
-		std::queue<IQdataPtr> sdr_queue;
+		std::queue<std::complex<double>*> sdr_queue;
 		std::mutex sdr_queue_mutex;
 		std::condition_variable sdr_var;
 

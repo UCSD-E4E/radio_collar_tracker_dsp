@@ -306,17 +306,17 @@ namespace RTT{
 						pulse_width) * _ms_per_sample + _time_start_ms);
 					if(pulse_width < LOW_THRESHOLD * ping_width_samp){
 						#ifdef DEBUG
-						// std::cout << "Ping at " << std::setprecision(3) << 
-						// 	(ping_start_ms - _time_start_ms) / 1e3 << 
-						// 	" rejected as too short: " << pulse_width * _ms_per_sample << std::endl;
+						std::cout << "Ping at " << std::setprecision(3) << 
+							(ping_start_ms - _time_start_ms) / 1e3 << 
+							" rejected as too short: " << pulse_width * _ms_per_sample << std::endl;
 						#endif
 						continue;
 					}
 					if(pulse_width > HIGH_THRESHOLD * ping_width_samp){
 						#ifdef DEBUG
-						// std::cout << "Ping at " << std::setprecision(3) << 
-						// 	(ping_start_ms - _time_start_ms) / 1e3 << 
-						// 	" rejected as too long: " << pulse_width * _ms_per_sample << std::endl;
+						std::cout << "Ping at " << std::setprecision(3) << 
+							(ping_start_ms - _time_start_ms) / 1e3 << 
+							" rejected as too long: " << pulse_width * _ms_per_sample << std::endl;
 						#endif
 						continue;
 					}

@@ -37,7 +37,7 @@ namespace RTT{
 		 * sends it along out the outputQueue queue.
 		 */
 		virtual void startProcessing(
-			std::queue<IQdataPtr>& inputQueue, 
+			std::queue<std::complex<double>*>& inputQueue, 
 			std::mutex& inputMutex, std::condition_variable& inputVar,
 			std::queue<PingPtr>& outputQueue, std::mutex& outputMutex, 
 			std::condition_variable& outputVar) = 0;
