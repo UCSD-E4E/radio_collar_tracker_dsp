@@ -39,20 +39,20 @@ AX_BOOST_THREAD
 AX_BOOST_PROGRAM_OPTIONS
 
 # Checks for Python libraries
-AC_PYTHON_MODULE([pynmea2], [fatal])
-AC_PYTHON_MODULE([serial], [fatal])
+AC_PYTHON3_MODULE([pynmea2], [fatal])
+AC_PYTHON3_MODULE([serial], [fatal])
 # AC_PYTHON_MODULE([mraa], [fatal])
 
-AC_PYTHON_MODULE([subprocess], [fatal])
-AC_PYTHON_MODULE([os], [fatal])
-AC_PYTHON_MODULE([threading], [fatal])
-AC_PYTHON_MODULE([signal], [fatal])
-AC_PYTHON_MODULE([enum], [fatal])
-AC_PYTHON_MODULE([time], [fatal])
-AC_PYTHON_MODULE([mmap], [fatal])
-AC_PYTHON_MODULE([sys], [fatal])
-AC_PYTHON_MODULE([calendar], [fatal])
-AC_PYTHON_MODULE([math], [fatal])
+AC_PYTHON3_MODULE([subprocess], [fatal])
+AC_PYTHON3_MODULE([os], [fatal])
+AC_PYTHON3_MODULE([threading], [fatal])
+AC_PYTHON3_MODULE([signal], [fatal])
+AC_PYTHON3_MODULE([enum], [fatal])
+AC_PYTHON3_MODULE([time], [fatal])
+AC_PYTHON3_MODULE([mmap], [fatal])
+AC_PYTHON3_MODULE([sys], [fatal])
+AC_PYTHON3_MODULE([calendar], [fatal])
+AC_PYTHON3_MODULE([math], [fatal])
 
 # Checks for header files.
 AC_CHECK_HEADERS([sys/time.h syslog.h signal.h error.h uhd.h getopt.h])
