@@ -10,8 +10,8 @@ dnl @author Andrew Collier <colliera@nu.ac.za>.
 dnl @version 2004-07-14
 dnl @license AllPermissive
 
-AC_DEFUN([AC_PYTHON_MODULE],[
-	AC_MSG_CHECKING(python module: $1)
+AC_DEFUN([AC_PYTHON2_MODULE],[
+	AC_MSG_CHECKING(python2 module: $1)
 	python -c "import $1" 2>/dev/null
 	if test $? -eq 0;
 	then
