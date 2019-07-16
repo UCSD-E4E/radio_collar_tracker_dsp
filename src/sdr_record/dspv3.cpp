@@ -251,6 +251,15 @@ namespace RTT{
 		std::size_t signal_idx = 0;
 		std::size_t out_count = 0;
 
+		#ifdef DEBUG
+		std::ofstream _ostr1{"classifier_in.log"};
+		// std::ofstream _ostr2{"classifier_out.log"};
+		std::ofstream _ostr3{"classifier_threshold.log"};
+		// std::ofstream _ostr4{"classifier_sig_fft.log"};
+		// std::ofstream _ostr5{"classifier_sig_in.log"};
+		// std::ofstream _ostr6{"classifier_test.log"};
+		#endif
+
 		std::shared_ptr<std::vector<double>> threshold_ptr(new std::vector<double>(nFreqs, 100));
 
 		while(_run || !i_q.empty()){
@@ -268,7 +277,6 @@ namespace RTT{
 					data.push_back(sig);
 					pk_hist.push_back(sig);
 					peaks.push_back(max(pk_hist));
-					// threshold_ptr.reset(&pool.getMedian(peaks));
 					threshold_ptr.reset(sig_median(peaks));
 				}else{
 					for(std::size_t j = 0; j < median_len; j++){
@@ -283,6 +291,12 @@ namespace RTT{
 
 					threshold_ptr.swap(sig);
 				}
+
+				#ifdef DEBUG
+				_ostr1 << sig[9] << std::endl;
+				_ostr3 << threshold[9] << std::endl;
+				#endif
+
 
 				signal_idx++;
 				id_signal.push_back(compare(sig, threshold_ptr, MIN_SNR));
@@ -322,6 +336,19 @@ namespace RTT{
 				}
 			}
 		}
+		#ifdef DEBUG
+		std::cout << "Threshold at " << threshold + MIN_SNR << std::endl;
+		_ostr1.close();
+		_ostr2.close();
+		_ostr3.close();
+		_ostr4.close();
+		_ostr5.close();
+		_ostr6.close();
+		#endif
+	}
+
+	const double pow(const fftw_complex* sample) const{
+		return std::abs(std::complex<double>(sample[0], sample[1])) * std::abs(std::complex<double>(sample[0], sample[1]))
 	}
 
 	void DSP_V3::_unpack(std::queue<std::complex<double>*>& i_q, std::mutex& i_m, 
@@ -383,15 +410,15 @@ namespace RTT{
 				integrate_counter += FFT_LEN;
 				sample_counter += FFT_LEN;
 
-				#ifdef DEBUG
-				for(std::size_t i = 0; i < FFT_LEN; i++){
-					_ostr1 << dataObj[i].real();
-					if(dataObj[i].imag() >= 0){
-						_ostr1 << '+';
-					}
-					_ostr1 << dataObj[i].imag() << "i" << std::endl;
-				}
-				#endif
+				// #ifdef DEBUG
+				// for(std::size_t i = 0; i < FFT_LEN; i++){
+				// 	_ostr1 << dataObj[i].real();
+				// 	if(dataObj[i].imag() >= 0){
+				// 		_ostr1 << '+';
+				// 	}
+				// 	_ostr1 << dataObj[i].imag() << "i" << std::endl;
+				// }
+				// #endif
 
 				for(size_t i = 0; i < FFT_LEN; i++){
 					_unpack_fft_in[i][0] = dataObj[i].real();
@@ -399,7 +426,7 @@ namespace RTT{
 				}
 				fftw_execute(_unpack_fft_plan);
 				for(size_t i = 0; i < nFreqs; i++){
-					(*integrator)[i] += std::abs(std::complex<double>(_unpack_fft_out[target_bins[i]][0], _unpack_fft_out[target_bins[i]][1])) * std::abs(std::complex<double>(_unpack_fft_out[target_bins[i]][0], _unpack_fft_out[target_bins[i]][1]));
+					(*integrator)[i] += pow(_unpack_fft_out[target_bins[i]] / FFT_LEN);
 				}
 
 				
