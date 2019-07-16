@@ -11,6 +11,7 @@ AC_PROG_CXX
 
 # Checks for python.
 AM_PATH_PYTHON(2.7)
+AM_PATH_PYTHON(2.7)
 AC_PATH_PROGS(BASH, bash sh)
 
 # Checks for programs.
@@ -39,8 +40,6 @@ AX_BOOST_THREAD
 AX_BOOST_PROGRAM_OPTIONS
 
 # Checks for Python libraries
-AC_PYTHON3_MODULE([pynmea2], [fatal])
-AC_PYTHON3_MODULE([serial], [fatal])
 # AC_PYTHON_MODULE([mraa], [fatal])
 
 AC_PYTHON3_MODULE([subprocess], [fatal])
