@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import os
 import glob
@@ -16,11 +16,11 @@ def sigint_handler(signal, frame):
 
 
 if __name__ == '__main__':
-	data_directory = '/mnt/RAW_DATA'
+	data_directory = '/media/e4e/RCT_DATA'
 	# data_directory = '/media/ntlhui/RCT_DATA'
 	if not os.path.ismount(data_directory):
 		print("Storage not ready!")
-		exit()
+		# exit()
 
 	if not os.path.isfile(os.path.join(data_directory, 'LAST_RUN.TXT')):
 		print("Storage not ready - no run file!")
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 		file.write("")
 
 
-	sdr_record_cmd = ('src/sdr_record/sdr_record -g 22.0 -s 250000 -c 17300000'
+	sdr_record_cmd = ('src/sdr_record/sdr_record -g 22.0 -s 1500000 -c 173500000'
 		' -r %d -o %s --gps_target /dev/ttyACM0' % (run_num, run_dir))
 	# tcp_server_cmd = 'src/python/tcp_server.py %s %d' % (run_dir, run_num)
 
