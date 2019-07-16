@@ -10,7 +10,7 @@
 namespace RTT{
 	class AbstractSDR{
 	public:
-		const size_t rx_buffer_size = 2048;
+		const static size_t rx_buffer_size = 2048;
 		virtual void startStreaming(std::queue<std::complex<double>*>&, std::mutex&, 
 			std::condition_variable&) = 0;
 		virtual void stopStreaming() = 0;
