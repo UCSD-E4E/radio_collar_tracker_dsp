@@ -16,8 +16,8 @@
 #include <sys/syscall.h>
 
 namespace RTT{
-	SDR::SDR(double gain, long int rate, long int freq) : device_args("recv_frame_size=8192"), 
-			subdev("A:A"), ant("RX2"), ref("internal"), cpu_format("sc16"), 
+	SDR::SDR(double gain, long int rate, long int freq) : device_args(""), 
+			subdev("A:A"), ant("RX2"), ref("internal"), cpu_format("fc64"), 
 			wire_format("sc16"), channel{0}, if_gain(gain), rx_rate(rate), 
 			rx_freq(freq){
 		double value{0};
@@ -137,7 +137,7 @@ namespace RTT{
 		stream_args.otw_format = new char[1024];
 		std::strcpy(stream_args.otw_format, wire_format.c_str());
 		stream_args.args = new char[1024];
-		std::strcpy(stream_args.args, "");
+		std::strcpy(stream_args.args, "fullscale=1.0, num_recv_frames=512");
 		size_t* channel_nums = new size_t[1];
 		channel_nums[0] = 0;
 		stream_args.channel_list = channel_nums;
@@ -150,6 +150,7 @@ namespace RTT{
 			char* errbuf = new char[1024];
 			retval = uhd_get_last_error(errbuf, 1024);
 			syslog(LOG_ERR, "UHD reports %s", errbuf);
+			std::cout << "UHD Error! " << errbuf << std::endl;
 			delete[] errbuf;
 			return;
 		}
@@ -168,9 +169,12 @@ namespace RTT{
 		struct timeval stoptime;
 		struct timeval finishtime;
 
+		gettimeofday(&starttime, NULL);
+		gettimeofday(&stoptime, NULL);
+		gettimeofday(&finishtime, NULL);
+
 		size_t num_samps = 0;
 		uhd_rx_metadata_error_code_t error_code;
-		int16_t* raw_buffer = new int16_t[rx_buffer_size * 2];
 
 		syslog(LOG_DEBUG, "sdr streamer issuing stream command");
 		uhd_rx_streamer_issue_stream_cmd(rx_streamer, &stream_cmd);
@@ -179,19 +183,25 @@ namespace RTT{
 		uhd_usrp_set_time_now(usrp, reftime.tv_sec, (double) reftime.tv_usec / 1e6, 0);
 
 		syslog(LOG_DEBUG, "Starting main loop");
+		std::cout << "Starting SDR main loop" << std::endl;
 
 
 		double time_inc = 0;
 		double time_inc1 = 0;
+		double time_reset = 0;
 		uint64_t time_count = 0;
+		uint64_t prev_finish = 0;
 		
 		while(run){
+			std::complex<double>* raw_buffer = new std::complex<double>[rx_buffer_size * 2];
 			
 			gettimeofday(&starttime, NULL);
 
 			// get a buffer of data from rx_streamer and put in raw_buffer
 			uhd_rx_streamer_recv(rx_streamer, (void**) &raw_buffer, rx_buffer_size, &md, 1.0, false, &num_samps);
 			gettimeofday(&stoptime, NULL);
+
+			prev_finish = finishtime.tv_sec * 1e6 + finishtime.tv_usec;
 
 			uhd_rx_metadata_error_code(md, &error_code);
 
@@ -213,11 +223,6 @@ namespace RTT{
 			
 			// std::vector<std::complex<double>>& double_data = *(new std::vector<std::complex<double>>());
 			// double_data.resize(rx_buffer_size);
-			std::complex<double>* double_data = new std::complex<double>[rx_buffer_size];
-
-			for(size_t i = 0; i < rx_buffer_size; i++){
-				double_data[i] = std::complex<double>(raw_buffer[2 * i] / 4096.0, raw_buffer[2 * i + 1] / 4096.0);
-			}
 			if(_start_ms == 0){
 				_start_ms = (uint64_t)(md->rx_metadata_cpp.time_spec.get_real_secs() * 1e3);
 			}
@@ -225,7 +230,7 @@ namespace RTT{
 			total_samples += num_samps;
 
 			std::unique_lock<std::mutex> guard(*output_mutex);
-			output_queue->push(double_data);
+			output_queue->push(raw_buffer);
 			guard.unlock();
 			output_var->notify_all();
 			gettimeofday(&finishtime, NULL);
@@ -237,11 +242,13 @@ namespace RTT{
 			// syslog(LOG_DEBUG, "%lu us for record, %lu us for queue\n", stoptimeus - starttimeus, finishtimeus - stoptimeus);
 			time_inc += stoptimeus - starttimeus;
 			time_inc1 += finishtimeus - stoptimeus;
+			time_reset += starttimeus - prev_finish;
 			time_count++; 
 
 		}
 		std::cout << time_inc / time_count << " us for recording " << rx_buffer_size << " samples" << std::endl;
-		std::cout << time_inc / time_count * 1e6 / (rx_buffer_size / rx_freq) << std::endl;
+		std::cout << time_reset / time_count << " us for reset " << rx_buffer_size << " samples" << std::endl;
+		std::cout << ((time_inc / time_count + time_inc1 / time_count) / 1e6) / ((double)rx_buffer_size / rx_rate) * 100 << "% of record time" << std::endl;
 		std::cout << time_inc1 / time_count << " us for queue" << std::endl;
 		syslog(LOG_DEBUG, "Stopping loop");
 
@@ -251,7 +258,6 @@ namespace RTT{
 		std::cout << "SDR Received "<< total_samples << " samples, " << (double)total_samples / rx_rate << " seconds of data" << std::endl;
 		uhd_rx_metadata_free(&md);
 
-		delete[] raw_buffer;
 		delete[] channel_nums;
 		delete[] stream_args.args;
 		delete[] stream_args.otw_format;
