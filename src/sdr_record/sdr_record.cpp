@@ -29,7 +29,7 @@
 #include "dsp.hpp"
 // #include "dspv1.hpp"
 #include "dspv3.hpp"
-#include "localization.hpp"
+// #include "localization.hpp"
 #include <string>
 #include <mutex>
 #include <queue>
@@ -211,7 +211,19 @@ namespace RTT{
 			gps->setOutputFile(buffer.str());
 		}
 
-		dsp = new RTT::DSP_V3{args.rate, args.rx_freq};
+		std::vector<std::size_t> frequencies{};
+		frequencies.push_back(173000000);
+		frequencies.push_back(173100000);
+		frequencies.push_back(173200000);
+		frequencies.push_back(173300000);
+		frequencies.push_back(173400000);
+		frequencies.push_back(173500000);
+		frequencies.push_back(173600000);
+		frequencies.push_back(173700000);
+		frequencies.push_back(173800000);
+		frequencies.push_back(173964000);
+
+		dsp = new RTT::DSP_V3{args.rate, args.rx_freq, frequencies};
 		if(!args.test_config){
 			buffer.str("");
 			buffer.clear();
@@ -236,7 +248,7 @@ namespace RTT{
 		_estimate_str = new std::ofstream{buffer.str()};
 		*_estimate_str << "{}" << std::endl; // to write to disk!
 
-		localizer = new RTT::PingLocalizer(*_estimate_str);
+		// localizer = new RTT::PingLocalizer(*_estimate_str);
 	}
 
 	void SDR_RECORD::sig_handler(int sig){
@@ -323,7 +335,7 @@ namespace RTT{
 			delete (RTT::SDR*) sdr;
 		}
 		delete dsp;
-		delete localizer;
+		// delete localizer;
 	}
 }
 
