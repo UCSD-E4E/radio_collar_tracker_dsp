@@ -11,7 +11,7 @@
 #include "sdr.hpp"
 #endif
 #include "dsp.hpp"
-#include "localization.hpp"
+#include "gps.hpp"
 #include <condition_variable>
 
 namespace RTT{
@@ -47,7 +47,7 @@ namespace RTT{
 
 		RTT::AbstractSDR* sdr;
 		RTT::DSP* dsp;
-		RTT::PingLocalizer* localizer;
+		// RTT::PingLocalizer* localizer;
 		RTT::GPS* gps;
 
 		std::condition_variable run_var;
