@@ -81,25 +81,25 @@ if __name__ == '__main__':
 		if len(f_pings) < 5:
 			continue
 
-		writer = shapefile.Writer(os.path.join(data_dir, "tx_%d_ping" % (h_freq)), shapeType = shapefile.POINT)
+		writer = shapefile.Writer(os.path.join(data_dir, "LOCATION_%d_ping" % (h_freq)), shapeType = shapefile.POINT)
 		writer.field('amplitude', 'N', decimal = 10)
 		writer.field('sequence', 'N')
 		for ping in f_pings:
 			writer.point(ping.lon, ping.lat)
 			writer.record(ping.amplitude, ping.seq)
 		writer.close()
-		proj = open(os.path.join(data_dir, "tx_%06d_ping.prj" % (h_freq)), 'w')
+		proj = open(os.path.join(data_dir, "LOCATION_%06d_ping.prj" % (h_freq)), 'w')
 		epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
 		proj.write(epsg1)
 		proj.close()
 
-		writer = shapefile.Writer(os.path.join(data_dir, "tx_%d_est" % (h_freq)), shapeType = shapefile.POINT)
+		writer = shapefile.Writer(os.path.join(data_dir, "LOCATION_%d_est" % (h_freq)), shapeType = shapefile.POINT)
 		writer.field('sequence', 'N')
 		for est in f_est:
 			writer.point(est.lon, est.lat)
 			writer.record(est.seq)
 		writer.close()
-		proj = open(os.path.join(data_dir, "tx_%06d_est.prj" % (h_freq)), 'w')
+		proj = open(os.path.join(data_dir, "LOCATION_%06d_est.prj" % (h_freq)), 'w')
 		epsg1 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
 		proj.write(epsg1)
 		proj.close()
