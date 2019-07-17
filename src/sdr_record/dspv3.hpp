@@ -17,15 +17,25 @@ namespace RTT{
 	class DSP_V3 : public DSP{
 
 	public:
-		DSP_V3(const std::size_t sampling_freq, const std::size_t center_freq, const std::vector<std::size_t>& target_freqs);
+		DSP_V3(const std::size_t sampling_freq, const std::size_t center_freq,
+			const std::vector<std::size_t>& target_freqs,
+			const std::size_t width_ms,
+			const double snr,
+			const double max_len_threshold,
+			const double min_len_threshold);
 		~DSP_V3();
 		void startProcessing(std::queue<std::complex<double>*>& inputQueue,
 			std::mutex& inputMutex, std::condition_variable& inputVar,
 			std::queue<PingPtr>& outputQueue, std::mutex& outputMutex,
 			std::condition_variable& outputVar);
 		void stopProcessing();
-		void setStartTime(std::size_t time_start_ms);
-		void setOutputDir(const std::string dir, const std::string fmt);
+		void setStartTime(const std::size_t time_start_ms);
+		void setOutputDir(const std::string& dir, const std::string& fmt);
+
+		void setPingWidth(const std::size_t width_ms);
+		void setMinSNR(const double snr);
+		void setHighThreshold(const double threshold);
+		void setLowThreshold(const double threshold);
 	private:
 		/**
 		 * Unpacks std::complex<double> objects and pushes them into the IQ data queue as a
@@ -74,10 +84,10 @@ namespace RTT{
 		// const double LOW_THRESHOLD = 0.75;
 
 		// 2019 test data
-		const static std::size_t ping_width_ms = 36;
-		const double MIN_SNR = .004;
-		const double HIGH_THRESHOLD = 1.5;
-		const double LOW_THRESHOLD = 0.75;
+		std::size_t ping_width_ms = 36;
+		double MIN_SNR = 4;
+		double HIGH_THRESHOLD = 1.5;
+		double LOW_THRESHOLD = 0.75;
 
 		std::size_t ping_width_samp;
 		const std::size_t FFT_LEN = 2048;

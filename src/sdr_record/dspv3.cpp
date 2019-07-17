@@ -22,12 +22,20 @@
 namespace RTT{
 	DSP_V3::DSP_V3(const std::size_t sampling_freq, 
 		const std::size_t center_freq,
-		const std::vector<std::size_t>& target_freqs) : 
+		const std::vector<std::size_t>& target_freqs,
+		const std::size_t width_ms,
+		const double snr,
+		const double max_len_threshold,
+		const double min_len_threshold) : 
 	target_freqs(target_freqs),
 	nFreqs(target_freqs.size()),
 	s_freq{sampling_freq},
 	c_freq{center_freq}{
 
+		ping_width_ms = width_ms;
+		MIN_SNR = snr;
+		HIGH_THRESHOLD = max_len_threshold;
+		LOW_THRESHOLD = min_len_threshold;
 		int_factor = int_time_s * sampling_freq / FFT_LEN;
 		clfr_input_freq = (double) sampling_freq / int_factor / FFT_LEN;
 		maximizer_len = 0.1 * clfr_input_freq;
@@ -535,13 +543,29 @@ namespace RTT{
 		#endif
 	}
 
-	void DSP_V3::setStartTime(std::size_t start_time_ms){
+	void DSP_V3::setStartTime(const std::size_t start_time_ms){
 		time_start_ms = start_time_ms;
 	}
 
-	void DSP_V3::setOutputDir(const std::string dir, const std::string fmt){
+	void DSP_V3::setOutputDir(const std::string& dir, const std::string& fmt){
 		_output_dir = dir;
 		_output_fmt = new char[fmt.length() + dir.length() + 1];
 		sprintf(_output_fmt, "%s/%s", dir.c_str(), fmt.c_str());
+	}
+
+	void DSP_V3::setPingWidth(const std::size_t width_ms){
+		ping_width_ms = width_ms;
+	}
+
+	void DSP_V3::setMinSNR(const double snr){
+		MIN_SNR = snr;
+	}
+
+	void DSP_V3::setHighThreshold(const double threshold){
+		HIGH_THRESHOLD = threshold;
+	}
+
+	void DSP_V3::setLowThreshold(const double threshold){
+		LOW_THRESHOLD = threshold;
 	}
 }
