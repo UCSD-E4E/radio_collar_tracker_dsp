@@ -48,7 +48,7 @@ namespace RTT{
 		virtual void stopProcessing() = 0;
 
 		virtual void setStartTime(std::size_t) = 0;
-		virtual void setOutputDir(const std::string, const std::string) = 0;
+		virtual void setOutputDir(const std::string&, const std::string&) = 0;
 	};
 }
 
