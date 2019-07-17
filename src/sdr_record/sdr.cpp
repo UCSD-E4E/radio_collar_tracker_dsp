@@ -126,7 +126,9 @@ namespace RTT{
 	}
 
 	void SDR::streamer(){
+		#ifdef DEBUG
 		std::cout << "SDR Thread: " << syscall(__NR_gettid) << std::endl;
+		#endif
 
 		// Configure streamer
 		syslog(LOG_DEBUG, "sdr streamer starting");
@@ -183,7 +185,9 @@ namespace RTT{
 		uhd_usrp_set_time_now(usrp, reftime.tv_sec, (double) reftime.tv_usec / 1e6, 0);
 
 		syslog(LOG_DEBUG, "Starting main loop");
+		#ifdef DEBUG
 		std::cout << "Starting SDR main loop" << std::endl;
+		#endif
 
 
 		double time_inc = 0;
