@@ -11,12 +11,12 @@
 #include <boost/accumulators/statistics.hpp>
 #include <stdexcept>
 #include "AbstractSDR.hpp"
+#include <iomanip>
 
-
-#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
-#include <iostream>
+#include <fstream>
 #endif
 
 namespace RTT{
@@ -31,10 +31,14 @@ namespace RTT{
 		int_factor = int_time_s * sampling_freq / FFT_LEN;
 		clfr_input_freq = (double) sampling_freq / int_factor / FFT_LEN;
 		maximizer_len = 0.1 * clfr_input_freq;
-		median_len = 0.3 * clfr_input_freq;
+		median_len = 1 * clfr_input_freq;
 		ping_width_samp = ping_width_ms * sampling_freq / 1000. / FFT_LEN / int_factor;
 		data_len = ping_width_samp * 2;
 		_ms_per_sample = 1/((double) sampling_freq / int_factor) * 1000.0;
+
+		#ifdef DEBUG
+		std::ofstream _ostr1{"dspv3_freqs.log"};
+		#endif
 
 
 		for(auto it = target_freqs.begin(); it != target_freqs.end(); it++){
@@ -44,10 +48,18 @@ namespace RTT{
 			}
 			if(*it >= center_freq){
 				// upper half
-				target_bins.push_back((*it - center_freq) / (sampling_freq / 2) * FFT_LEN / 2);
+				std::size_t target_bin = (double)(*it - center_freq) / (sampling_freq / 2) * FFT_LEN / 2;
+				target_bins.push_back(target_bin);
+				#ifdef DEBUG
+				_ostr1 << *it << ", " << target_bin << std::endl;
+				#endif
 			}else{
 				// lower half
-				target_bins.push_back(FFT_LEN - (center_freq - *it) / (sampling_freq / 2) * FFT_LEN / 2);
+				std::size_t target_bin = FFT_LEN - (double)(center_freq - *it) / (sampling_freq / 2) * FFT_LEN / 2;
+				target_bins.push_back(target_bin);
+				#ifdef DEBUG
+				_ostr1 << *it << ", " << target_bin << std::endl;
+				#endif
 			}
 		}
 
@@ -71,6 +83,10 @@ namespace RTT{
 		fftw_plan_with_nthreads(4);
 		_unpack_fft_plan = fftw_plan_dft_1d(FFT_LEN, _unpack_fft_in, _unpack_fft_out,
 			FFTW_FORWARD, FFTW_MEASURE);
+
+		#ifdef DEBUG
+		_ostr1.close();
+		#endif
 	}
 
 	DSP_V3::~DSP_V3(){
@@ -161,37 +177,35 @@ namespace RTT{
 
 	std::size_t _debug_ctr = 0;
 
-	std::shared_ptr<bool> DSP_V3::compare(
-		std::shared_ptr<std::vector<double>> data_ptr,
-		std::shared_ptr<std::vector<double>> threshold_ptr, double min_snr){
+	std::shared_ptr<std::vector<bool>> DSP_V3::compare(
+		const std::vector<double>& data,
+		const std::vector<double>& threshold, const double min_snr) const{
 
-		std::vector<double>& data = *data_ptr;
-		std::vector<double>& threshold = *threshold_ptr;
-		bool* retval = new bool[nFreqs];
+		std::shared_ptr<std::vector<bool>> retval(new std::vector<bool>(nFreqs));
 		for(std::size_t i = 0; i < nFreqs; i++){
-			retval[i] = (data[i] > threshold[i] + min_snr);
+			(*retval)[i] = (data[i] > (threshold[i] + min_snr));
 		}
-		return std::shared_ptr<bool>(retval, std::default_delete<bool[]>());
+		return retval;
 	}
 
 	std::shared_ptr<std::set<std::size_t>> DSP_V3::has_falling_edge(
-		boost::circular_buffer<std::shared_ptr<bool>>::iterator it){
-		std::shared_ptr<bool> s1 = *(it - 1);
-		std::shared_ptr<bool> s2 = *it;
+		boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator it){
+		std::vector<bool>& s1 = **(it - 1);
+		std::vector<bool>& s2 = **it;
 
 		std::shared_ptr<std::set<std::size_t>> retval_ptr = std::make_shared<std::set<std::size_t>>();
 		std::set<std::size_t>& retval = *retval_ptr;
 
 		for(std::size_t i = 0; i < nFreqs; i++){
-			if(s1.get()[i] == true && s2.get()[i] == false){
+			if(s1[i] == true && s2[i] == false){
 				retval.insert(i);
 			}
 		}
 		return retval_ptr;
 	}
 
-	bool is_rising_edge(boost::circular_buffer<std::shared_ptr<bool>>::iterator it, std::size_t i){
-		if((*(it - 1)).get()[i] == false && (*it).get()[i] == true){
+	bool is_rising_edge(boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator it, std::size_t i){
+		if((**(it-1))[i] == false && (**it)[i] == true){
 			return true;
 		}else{
 			return false;
@@ -212,11 +226,14 @@ namespace RTT{
 	}
 
 	const std::size_t DSP_V3::get_pulse_width(
-		boost::circular_buffer<std::shared_ptr<bool>>::iterator end,
-		boost::circular_buffer<std::shared_ptr<bool>>::iterator begin,
+		boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator end,
+		boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator begin,
 		std::size_t i){
 
 		std::size_t width = 0;
+		if(end == begin){
+			return -1;
+		}
 
 		while(!is_rising_edge(end, i)){
 			end--;
@@ -239,12 +256,15 @@ namespace RTT{
 		
 
 		std::size_t id_len = (std::size_t)(clfr_input_freq * 0.5);
-		boost::circular_buffer<std::shared_ptr<bool>> id_signal{id_len};
+		boost::circular_buffer<std::shared_ptr<std::vector<bool>>> id_signal{id_len};
+		#ifdef DEBUG
 		std::cout << id_len << " len id_len" << std::endl;
+		std::cout << data_len << " len data" << std::endl;
 		std::cout << maximizer_len << " len pk_hist" << std::endl;
 		std::cout << median_len << " len peaks" << std::endl;
+		#endif
 		for(std::size_t i = 0; i < id_len; i++){
-			std::shared_ptr<bool> id_sig(new bool[nFreqs], std::default_delete<bool[]>());
+			std::shared_ptr<std::vector<bool>> id_sig(new std::vector<bool>(nFreqs));
 			id_signal.push_back(id_sig);
 		}
 
@@ -253,14 +273,14 @@ namespace RTT{
 
 		#ifdef DEBUG
 		std::ofstream _ostr1{"classifier_in.log"};
-		// std::ofstream _ostr2{"classifier_out.log"};
+		std::ofstream _ostr2{"classifier_compare.log"};
 		std::ofstream _ostr3{"classifier_threshold.log"};
 		// std::ofstream _ostr4{"classifier_sig_fft.log"};
 		// std::ofstream _ostr5{"classifier_sig_in.log"};
 		// std::ofstream _ostr6{"classifier_test.log"};
 		#endif
 
-		std::shared_ptr<std::vector<double>> threshold_ptr(new std::vector<double>(nFreqs, 100));
+		std::vector<double>* threshold_ptr = new std::vector<double>(nFreqs, 100);
 
 		while(_run || !i_q.empty()){
 			std::unique_lock<std::mutex> in_lock(i_m);
@@ -269,15 +289,15 @@ namespace RTT{
 			}
 
 			if(!i_q.empty()){
-				std::vector<double>& threshold = *threshold_ptr;
 				std::shared_ptr<std::vector<double>> sig = i_q.front();
 				i_q.pop();
 
-				if(threshold[0] != 100){
+				if((*threshold_ptr)[0] != 100){
 					data.push_back(sig);
 					pk_hist.push_back(sig);
 					peaks.push_back(max(pk_hist));
-					threshold_ptr.reset(sig_median(peaks));
+					delete threshold_ptr;
+					threshold_ptr = sig_median(peaks);
 				}else{
 					for(std::size_t j = 0; j < median_len; j++){
 						peaks.push_back(sig);
@@ -288,41 +308,79 @@ namespace RTT{
 					for(std::size_t j = 0; j < data_len; j++){
 						data.push_back(sig);
 					}
-
-					threshold_ptr.swap(sig);
+					delete threshold_ptr;
+					threshold_ptr = new std::vector<double>(*sig);
 				}
+				std::vector<double>& threshold = *threshold_ptr;
 
 				#ifdef DEBUG
-				_ostr1 << sig[9] << std::endl;
-				_ostr3 << threshold[9] << std::endl;
+				for(std::size_t i = 0; i < nFreqs; i++){
+					_ostr1 << (*sig)[i] << ", ";
+					_ostr3 << threshold[i] + MIN_SNR << ", ";
+				}
+				_ostr1 << std::endl;
+				_ostr3 << std::endl;
 				#endif
 
 
 				signal_idx++;
-				id_signal.push_back(compare(sig, threshold_ptr, MIN_SNR));
+				std::shared_ptr<std::vector<bool>> sig_cmp = compare(*sig, threshold, MIN_SNR);
+				id_signal.push_back(sig_cmp);
+				#ifdef DEBUG
+				for(std::size_t i = 0; i < nFreqs; i++){
+					if((*sig_cmp)[1]){
+						_ostr2 << 1.0 << ", ";
+					}else{
+						_ostr2 << 0.0 << ", ";
+					}
+				}
+				_ostr2 << std::endl;
+				#endif
 
 				// std::cout << "Fail after falling edge" << std::endl;
 				std::shared_ptr<std::set<std::size_t>> edge_ptr = has_falling_edge(id_signal.end() - 1);
 				if(!edge_ptr->empty()){
 					std::set<std::size_t>& edges = *edge_ptr;
 					for(auto it = edges.begin(); it != edges.end(); it++){
-						// std::cout << "Fail after pulse width" << std::endl;
-						const std::size_t pulse_width = get_pulse_width(id_signal.end() - 1, id_signal.begin(), *it);
+						std::size_t pulse_width = get_pulse_width(id_signal.end() - 1, id_signal.begin(), *it);
+						if(pulse_width + 1 > data.size()){
+							pulse_width = data.size() - 1;
+						}
 						auto ping_start = data.end() - 1 - pulse_width;
 						auto ping_end = data.end() - 1;
 						std::size_t ping_start_ms = (std::size_t)((signal_idx - 
 							pulse_width) * _ms_per_sample);
 						if(pulse_width < LOW_THRESHOLD * ping_width_samp){
+							#ifdef DEBUG
+							std::cout << "Ping " << out_count << " at " << std::setprecision(0) <<
+							(ping_start_ms - time_start_ms) / 1e3 << "s " << std::setprecision(3) <<
+							", amplitude N/A, threshold: " << threshold[*it] + MIN_SNR <<
+							", width: " << pulse_width * _ms_per_sample <<
+							", freq: " << std::fixed << std::setprecision(0) <<
+							target_freqs[*it] <<
+							", bin: " << *it << 
+							" was rejected for being too short!" << std::endl;
+							#endif
 							continue;
 						}
 						if(pulse_width > HIGH_THRESHOLD * ping_width_samp){
+							#ifdef DEBUG
+							std::cout << "Ping " << out_count << " at " << std::setprecision(0) <<
+							(ping_start_ms - time_start_ms) / 1e3 << "s " << std::setprecision(3) <<
+							", amplitude N/A, threshold: " << threshold[*it] + MIN_SNR <<
+							", width: " << pulse_width * _ms_per_sample <<
+							", freq: " << std::fixed << std::setprecision(0) <<
+							target_freqs[*it] <<
+							", bin: " << *it << 
+							" was rejected for being too long!" << std::endl;
+							#endif
 							continue;
 						}
 
 						// std::cout << "Fail after pulse magnitude" << std::endl;
 						const double amplitude = get_pulse_magnitude(ping_start, ping_end, *it);
 
-						PingPtr ping = std::make_shared<Ping>(ping_start_ms, amplitude, idxToFreq(*it));
+						PingPtr ping = std::make_shared<Ping>(ping_start_ms, amplitude, idxToFreq(target_bins[*it]));
 
 						{
 							std::unique_lock<std::mutex> out_lock(o_m);
@@ -330,25 +388,39 @@ namespace RTT{
 							out_count++;
 							out_lock.unlock();
 							o_v.notify_all();
-							std::cout << "Got ping!" << std::endl;
+							#ifdef DEBUG
+							std::cout << "Ping " << out_count << 
+								" at " << std::setprecision(3) << 
+								(ping_start_ms - time_start_ms) / 1e3 << "s " << 
+								", amplitude " << amplitude << 
+								", threshold: " << threshold[*it] + MIN_SNR << 
+								", width: " << pulse_width * _ms_per_sample << 
+								", freq: " << std::fixed << std::setprecision(0) << 
+								target_freqs[*it] << 
+								", idx: " << *it <<
+								", bin: " << target_bins[*it] << std::endl;
+							#endif
 						}
 					}
 				}
 			}
 		}
 		#ifdef DEBUG
-		std::cout << "Threshold at " << threshold + MIN_SNR << std::endl;
+		// std::cout << "Threshold at " << threshold + MIN_SNR << std::endl;
 		_ostr1.close();
 		_ostr2.close();
 		_ostr3.close();
-		_ostr4.close();
-		_ostr5.close();
-		_ostr6.close();
+		// _ostr4.close();
+		// _ostr5.close();
+		// _ostr6.close();
 		#endif
 	}
 
-	const double pow(const fftw_complex* sample) const{
-		return std::abs(std::complex<double>(sample[0], sample[1])) * std::abs(std::complex<double>(sample[0], sample[1]))
+	const double DSP_V3::pow(const fftw_complex& sample) const{
+		double real = sample[0];
+		double imag = sample[1];
+		std::complex<double> val{real, imag};
+		return std::abs(val) * std::abs(val);
 	}
 
 	void DSP_V3::_unpack(std::queue<std::complex<double>*>& i_q, std::mutex& i_m, 
@@ -368,7 +440,9 @@ namespace RTT{
 
 		if(!_output_dir.empty()){
 			data_str.open(fname, std::ofstream::binary);
+			#ifdef DEBUG
 			std::cout << "Opening initial " << fname << std::endl;
+			#endif
 		}
 
 		std::shared_ptr<std::vector<double>> integrator = std::make_shared<std::vector<double>>();
@@ -426,7 +500,7 @@ namespace RTT{
 				}
 				fftw_execute(_unpack_fft_plan);
 				for(size_t i = 0; i < nFreqs; i++){
-					(*integrator)[i] += pow(_unpack_fft_out[target_bins[i]] / FFT_LEN);
+					(*integrator)[i] += pow(_unpack_fft_out[target_bins[i]]);
 				}
 
 				
@@ -440,7 +514,9 @@ namespace RTT{
 					if(frame_counter++ == FRAMES_PER_FILE){
 						data_str.close();
 						sprintf(fname, _output_fmt, ++file_counter);
+						#ifdef DEBUG
 						std::cout << "Opening " << fname << std::endl;
+						#endif
 						data_str.open(fname, std::ofstream::binary);
 						frame_counter = 0;
 					}
@@ -452,7 +528,11 @@ namespace RTT{
 		if(!_output_dir.empty()){
 			data_str.close();
 		}
+		std::cout << "Unpack processed " << sample_counter << " samples" << std::endl;
 		delete[] int_buf;
+		#ifdef DEBUG
+		_ostr1.close();
+		#endif
 	}
 
 	void DSP_V3::setStartTime(std::size_t start_time_ms){

@@ -68,16 +68,17 @@ namespace RTT{
 		std::size_t data_len;
 		
 		// 2017 data
-		const static std::size_t ping_width_ms = 15;
-		const double MIN_SNR = 0.07;
-		const double HIGH_THRESHOLD = 2;
-		const double LOW_THRESHOLD = 0.75;
+		// const static std::size_t ping_width_ms = 15;
+		// const double MIN_SNR = 0.07;
+		// const double HIGH_THRESHOLD = 2;
+		// const double LOW_THRESHOLD = 0.75;
 
 		// 2019 test data
-		// const static std::size_t ping_width_ms = 22;
-		// const double MIN_SNR = 0.4;
-		// const double HIGH_THRESHOLD = 1.5;
-		// const double LOW_THRESHOLD = 0.75;std::size_t ping_width_samp;
+		const static std::size_t ping_width_ms = 36;
+		const double MIN_SNR = .004;
+		const double HIGH_THRESHOLD = 1.5;
+		const double LOW_THRESHOLD = 0.75;
+
 		std::size_t ping_width_samp;
 		const std::size_t FFT_LEN = 2048;
 		double clfr_input_freq;
@@ -94,19 +95,19 @@ namespace RTT{
 		fftw_complex* _unpack_fft_out;
 		fftw_plan _unpack_fft_plan;
 
-		std::shared_ptr<bool> compare(std::shared_ptr<std::vector<double>> data, std::shared_ptr<std::vector<double>> threshold, double min_snr);
-		std::shared_ptr<std::set<std::size_t>> has_falling_edge(boost::circular_buffer<std::shared_ptr<bool>>::iterator it);
+		std::shared_ptr<std::vector<bool>> compare(const std::vector<double>& data, const std::vector<double>& threshold, double min_snr) const;
+		std::shared_ptr<std::set<std::size_t>> has_falling_edge(boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator it);
 
 		const std::size_t get_pulse_width(
-		boost::circular_buffer<std::shared_ptr<bool>>::iterator begin,
-		boost::circular_buffer<std::shared_ptr<bool>>::iterator end,
+		boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator begin,
+		boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator end,
 		std::size_t i);
 		double _ms_per_sample;
 
 		const std::vector<std::size_t> target_freqs;
 		const std::size_t nFreqs;
 		std::vector<std::size_t> target_bins;
-		const double pow(const fftw_complex* sample) const;
+		const double pow(const fftw_complex& sample) const;
 		const double get_pulse_magnitude(boost::circular_buffer<std::shared_ptr<std::vector<double>>>::iterator start,
 			boost::circular_buffer<std::shared_ptr<std::vector<double>>>::iterator end, std::size_t idx) const;
 		const std::size_t idxToFreq(const std::size_t idx) const;
