@@ -212,16 +212,16 @@ namespace RTT{
 		}
 
 		std::vector<std::size_t> frequencies{};
-		frequencies.push_back(173000000);
-		frequencies.push_back(173100000);
-		frequencies.push_back(173200000);
-		frequencies.push_back(173300000);
-		frequencies.push_back(173400000);
-		frequencies.push_back(173500000);
-		frequencies.push_back(173600000);
-		frequencies.push_back(173700000);
-		frequencies.push_back(173800000);
-		frequencies.push_back(173964000);
+		frequencies.push_back(173964000+1000);
+		// frequencies.push_back(173000000);
+		// frequencies.push_back(173100000);
+		// frequencies.push_back(173200000);
+		// frequencies.push_back(173300000);
+		// frequencies.push_back(173400000);
+		// frequencies.push_back(173500000);
+		// frequencies.push_back(173600000);
+		// frequencies.push_back(173700000);
+		// frequencies.push_back(173800000);
 
 		dsp = new RTT::DSP_V3{args.rate, args.rx_freq, frequencies};
 		if(!args.test_config){
@@ -248,7 +248,7 @@ namespace RTT{
 		_estimate_str = new std::ofstream{buffer.str()};
 		*_estimate_str << "{}" << std::endl; // to write to disk!
 
-		// localizer = new RTT::PingLocalizer(*_estimate_str);
+		localizer = new RTT::PingLocalizer(*_estimate_str);
 	}
 
 	void SDR_RECORD::sig_handler(int sig){
@@ -298,12 +298,12 @@ namespace RTT{
 			ping_queue_mutex, ping_var);
 		sdr->startStreaming(sdr_queue, sdr_queue_mutex, sdr_var);
 		dsp->setStartTime(sdr->getStartTime_ms());
-		// gps->start();
-		// if(args.test_config){
-		// 	// wait for GPS to finish loading!
-		// 	gps->waitForLoad();
-		// }
-		// localizer->start(ping_queue, ping_queue_mutex, ping_var, *gps);
+		gps->start();
+		if(args.test_config){
+			// wait for GPS to finish loading!
+			gps->waitForLoad();
+		}
+		localizer->start(ping_queue, ping_queue_mutex, ping_var, *gps);
 		while(true){
 			std::unique_lock<std::mutex> run_lock(run_mutex);
 			if(program_on){
@@ -317,12 +317,12 @@ namespace RTT{
 		sdr->stopStreaming();
 		std::cout << "Stopping dsp" << std::endl;
 		dsp->stopProcessing();
-		// std::cout << "Stopping localizer" << std::endl;
-		// localizer->stop();
-		// if(!args.test_config){
-		// 	std::cout << "Stopping GPS" << std::endl;
-		// 	gps->stop();
-		// }
+		std::cout << "Stopping localizer" << std::endl;
+		localizer->stop();
+		if(!args.test_config){
+			std::cout << "Stopping GPS" << std::endl;
+			gps->stop();
+		}
 	}
 
 	SDR_RECORD::~SDR_RECORD(){
@@ -344,7 +344,9 @@ int main(int argc, char **argv){
 	setlogmask(LOG_UPTO(4));
 
 	syslog(LOG_INFO, "Getting command line options");
+	#ifdef DEBUG
 	std::cout << "Main Thread: " << syscall(__NR_gettid) << std::endl;
+	#endif
 	RTT::SDR_RECORD* program = RTT::SDR_RECORD::instance();
 	program->init(argc, argv);
 	program->run();
