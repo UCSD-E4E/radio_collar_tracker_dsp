@@ -14,6 +14,7 @@
 #include "gps.hpp"
 #include <condition_variable>
 #include "localization.hpp"
+#include <boost/program_options.hpp>
 
 namespace RTT{
 	class SDR_RECORD{
@@ -55,6 +56,8 @@ namespace RTT{
 		std::mutex run_mutex;
 
 		std::ofstream* _estimate_str;
+
+		boost::program_options::variables_map vm;
 	protected:
 		void receiver();
 	public:

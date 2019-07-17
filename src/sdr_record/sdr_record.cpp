@@ -55,20 +55,6 @@ namespace RTT{
 
 	SDR_RECORD* SDR_RECORD::m_pInstance = NULL;
 
-	void SDR_RECORD::print_help(){
-		printf("sdr_record - Radio Collar Tracker drone application to pull IQ samples from USRP and dump to disk\n\n"
-				"Options:\n"
-				"    -r (run_number)\n"
-				"    -f (collar frequency in Hz)\n"
-				"    -s (sample rate in Hz)\n"
-				"    -g (gain)\n"
-				"    -o (output directory)\n"
-				"    -v [1-7]            Verbosity Level\n"
-				"    -h (print this help message)\n");
-
-		exit(0);
-	}
-
 	SDR_RECORD::SDR_RECORD(){
 		syslog(LOG_INFO, "Setting signal handler");
 		signal(SIGINT, &RTT::SDR_RECORD::sig_handler);
@@ -98,8 +84,20 @@ namespace RTT{
 			("test_data", po::value(&args.test_data), "Test Data")
 			("gps_target", po::value(&args.gps_target), "GPS Target")
 		;
-		po::variables_map vm;
+
+		po::options_description config{"File"};
+		config.add_options()
+			("ping_width_ms", po::value<std::size_t>(), "Ping width in milliseconds")
+			("ping_min_snr", po::value<double>(), "Ping minimum SNR")
+			("ping_max_len_mult", po::value<double>(), "Ping max len multiplier")
+			("ping_min_len_mult", po::value<double>(), "Ping min len multiplier");
+
+		std::ifstream config_file{"/usr/local/etc/rct_config"};
+
 		po::store(po::parse_command_line(argc, argv, desc), vm);
+		if(config_file){
+			po::store(po::parse_config_file(config_file, config), vm);
+		}
 		notify(vm);
 
 		if(vm.count("help")){
@@ -223,7 +221,11 @@ namespace RTT{
 		// frequencies.push_back(173700000);
 		// frequencies.push_back(173800000);
 
-		dsp = new RTT::DSP_V3{args.rate, args.rx_freq, frequencies};
+		dsp = new RTT::DSP_V3{args.rate, args.rx_freq, frequencies, 
+			vm["ping_width_ms"].as<std::size_t>(),
+			vm["ping_min_snr"].as<double>(),
+			vm["ping_max_len_mult"].as<double>(),
+			vm["ping_min_len_mult"].as<double>()};
 		if(!args.test_config){
 			buffer.str("");
 			buffer.clear();
@@ -233,6 +235,7 @@ namespace RTT{
 			buffer << std::setw(4) << "%06d";
 			dsp->setOutputDir(args.data_dir, buffer.str());
 		}
+
 
 
 		buffer.str("");
