@@ -17,59 +17,9 @@
 
 namespace RTT{
 
-
-	// double distance(const double ref_x, const double ref_y, const double ref_z,
-	// 	const double obj_x, const double obj_y, const double obj_z){
-
-	// 	const double diff_x = ref_x - obj_x;
-	// 	const double diff_y = ref_y - obj_y;
-	// 	const double diff_z = ref_z - obj_z;
-
-	// 	const double sqr = diff_x * diff_x + diff_y * diff_y + diff_z * diff_z;
-
-	// 	return sqrt(sqr);
-	// }
-
-	// double model(const PingLocalizer::input_vector& input, const PingLocalizer::parameter_vector& params){
-	// 	// const double amplitude = input(0);
-	// 	const double drone_x = input(0);
-	// 	const double drone_y = input(1);
-	// 	const double drone_z = input(2);
-
-	// 	const double tx_pow = params(0);
-	// 	const double order = params(1);
-	// 	const double tx_x = params(2);
-	// 	const double tx_y = params(3);
-	// 	const double tx_z = params(4);
-
-	// 	const double dist = distance(drone_x, drone_y, drone_z, tx_x, tx_y, tx_z);
-
-	// 	return tx_pow - 10 * order * std::log10(dist);
-	// }
-
-	// double residual(const std::pair<PingLocalizer::input_vector, double>& data, const PingLocalizer::parameter_vector& params){
-	// 	return model(data.first, params) - data.second;
-	// }
-
-	// PingLocalizer::estimate_result& PingLocalizer::estimate(
-	// 	std::vector<std::pair<input_vector, double>> data){
-	// 	PingLocalizer::estimate_result* result = new PingLocalizer::estimate_result ;
-	// 	result->params = params;
-	// 	result->mse = dlib::solve_least_squares_lm(
-	// 		dlib::objective_delta_stop_strategy(1e-7),
-	// 		residual, 
-	// 		dlib::derivative(residual),
-	// 		data,
-	// 		result->params);
-	// 	return *result;
-	// }
-
 	void PingLocalizer::process(std::queue<PingPtr>& queue, std::mutex& mutex,
 		std::condition_variable& var, GPS& gps_module){
 		
-		// std::vector<std::pair<input_vector, double>> data_samples;
-		// input_vector input;
-		// params = 90, 0.125, 0, 0, 0;
 		
 		#ifdef DEBUG
 		std::ofstream _pings{"localizer_in.log"};
@@ -81,20 +31,41 @@ namespace RTT{
 		while(run || !queue.empty()){
 		// 	std::cout << "itr" << std::endl;
 			std::unique_lock<std::mutex> inputLock(mutex);
-			if(queue.empty()){
+			if(queue.empty() && pingQueue.empty()){
 				var.wait(inputLock);
 			}
-			if(!queue.empty()){
+			if(!queue.empty() || !pingQueue.empty()){
 				// add ping to data matrix
-				Ping ping = *queue.front();
-				queue.pop();
+				PingPtr pingptr;
+				if(!queue.empty()){
+					std::cout << "Got new point" << std::endl;
+					pingptr = queue.front();
+					queue.pop();
+				}else if(!pingQueue.empty()){
+					std::cout << "Got old point" << std::endl;
+					pingptr = pingQueue.front();
+					pingQueue.pop();
+				}else{
+					std::cout << "WTF?" << std::endl;
+					continue;
+				}
 				inputLock.unlock();
-				const Location* loc = gps_module.getPositionAt(ping.time_ms);
+				if(gps_module.getFirst_ms() == 0){
+					std::cout << "Rejecting early ping, GPS reports init time of " << gps_module.getFirst_ms() << std::endl;
+					continue;
+				}
+				Ping ping = *pingptr;
+				if(ping.time_ms < gps_module.getFirst_ms()){
+					std::cout << "Rejecting point at " << ping.time_ms << ", less than " << gps_module.getFirst_ms() << std::endl;
+					continue;
+				}
+				const Location* loc = gps_module.getPositionAtMs(ping.time_ms);
 				if(loc == nullptr){
 					#ifdef DEBUG
 					std::cout << "No GPS data at " << ping.time_ms << "!" << std::endl;
 					_bad_gps << ping.time_ms << std::endl;
 					#endif
+					// pingQueue.push(pingptr);
 					continue;
 				}
 
@@ -105,16 +76,12 @@ namespace RTT{
 				// char zone[4];
 				// UTM::LLtoUTM(loc->lat * 1e-7, loc->lon * 1e-7, northing, easting, zone);
 
-				// input(0) = easting;
-				// input(1) = northing;
-				// input(2) = loc->alt;
-
 				// #ifdef DEBUG
-				// std::cout << "Got ping at " << (int)(ping.time_ms / 1e3) % (4000)
-					// << " at " << loc->lat << ", " << loc->lon << std::endl;
+				std::cout << "Got ping at " << (int)(ping.time_ms / 1e3)
+					<< " at " << loc->lat << ", " << loc->lon << std::endl;
 				// _pings << ping.time_ms << ", " << ping.amplitude << ", " 
-					// << (long long)northing << ", " << (long long)easting << ", " << loc->alt 
-					// << std::endl;
+				// 	<< (long long)northing << ", " << (long long)easting << ", " << loc->alt 
+				// 	<< std::endl;
 				// #endif
 				_out << "{\"ping\": {\"time\": " << ping.time_ms << ", ";
 				_out << 		"\"lat\": " << std::setprecision(10) << loc->lat << ", ";
@@ -123,44 +90,6 @@ namespace RTT{
 				_out << 		"\"amp\": " << std::setprecision(5) << ping.amplitude << ", ";
 				_out << 		"\"txf\": " << std::setprecision(5) << ping.frequency << "}}" << std::endl;;
 
-				// if(params(2) == 0){
-				// 	params(2) = easting + 1;
-				// 	params(3) = northing + 1;
-				// 	params(4) = 0;
-				// }
-
-				// const double output = ping.amplitude;
-
-				// data_samples.push_back(std::make_pair(input, output));
-
-				// #ifdef DEBUG
-				// for (auto it = data_samples.begin(); it != data_samples.end(); it++){
-				// 	_test << "{" << it->first(0) << ", " << (long long)((it->first(1))) << ", "
-				// 		<< (long long)((it->first(2))) <<  ", " <<
-				// 		it->second << "}, ";
-				// }
-				// _test << std::endl;
-				// #endif
-
-				// if(data_samples.size() >= 5){
-				// 	PingLocalizer::estimate_result& result = estimate(data_samples);
-				// 	params = result.params;
-				// 	double lat;
-				// 	double lon;
-				// 	UTM::UTMtoLL(result.params(3), result.params(2), zone, lat, lon);
-				// 	std::cout << "Estimate run, estimate at: " << std::setprecision(10) << lat 
-				// 		<< ", " << lon << " with " << data_samples.size() << " data" << std::endl;
-				// 	_out << "{\"estimate\": {\"lat\": " << std::setprecision(10) << lat << ", ";
-				// 	_out << 				"\"lon\": " << std::setprecision(10) << lon << ", ";
-				// 	_out << 				"\"alt\": " << std::setprecision(5) << 0 << "}}";
-				// 	_out << std::endl;
-				// 	#ifdef DEBUG
-				// 	_estimates << result.params(0) << ", " << result.params(1) << ", " 
-				// 		<< (long long)result.params(2) << ", " << (long long)result.params(3) << ", " 
-				// 		<< (long long)result.params(4) << ", " << result.mse << std::endl;
-				// 	#endif
-				// 	delete &result;
-				// }
 			}
 		}
 		#ifdef DEBUG
