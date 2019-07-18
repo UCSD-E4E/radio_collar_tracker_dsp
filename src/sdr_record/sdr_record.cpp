@@ -87,10 +87,11 @@ namespace RTT{
 
 		po::options_description config{"File"};
 		config.add_options()
-			("ping_width_ms", po::value<std::size_t>(), "Ping width in milliseconds")
-			("ping_min_snr", po::value<double>(), "Ping minimum SNR")
-			("ping_max_len_mult", po::value<double>(), "Ping max len multiplier")
-			("ping_min_len_mult", po::value<double>(), "Ping min len multiplier");
+			("gps_mode", po::value(&args.gps_mode), "GPS Test Mode")
+			("ping_width_ms", po::value(&args.ping_width_ms), "Ping width in milliseconds")
+			("ping_min_snr", po::value(&args.ping_min_snr), "Ping minimum SNR")
+			("ping_max_len_mult", po::value(&args.ping_max_len_mult), "Ping max len multiplier")
+			("ping_min_len_mult", po::value(&args.ping_min_len_mult), "Ping min len multiplier");
 
 		std::ifstream config_file{"/usr/local/etc/rct_config"};
 
@@ -196,6 +197,9 @@ namespace RTT{
 			buffer << "GPS_";
 			buffer << std::setw(6) << std::setfill('0') << args.run_num;
 			gps = new RTT::GPS(RTT::GPS::TEST_FILE, buffer.str());
+		}else if(args.gps_mode){
+			std::cout << "Test GPS mode!" << std::endl;
+			gps = new RTT::GPS(RTT::GPS::TEST_NULL, "");
 		}else{
 			gps = new RTT::GPS(RTT::GPS::SERIAL, args.gps_target);
 		}
@@ -222,10 +226,11 @@ namespace RTT{
 		// frequencies.push_back(173800000);
 
 		dsp = new RTT::DSP_V3{args.rate, args.rx_freq, frequencies, 
-			vm["ping_width_ms"].as<std::size_t>(),
-			vm["ping_min_snr"].as<double>(),
-			vm["ping_max_len_mult"].as<double>(),
-			vm["ping_min_len_mult"].as<double>()};
+			args.ping_width_ms,
+			args.ping_min_snr,
+			args.ping_max_len_mult,
+			args.ping_min_len_mult};
+		std::cout << "Initialized DSP with ping width of " << args.ping_width_ms << " ms" << std::endl;
 		if(!args.test_config){
 			buffer.str("");
 			buffer.clear();
@@ -300,7 +305,6 @@ namespace RTT{
 		dsp->startProcessing(sdr_queue, sdr_queue_mutex, sdr_var, ping_queue, 
 			ping_queue_mutex, ping_var);
 		sdr->startStreaming(sdr_queue, sdr_queue_mutex, sdr_var);
-		dsp->setStartTime(sdr->getStartTime_ms());
 		gps->start();
 		if(args.test_config){
 			// wait for GPS to finish loading!
@@ -308,6 +312,9 @@ namespace RTT{
 		}
 		localizer->start(ping_queue, ping_queue_mutex, ping_var, *gps);
 		while(true){
+			if(sdr->getStartTime_ms() != 0){
+				dsp->setStartTime(sdr->getStartTime_ms());
+			}
 			std::unique_lock<std::mutex> run_lock(run_mutex);
 			if(program_on){
 				run_var.wait_for(run_lock, std::chrono::milliseconds{1000});
