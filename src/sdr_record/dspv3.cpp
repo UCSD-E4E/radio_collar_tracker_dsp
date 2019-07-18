@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include "AbstractSDR.hpp"
 #include <iomanip>
+#include <sys/time.h>
 
 // #define DEBUG
 
@@ -33,6 +34,7 @@ namespace RTT{
 	c_freq{center_freq}{
 
 		ping_width_ms = width_ms;
+		std::cout << "Constructing DSP with width of " << ping_width_ms << " ms" << std::endl;
 		MIN_SNR = snr;
 		HIGH_THRESHOLD = max_len_threshold;
 		LOW_THRESHOLD = min_len_threshold;
@@ -42,7 +44,7 @@ namespace RTT{
 		median_len = 1 * clfr_input_freq;
 		ping_width_samp = ping_width_ms * sampling_freq / 1000. / FFT_LEN / int_factor;
 		data_len = ping_width_samp * 2;
-		_ms_per_sample = 1/((double) sampling_freq / int_factor) * 1000.0;
+		_ms_per_sample = 1/((double) sampling_freq / int_factor / FFT_LEN) * 1e3;
 
 		#ifdef DEBUG
 		std::ofstream _ostr1{"dspv3_freqs.log"};
@@ -122,6 +124,11 @@ namespace RTT{
 		std::condition_variable& o_v){
 		_in_v = &i_v;
 		_run = true;
+		if(time_start_ms == 0){
+			struct timeval start;
+			gettimeofday(&start, NULL);
+			time_start_ms = start.tv_sec * 1e3 + start.tv_usec / 1e3;
+		}
 		_thread = new std::thread(&DSP_V3::_unpack, this, std::ref(i_q), 
 			std::ref(i_m), std::ref(i_v));
 		_c_thread = new std::thread(&DSP_V3::classify, this, std::ref(_c_q),
@@ -356,12 +363,12 @@ namespace RTT{
 						}
 						auto ping_start = data.end() - 1 - pulse_width;
 						auto ping_end = data.end() - 1;
-						std::size_t ping_start_ms = (std::size_t)((signal_idx - 
+						double ping_start_ms = (std::size_t)((signal_idx - 
 							pulse_width) * _ms_per_sample);
 						if(pulse_width < LOW_THRESHOLD * ping_width_samp){
 							#ifdef DEBUG
 							std::cout << "Ping " << out_count << " at " << std::setprecision(0) <<
-							(ping_start_ms - time_start_ms) / 1e3 << "s " << std::setprecision(3) <<
+							(ping_start_ms + time_start_ms) / 1e3 << "s " << std::setprecision(3) <<
 							", amplitude N/A, threshold: " << threshold[*it] + MIN_SNR <<
 							", width: " << pulse_width * _ms_per_sample <<
 							", freq: " << std::fixed << std::setprecision(0) <<
@@ -374,7 +381,7 @@ namespace RTT{
 						if(pulse_width > HIGH_THRESHOLD * ping_width_samp){
 							#ifdef DEBUG
 							std::cout << "Ping " << out_count << " at " << std::setprecision(0) <<
-							(ping_start_ms - time_start_ms) / 1e3 << "s " << std::setprecision(3) <<
+							(ping_start_ms + time_start_ms) / 1e3 << "s " << std::setprecision(3) <<
 							", amplitude N/A, threshold: " << threshold[*it] + MIN_SNR <<
 							", width: " << pulse_width * _ms_per_sample <<
 							", freq: " << std::fixed << std::setprecision(0) <<
@@ -388,7 +395,7 @@ namespace RTT{
 						// std::cout << "Fail after pulse magnitude" << std::endl;
 						const double amplitude = get_pulse_magnitude(ping_start, ping_end, *it);
 
-						PingPtr ping = std::make_shared<Ping>(ping_start_ms, amplitude, idxToFreq(target_bins[*it]));
+						PingPtr ping = std::make_shared<Ping>(ping_start_ms + time_start_ms, amplitude, idxToFreq(target_bins[*it]));
 
 						{
 							std::unique_lock<std::mutex> out_lock(o_m);
@@ -399,7 +406,7 @@ namespace RTT{
 							#ifdef DEBUG
 							std::cout << "Ping " << out_count << 
 								" at " << std::setprecision(3) << 
-								(ping_start_ms - time_start_ms) / 1e3 << "s " << 
+								(ping_start_ms + time_start_ms) / 1e3 << "s " << 
 								", amplitude " << amplitude << 
 								", threshold: " << threshold[*it] + MIN_SNR << 
 								", width: " << pulse_width * _ms_per_sample << 
