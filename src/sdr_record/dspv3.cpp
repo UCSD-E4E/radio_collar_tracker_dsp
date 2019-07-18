@@ -128,6 +128,7 @@ namespace RTT{
 			struct timeval start;
 			gettimeofday(&start, NULL);
 			time_start_ms = start.tv_sec * 1e3 + start.tv_usec / 1e3;
+			std::cout << "Setting DSP Start to " << time_start_ms << " ms" << std::endl;
 		}
 		_thread = new std::thread(&DSP_V3::_unpack, this, std::ref(i_q), 
 			std::ref(i_m), std::ref(i_v));
@@ -406,7 +407,7 @@ namespace RTT{
 							#ifdef DEBUG
 							std::cout << "Ping " << out_count << 
 								" at " << std::setprecision(3) << 
-								(ping_start_ms + time_start_ms) / 1e3 << "s " << 
+								ping->time_ms << "ms " << 
 								", amplitude " << amplitude << 
 								", threshold: " << threshold[*it] + MIN_SNR << 
 								", width: " << pulse_width * _ms_per_sample << 
@@ -552,6 +553,7 @@ namespace RTT{
 
 	void DSP_V3::setStartTime(const std::size_t start_time_ms){
 		time_start_ms = start_time_ms;
+		std::cout << "Setting DSP Start to " << time_start_ms << " ms" << std::endl;
 	}
 
 	void DSP_V3::setOutputDir(const std::string& dir, const std::string& fmt){
