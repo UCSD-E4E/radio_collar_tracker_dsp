@@ -3,6 +3,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 #include <chrono>
+#include <sys/time.h>
 #include <poll.h>
 #include <termios.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -25,8 +26,11 @@ namespace RTT{
 		pt::ptree root;
 		pt::read_json(data, root);
 
-		retval->ltime = std::chrono::system_clock::now().time_since_epoch() / 
-			std::chrono::milliseconds(1);
+		struct timeval now;
+
+		gettimeofday(&now, NULL);
+
+		retval->ltime = now.tv_sec*1e3 + now.tv_usec / 1e3;
 		std::string tme = root.get<std::string>("tme");
 		std::size_t hr = std::stoi(tme.substr(0, 2));
 		std::size_t min = std::stoi(tme.substr(2, 2));
@@ -134,6 +138,8 @@ namespace RTT{
 		std::ofstream _ostr2{"serial_gps_out.log"};
 		#endif
 
+		struct timeval pushtime;
+
 		while(_run){
 			pollrc = poll(fds, 1, 1000);
 			if(pollrc == 1){
@@ -163,31 +169,36 @@ namespace RTT{
 
 
 						if(gotLine){
-							Location& packet = SerialGPS::parseLocation(message_buf);
-							if(packet.ltime != 0 &&
-								packet.gtime != 0 &&
-								packet.lon != 0 &&
-								packet.lat != 0){
-								std::unique_lock<std::mutex> guard{o_m};
-								o_q.push(&packet);
-								guard.unlock();
-								o_v.notify_all();
-								#ifdef DEBUG
-								std::cout << "Pushed point at  " << packet.ltime << std::endl;
-								_ostr2 << "Got packet at " << packet.ltime << std::endl;
-								#endif
-								_logfile << std::fixed << std::showpoint << std::setprecision(3) << packet.ltime;
-								_logfile << ", " << std::dec << packet.lat;
-								_logfile << ", " << std::dec << packet.lon;
-								_logfile << ", " << std::fixed << std::showpoint << std::setprecision(3) << packet.gtime;
-								_logfile << ", " << std::fixed << packet.alt;
-								_logfile << ", " << std::fixed << packet.rel_alt;
-								_logfile << ", " << std::fixed << packet.vx;
-								_logfile << ", " << std::fixed << packet.vy;
-								_logfile << ", " << std::fixed << packet.vz << std::endl;
-								// logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (local_timestamp,
-        //         lat*1e7, lon*1e7, global_timestamp, alt, rel_alt, vx, vy, vz, hdg))
+							try{
+								Location& packet = SerialGPS::parseLocation(message_buf);
+								if(packet.ltime != 0 &&
+									packet.gtime != 0 &&
+									packet.lon != 0 &&
+									packet.lat != 0){
+									std::unique_lock<std::mutex> guard{o_m};
+									o_q.push(&packet);
+									guard.unlock();
+									o_v.notify_all();
+									gettimeofday(&pushtime, NULL);
+									#ifdef DEBUG
+									std::cout << "Pushed point at  " << packet.ltime << " at " << pushtime.tv_sec << "s" << std::endl;
+									_ostr2 << "Got packet at " << packet.ltime << std::endl;
+									#endif
+									_logfile << std::fixed << std::showpoint << std::setprecision(3) << packet.ltime;
+									_logfile << ", " << std::dec << packet.lat;
+									_logfile << ", " << std::dec << packet.lon;
+									_logfile << ", " << std::fixed << std::showpoint << std::setprecision(3) << packet.gtime;
+									_logfile << ", " << std::fixed << packet.alt;
+									_logfile << ", " << std::fixed << packet.rel_alt;
+									_logfile << ", " << std::fixed << packet.vx;
+									_logfile << ", " << std::fixed << packet.vy;
+									_logfile << ", " << std::fixed << packet.vz << std::endl;
+									// logfile.write("%.3f, %d, %d, %.3f, %d, %d, %d, %d, %d, %d\n" % (local_timestamp,
+	        //         lat*1e7, lon*1e7, global_timestamp, alt, rel_alt, vx, vy, vz, hdg))
 
+								}
+							}catch(...){
+								continue;
 							}
 							message_buf = "";
 							gotLine = false;
