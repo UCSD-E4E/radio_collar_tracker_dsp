@@ -34,6 +34,11 @@ namespace RTT{
 			bool test_config = false;
 			std::string test_data = "";
 			std::string gps_target = "";
+			std::size_t ping_width_ms = 36;
+			double ping_min_snr = 4;
+			double ping_max_len_mult = 1.5;
+			double ping_min_len_mult = 0.75;
+			bool gps_mode = false;
 		} args;
 
 		static SDR_RECORD* m_pInstance;
