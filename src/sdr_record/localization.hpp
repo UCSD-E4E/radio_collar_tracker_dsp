@@ -46,6 +46,7 @@ namespace RTT{
 		// estimate_result& estimate(std::vector<std::pair<input_vector, double>> data);
 
 		std::ostream& _out;
+		std::queue<PingPtr> pingQueue;
 	};
 }
 
