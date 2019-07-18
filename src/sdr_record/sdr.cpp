@@ -228,7 +228,7 @@ namespace RTT{
 			// std::vector<std::complex<double>>& double_data = *(new std::vector<std::complex<double>>());
 			// double_data.resize(rx_buffer_size);
 			if(_start_ms == 0){
-				_start_ms = (uint64_t)(md->rx_metadata_cpp.time_spec.get_real_secs() * 1e3);
+				_start_ms = starttime.tv_sec * 1e3 + starttime.tv_usec * 1e-3;
 			}
 
 			total_samples += num_samps;
@@ -250,10 +250,12 @@ namespace RTT{
 			time_count++; 
 
 		}
+		#ifdef DEBUG
 		std::cout << time_inc / time_count << " us for recording " << rx_buffer_size << " samples" << std::endl;
 		std::cout << time_reset / time_count << " us for reset " << rx_buffer_size << " samples" << std::endl;
 		std::cout << ((time_inc / time_count + time_inc1 / time_count) / 1e6) / ((double)rx_buffer_size / rx_rate) * 100 << "% of record time" << std::endl;
 		std::cout << time_inc1 / time_count << " us for queue" << std::endl;
+		#endif
 		syslog(LOG_DEBUG, "Stopping loop");
 
 		stream_cmd.stream_mode =  UHD_STREAM_MODE_STOP_CONTINUOUS;
