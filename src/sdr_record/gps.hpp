@@ -83,7 +83,7 @@ namespace RTT{
 			TEST_NULL,
 		};
 		GPS(GPS::Protocol, std::string);	
-		const Location* getPositionAt(uint64_t);
+		const Location* getPositionAtMs(uint64_t);
 
 		void start();
 		void stop();
