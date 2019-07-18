@@ -25,6 +25,11 @@ namespace RTT{
 			_core->start(pointQueue, pointMutex, pointVar);
 			_run = true;
 			_map_thread = new std::thread(&GPS::_thread, this);
+		}else{
+			struct timeval start;
+			gettimeofday(&start, NULL);
+			first_time = start.tv_sec * 1e3 + start.tv_usec / 1e3;
+			std::cout << "GPS starting with first time of " << first_time << " ms" << std::endl;
 		}
 	}
 
@@ -83,7 +88,7 @@ namespace RTT{
 		// std::cout << "Got " << count << " points" << std::endl;
 	}
 
-	const Location* GPS::getPositionAt(uint64_t t){
+	const Location* GPS::getPositionAtMs(uint64_t t){
 		TimeBlock tblock(t);
 		if(_core == nullptr){
 			pointLookup[tblock] = new Location{};
