@@ -7,6 +7,7 @@
 #include <iostream>
 #include "UTM.h"
 #include <iomanip>
+#include <sys/time.h>
 
 #define DEBUG
 
@@ -23,15 +24,21 @@ namespace RTT{
 		
 		#ifdef DEBUG
 		std::ofstream _pings{"localizer_in.log"};
-		std::ofstream _estimates{"localizer_out.log"};
 		std::ofstream _bad_gps{"localizer_err.log"};
-		std::ofstream _test{"localizer_check.log"};
+		std::ofstream _status{"localizer_status.log"};
+		struct timeval now;
 		#endif
 
-		while(run || !queue.empty()){
+		std::size_t ping_counter = 0;
+
+		while(run || !queue.empty() || !pingQueue.empty()){
 		// 	std::cout << "itr" << std::endl;
 			std::unique_lock<std::mutex> inputLock(mutex);
 			if(queue.empty() && pingQueue.empty()){
+				#ifdef DEBUG
+				gettimeofday(&now, NULL);
+				_status << (std::size_t)(now.tv_sec * 1e3 + now.tv_usec / 1e3) << ": wait for queue data" << std::endl;
+				#endif
 				var.wait(inputLock);
 			}
 			if(!queue.empty() || !pingQueue.empty()){
@@ -41,10 +48,18 @@ namespace RTT{
 					std::cout << "Got new point" << std::endl;
 					pingptr = queue.front();
 					queue.pop();
+					#ifdef DEBUG
+					gettimeofday(&now, NULL);
+					_status << (std::size_t)(now.tv_sec * 1e3 + now.tv_usec / 1e3) << ": got new ping at " << pingptr->time_ms << " ms" << std::endl;
+					#endif
 				}else if(!pingQueue.empty()){
 					std::cout << "Got old point" << std::endl;
 					pingptr = pingQueue.front();
 					pingQueue.pop();
+					#ifdef DEBUG
+					gettimeofday(&now, NULL);
+					_status << (std::size_t)(now.tv_sec * 1e3 + now.tv_usec / 1e3) << ": got old ping from " << pingptr->time_ms << " ms" << std::endl;
+					#endif
 				}else{
 					std::cout << "WTF?" << std::endl;
 					continue;
@@ -65,10 +80,18 @@ namespace RTT{
 					std::cout << "No GPS data at " << ping.time_ms << "!" << std::endl;
 					_bad_gps << ping.time_ms << std::endl;
 					#endif
-					// pingQueue.push(pingptr);
+					#ifdef DEBUG
+					gettimeofday(&now, NULL);
+					_status << (std::size_t)(now.tv_sec * 1e3 + now.tv_usec / 1e3) << ": Requested location, no joy! Recycling" << std::endl;
+					#endif
+					pingQueue.push(pingptr);
+					gps_module.waitForPos();
 					continue;
 				}
-
+				#ifdef DEBUG
+				gettimeofday(&now, NULL);
+				_status << (std::size_t)(now.tv_sec * 1e3 + now.tv_usec / 1e3) << ": Requested location, got one at " << loc->ltime << " ms" << std::endl;
+				#endif
 				// convert to UTM
 
 				// double northing;
@@ -89,15 +112,18 @@ namespace RTT{
 				_out <<			"\"alt\": " << std::setprecision(10) << loc->alt << ", ";
 				_out << 		"\"amp\": " << std::setprecision(5) << ping.amplitude << ", ";
 				_out << 		"\"txf\": " << std::setprecision(5) << ping.frequency << "}}" << std::endl;;
+				ping_counter++;
 
 			}
 		}
 		#ifdef DEBUG
 		_pings.close();
-		_estimates.close();
 		_bad_gps.close();
-		_test.close();
+		_status.close();
 		#endif
+
+		std::cout << "Localizer localized " << ping_counter << " pings" << std::endl;
+		std::cout << "Localizer failed on " << pingQueue.size() << " pings" << std::endl;
 
 	}
 
