@@ -80,6 +80,7 @@ namespace RTT{
 			 */
 			TEST_FILE,
 			SERIAL,
+			TEST_NULL,
 		};
 		GPS(GPS::Protocol, std::string);	
 		const Location* getPositionAt(uint64_t);
@@ -90,6 +91,8 @@ namespace RTT{
 		void setOutputFile(const std::string);
 
 		void waitForLoad();
+
+		const std::size_t getFirst_ms() const;
 	};
 }
 

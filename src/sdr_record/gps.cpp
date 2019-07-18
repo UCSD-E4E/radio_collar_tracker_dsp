@@ -3,6 +3,7 @@
 #include "serial_gps.hpp"
 #include <chrono>
 #include <iostream>
+#include <sys/time.h>
 
 namespace RTT{
 	GPS::GPS(GPS::Protocol protocol, std::string path){
@@ -13,22 +14,29 @@ namespace RTT{
 			case GPS::Protocol::SERIAL:
 				_core = new SerialGPS{path};
 				break;
+			case GPS::Protocol::TEST_NULL:
+				_core = nullptr;
+				break;
 		}
 	}
 
 	void GPS::start(){
-		_core->start(pointQueue, pointMutex, pointVar);
-		_run = true;
-		_map_thread = new std::thread(&GPS::_thread, this);
+		if(_core){
+			_core->start(pointQueue, pointMutex, pointVar);
+			_run = true;
+			_map_thread = new std::thread(&GPS::_thread, this);
+		}
 	}
 
 	void GPS::waitForLoad(){
-		_core->stop();
-		_run = false;
-		std::unique_lock<std::mutex> lock(pointMutex);
-		pointVar.notify_all();
-		lock.unlock();
-		_map_thread->join();
+		if(_core){
+			_core->stop();
+			_run = false;
+			std::unique_lock<std::mutex> lock(pointMutex);
+			pointVar.notify_all();
+			lock.unlock();
+			_map_thread->join();
+		}
 	}
 
 	void GPS::stop(){
@@ -43,6 +51,7 @@ namespace RTT{
 	void GPS::_thread(){
 		uint64_t prev_time = 0;
 		size_t count = 0;
+		struct timeval rxtime;
 		while(_run){
 			std::unique_lock<std::mutex> lock(pointMutex);
 			if(pointQueue.empty()){
@@ -53,6 +62,9 @@ namespace RTT{
 				pointQueue.pop();
 				count++;
 				lock.unlock();
+				gettimeofday(&rxtime, NULL);
+
+				std::cout << "Received point at " << point->ltime << " at " << rxtime.tv_sec << "s" << std::endl;
 
 				if(first_time == 0){
 					first_time = point->ltime;
@@ -73,6 +85,13 @@ namespace RTT{
 
 	const Location* GPS::getPositionAt(uint64_t t){
 		TimeBlock tblock(t);
+		if(_core == nullptr){
+			pointLookup[tblock] = new Location{};
+			pointLookup[tblock]->ltime = t;
+			pointLookup[tblock]->lat = 0;
+			pointLookup[tblock]->lon = 0;
+			return pointLookup[tblock];
+		}
 		if(t > last_time && t < last_time + 1000){
 			return lastLocation;
 		}
@@ -84,6 +103,13 @@ namespace RTT{
 	}
 
 	void GPS::setOutputFile(const std::string file){
-		_core->setOutputFile(file);
+		if(_core){
+			_core->setOutputFile(file);
+		}
 	}
+
+	const std::size_t GPS::getFirst_ms() const{
+		return first_time;
+	}
+
 }
