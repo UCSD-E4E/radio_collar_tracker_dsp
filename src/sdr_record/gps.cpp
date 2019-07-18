@@ -5,6 +5,12 @@
 #include <iostream>
 #include <sys/time.h>
 
+// #define DEBUG
+
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 namespace RTT{
 	GPS::GPS(GPS::Protocol protocol, std::string path){
 		switch(protocol){
@@ -29,7 +35,9 @@ namespace RTT{
 			struct timeval start;
 			gettimeofday(&start, NULL);
 			first_time = start.tv_sec * 1e3 + start.tv_usec / 1e3;
+			#ifdef DEBUG
 			std::cout << "GPS starting with first time of " << first_time << " ms" << std::endl;
+			#endif
 		}
 	}
 
@@ -56,7 +64,11 @@ namespace RTT{
 	void GPS::_thread(){
 		uint64_t prev_time = 0;
 		size_t count = 0;
+
+		#ifdef DEBUG
 		struct timeval rxtime;
+		#endif
+
 		while(_run){
 			std::unique_lock<std::mutex> lock(pointMutex);
 			if(pointQueue.empty()){
@@ -67,9 +79,11 @@ namespace RTT{
 				pointQueue.pop();
 				count++;
 				lock.unlock();
-				gettimeofday(&rxtime, NULL);
 
+				#ifdef DEBUG
+				gettimeofday(&rxtime, NULL);
 				std::cout << "Received point at " << point->ltime << " at " << rxtime.tv_sec << "s" << std::endl;
+				#endif
 
 				if(first_time == 0){
 					first_time = point->ltime;
@@ -101,7 +115,10 @@ namespace RTT{
 			return lastLocation;
 		}
 		if(t < first_time || t > last_time){
+			#ifdef DEBUG
 			std::cout << "First time: " << first_time << ", Last time: " << last_time << ", Requested " << t << std::endl;
+			#endif
+			
 			return nullptr;
 		}
 		return pointLookup[tblock];
@@ -115,6 +132,11 @@ namespace RTT{
 
 	const std::size_t GPS::getFirst_ms() const{
 		return first_time;
+	}
+
+	void GPS::waitForPos(){
+		std::unique_lock<std::mutex> lock(pointMutex);
+		pointVar.wait(lock);
 	}
 
 }

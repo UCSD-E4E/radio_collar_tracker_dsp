@@ -93,6 +93,8 @@ namespace RTT{
 		void waitForLoad();
 
 		const std::size_t getFirst_ms() const;
+
+		void waitForPos();
 	};
 }
 
