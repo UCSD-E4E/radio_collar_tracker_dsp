@@ -67,7 +67,7 @@ namespace RTT{
 		std::condition_variable _c_v;
 		std::thread* _c_thread;
 
-		const float int_time_s = 3e-3;
+		const float int_time_s = 6e-3;
 		std::size_t int_factor;
 
 		std::string _output_dir;

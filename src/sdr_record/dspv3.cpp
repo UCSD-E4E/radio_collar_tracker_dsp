@@ -14,7 +14,7 @@
 #include <iomanip>
 #include <sys/time.h>
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #include <fstream>
@@ -39,10 +39,11 @@ namespace RTT{
 		HIGH_THRESHOLD = max_len_threshold;
 		LOW_THRESHOLD = min_len_threshold;
 		int_factor = int_time_s * sampling_freq / FFT_LEN;
+		std::cout << "DSP int factor: " << int_factor << std::endl;
 		clfr_input_freq = (double) sampling_freq / int_factor / FFT_LEN;
 		maximizer_len = 0.1 * clfr_input_freq;
 		median_len = 1 * clfr_input_freq;
-		ping_width_samp = ping_width_ms * sampling_freq / 1000. / FFT_LEN / int_factor;
+		ping_width_samp = ping_width_ms / 1000. * sampling_freq / FFT_LEN / int_factor;
 		data_len = ping_width_samp * 2;
 		_ms_per_sample = 1/((double) sampling_freq / int_factor / FFT_LEN) * 1e3;
 
@@ -286,6 +287,7 @@ namespace RTT{
 
 		std::size_t signal_idx = 0;
 		std::size_t out_count = 0;
+		std::size_t sample_counter = 0;
 
 		#ifdef DEBUG
 		std::ofstream _ostr1{"classifier_in.log"};
@@ -307,6 +309,7 @@ namespace RTT{
 			if(!i_q.empty()){
 				std::shared_ptr<std::vector<double>> sig = i_q.front();
 				i_q.pop();
+				sample_counter++;
 
 				if((*threshold_ptr)[0] != 100){
 					data.push_back(sig);
@@ -366,11 +369,12 @@ namespace RTT{
 						auto ping_end = data.end() - 1;
 						double ping_start_ms = (std::size_t)((signal_idx - 
 							pulse_width) * _ms_per_sample);
+						const double amplitude = get_pulse_magnitude(ping_start, ping_end, *it);
 						if(pulse_width < LOW_THRESHOLD * ping_width_samp){
 							#ifdef DEBUG
 							std::cout << "Ping " << out_count << " at " << std::setprecision(0) <<
 							(ping_start_ms + time_start_ms) / 1e3 << "s " << std::setprecision(3) <<
-							", amplitude N/A, threshold: " << threshold[*it] + MIN_SNR <<
+							", amplitude " << amplitude << ", threshold: " << threshold[*it] + MIN_SNR <<
 							", width: " << pulse_width * _ms_per_sample <<
 							", freq: " << std::fixed << std::setprecision(0) <<
 							target_freqs[*it] <<
@@ -383,7 +387,7 @@ namespace RTT{
 							#ifdef DEBUG
 							std::cout << "Ping " << out_count << " at " << std::setprecision(0) <<
 							(ping_start_ms + time_start_ms) / 1e3 << "s " << std::setprecision(3) <<
-							", amplitude N/A, threshold: " << threshold[*it] + MIN_SNR <<
+							", amplitude " << amplitude << ", threshold: " << threshold[*it] + MIN_SNR <<
 							", width: " << pulse_width * _ms_per_sample <<
 							", freq: " << std::fixed << std::setprecision(0) <<
 							target_freqs[*it] <<
@@ -394,7 +398,6 @@ namespace RTT{
 						}
 
 						// std::cout << "Fail after pulse magnitude" << std::endl;
-						const double amplitude = get_pulse_magnitude(ping_start, ping_end, *it);
 
 						PingPtr ping = std::make_shared<Ping>(ping_start_ms + time_start_ms, amplitude, idxToFreq(target_bins[*it]));
 
@@ -430,6 +433,7 @@ namespace RTT{
 		// _ostr5.close();
 		// _ostr6.close();
 		#endif
+		std::cout << "Classifier received " << sample_counter << " samples, estimated " << sample_counter * _ms_per_sample / 1e3 << " s" << std::endl;
 	}
 
 	const double DSP_V3::pow(const fftw_complex& sample) const{
@@ -449,6 +453,7 @@ namespace RTT{
 		std::size_t sample_counter = 0;
 		std::size_t frame_counter = 0;
 		std::size_t integrate_counter = 0;
+		std::size_t fft_counter = 0;
 		char fname[1024];
 		sprintf(fname, _output_fmt, file_counter);
 		std::ofstream data_str;
@@ -484,7 +489,7 @@ namespace RTT{
 				i_q.pop();
 				inputLock.unlock();
 
-				if(integrate_counter > int_factor){
+				if(integrate_counter >= int_factor){
 					// push integrator to queue
 					std::unique_lock<std::mutex> cLock(_c_m);
 					_c_q.push(integrator);
@@ -497,7 +502,7 @@ namespace RTT{
 					}
 					integrate_counter = 0;
 				}
-				integrate_counter += FFT_LEN;
+				integrate_counter += 1;
 				sample_counter += FFT_LEN;
 
 				// #ifdef DEBUG
@@ -515,6 +520,7 @@ namespace RTT{
 					_unpack_fft_in[i][1] = dataObj[i].imag();
 				}
 				fftw_execute(_unpack_fft_plan);
+				fft_counter++;
 				for(size_t i = 0; i < nFreqs; i++){
 					(*integrator)[i] += pow(_unpack_fft_out[target_bins[i]]);
 				}
@@ -544,7 +550,8 @@ namespace RTT{
 		if(!_output_dir.empty()){
 			data_str.close();
 		}
-		std::cout << "Unpack processed " << sample_counter << " samples" << std::endl;
+		std::cout << "Unpack received " << sample_counter << " samples, estimated " << (double)sample_counter / s_freq << " seconds of data" << std::endl;
+		std::cout << "Unpack ran " << fft_counter << " ffts" << std::endl;
 		delete[] int_buf;
 		#ifdef DEBUG
 		_ostr1.close();
@@ -553,7 +560,6 @@ namespace RTT{
 
 	void DSP_V3::setStartTime(const std::size_t start_time_ms){
 		time_start_ms = start_time_ms;
-		std::cout << "Setting DSP Start to " << time_start_ms << " ms" << std::endl;
 	}
 
 	void DSP_V3::setOutputDir(const std::string& dir, const std::string& fmt){
