@@ -13,13 +13,15 @@ def main():
 	UDP_PORT = 9000
 	BUFFER_LEN = 1024
 
-	sock = socket.socket(socket.AF_INET, sock.SOCK_DGRAM)
-	sock.bind('', UDP_PORT)
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	sock.bind(('', UDP_PORT))
 
 	try:
 		while True:
 			data, addr = sock.recvfrom(BUFFER_LEN)
 			print(data)
+	except:
+		pass
 
 if __name__ == '__main__':
 	main()
