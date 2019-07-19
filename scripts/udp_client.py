@@ -21,21 +21,23 @@ def main():
 
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	sock.setsockopt(socket.SOL_SOCKET, socket.BROADCAST, 1)
+	sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
 	try:
 		while True:
 			line = localization_file.readline()
 			print(line)
-			if line = '':
+			if line == '':
 				continue
 			if 'stop' in json.loads(line):
 				break
 			sock.sendto(line.encode('utf-8'), ('255.255.255.255', UDP_PORT))
-	finally:
-		localization_file.close()
-		sock.close()
+	except:
+		pass
+	localization_file.close()
+	sock.close()
 
 
 if __name__ == '__main__':
 	main()
+	
