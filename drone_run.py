@@ -16,8 +16,8 @@ def sigint_handler(signal, frame):
 
 
 if __name__ == '__main__':
-	data_directory = '/media/e4e/RCT_DATA'
-	# data_directory = '/media/ntlhui/RCT_DATA'
+	data_directory = '/media/e4e/RCT_DATA1'
+	#data_directory = '/media/ntlhui/RCT_DATA'
 	if not os.path.ismount(data_directory):
 		print("Storage not ready!")
 		# exit()
@@ -43,9 +43,9 @@ if __name__ == '__main__':
 
 	sdr_record_cmd = ('src/sdr_record/sdr_record -g 22.0 -s 1500000 -c 173500000'
 		' -r %d -o %s --gps_target /dev/ttyACM0' % (run_num, run_dir))
-	# tcp_server_cmd = 'src/python/tcp_server.py %s %d' % (run_dir, run_num)
+	udp_server_cmd = 'scripts/udp_client.py %s %d' % (run_dir, run_num)
 
-	# tcp_server = subprocess.Popen(shlex.split(tcp_server_cmd))
+	tcp_server = subprocess.Popen(shlex.split(tcp_server_cmd))
 	sdr_record = subprocess.Popen(shlex.split(sdr_record_cmd))
 
 	signal.signal(signal.SIGINT, sigint_handler)
