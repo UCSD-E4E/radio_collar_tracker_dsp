@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
 
 	sdr_record_cmd = ('src/sdr_record/sdr_record -g 22.0 -s 1500000 -c 173500000'
-		' -r %d -o %s --gps_target /dev/ttyACM0' % (run_num, run_dir))
+		' -r %d -o %s' % (run_num, run_dir))
 	udp_server_cmd = 'scripts/udp_client.py %s %d' % (run_dir, run_num)
 
 	udp_server = subprocess.Popen(shlex.split(udp_server_cmd))
