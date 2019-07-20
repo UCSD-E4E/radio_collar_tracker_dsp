@@ -82,11 +82,11 @@ namespace RTT{
 			("verbose,v", po::value(&verbosity), "Verbosity")
 			("test_config", "Test Configuration")
 			("test_data", po::value(&args.test_data), "Test Data")
-			("gps_target", po::value(&args.gps_target), "GPS Target")
 		;
 
 		po::options_description config{"File"};
 		config.add_options()
+			("gps_target", po::value(&args.gps_target), "GPS Target")
 			("gps_mode", po::value(&args.gps_mode), "GPS Test Mode")
 			("ping_width_ms", po::value(&args.ping_width_ms), "Ping width in milliseconds")
 			("ping_min_snr", po::value(&args.ping_min_snr), "Ping minimum SNR")
