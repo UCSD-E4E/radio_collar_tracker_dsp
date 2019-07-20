@@ -39,6 +39,7 @@ namespace RTT{
 			double ping_max_len_mult = 1.5;
 			double ping_min_len_mult = 0.75;
 			bool gps_mode = false;
+			std::vector<int> frequencies;
 		} args;
 
 		static SDR_RECORD* m_pInstance;

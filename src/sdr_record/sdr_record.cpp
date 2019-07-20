@@ -91,7 +91,8 @@ namespace RTT{
 			("ping_width_ms", po::value(&args.ping_width_ms), "Ping width in milliseconds")
 			("ping_min_snr", po::value(&args.ping_min_snr), "Ping minimum SNR")
 			("ping_max_len_mult", po::value(&args.ping_max_len_mult), "Ping max len multiplier")
-			("ping_min_len_mult", po::value(&args.ping_min_len_mult), "Ping min len multiplier");
+			("ping_min_len_mult", po::value(&args.ping_min_len_mult), "Ping min len multiplier")
+			("frequencies", po::value<std::vector<int>>()->multitoken(), "Transmitter frequencies");
 
 		std::ifstream config_file{"/usr/local/etc/rct_config"};
 
@@ -172,6 +173,17 @@ namespace RTT{
 			}
 		}
 		syslog(LOG_DEBUG, "Got rate as %lu\n", args.rate);
+
+		if(vm.count("frequencies")){
+			args.frequencies = vm["frequencies"].as<std::vector<int>>();
+			std::cout << "Frequencies are: ";
+			for(std::size_t i = 0; i < args.frequencies.size(); i++){
+				std::cout << args.frequencies[i] << ", ";
+			}
+			std::cout << std::endl;
+		}else{
+			std::cout << "No frequencies!" << std::endl;
+		}
 	}
 
 	void SDR_RECORD::init(int argc, char * const*argv){
@@ -214,16 +226,9 @@ namespace RTT{
 		}
 
 		std::vector<std::size_t> frequencies{};
-		frequencies.push_back(173964000+1000);
-		// frequencies.push_back(173000000);
-		// frequencies.push_back(173100000);
-		// frequencies.push_back(173200000);
-		// frequencies.push_back(173300000);
-		// frequencies.push_back(173400000);
-		// frequencies.push_back(173500000);
-		// frequencies.push_back(173600000);
-		// frequencies.push_back(173700000);
-		// frequencies.push_back(173800000);
+		for(std::size_t i = 0; i < args.frequencies.size(); i++){
+			frequencies.push_back(args.frequencies[i]);
+		}
 
 		dsp = new RTT::DSP_V3{args.rate, args.rx_freq, frequencies, 
 			args.ping_width_ms,
