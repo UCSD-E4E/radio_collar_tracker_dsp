@@ -13,6 +13,7 @@
 #include "AbstractSDR.hpp"
 #include <iomanip>
 #include <sys/time.h>
+#include <cstdint>
 
 #define DEBUG
 
@@ -454,6 +455,7 @@ namespace RTT{
 		std::size_t frame_counter = 0;
 		std::size_t integrate_counter = 0;
 		std::size_t fft_counter = 0;
+		std::size_t write_counter = 0;
 		char fname[1024];
 		sprintf(fname, _output_fmt, file_counter);
 		std::ofstream data_str;
@@ -489,15 +491,15 @@ namespace RTT{
 				i_q.pop();
 				inputLock.unlock();
 
-				if(integrate_counter >= int_factor){
+				if(integrate_counter >= int_factor && nFreqs > 0){
 					// push integrator to queue
 					std::unique_lock<std::mutex> cLock(_c_m);
 					_c_q.push(integrator);
 					cLock.unlock();
 					_c_v.notify_all();
 					integrator.reset(new std::vector<double>());
-					integrator->resize(FFT_LEN);
-					for(size_t i = 0; i < FFT_LEN; i++){
+					integrator->resize(nFreqs);
+					for(size_t i = 0; i < nFreqs; i++){
 						(*integrator)[i] = 0;
 					}
 					integrate_counter = 0;
@@ -528,12 +530,13 @@ namespace RTT{
 				
 				if(!_output_dir.empty()){
 					for(std::size_t i = 0; i < AbstractSDR::rx_buffer_size; i++){
-						int_buf[2*i] = dataObj[i].real();
-						int_buf[2*i + 1] = dataObj[i].imag();
+						int_buf[2*i] = dataObj[i].real() * INT16_MAX;
+						int_buf[2*i + 1] = dataObj[i].imag() * INT16_MAX;
 					}
 					data_str.write((char*)int_buf, AbstractSDR::rx_buffer_size * 2 * sizeof(int16_t));
 					data_str.flush();
 					if(frame_counter++ == FRAMES_PER_FILE){
+						write_counter += data_str.tellp();
 						data_str.close();
 						sprintf(fname, _output_fmt, ++file_counter);
 						#ifdef DEBUG
@@ -552,6 +555,7 @@ namespace RTT{
 		}
 		std::cout << "Unpack received " << sample_counter << " samples, estimated " << (double)sample_counter / s_freq << " seconds of data" << std::endl;
 		std::cout << "Unpack ran " << fft_counter << " ffts" << std::endl;
+		std::cout << "Unpack wrote " << write_counter / 1024 / 1024 << " MB, estimated " << (double)write_counter / 4 / s_freq << " seconds of data" << std::endl;
 		delete[] int_buf;
 		#ifdef DEBUG
 		_ostr1.close();
