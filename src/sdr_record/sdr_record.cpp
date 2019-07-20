@@ -176,7 +176,7 @@ namespace RTT{
 
 		if(vm.count("frequencies")){
 			args.frequencies = vm["frequencies"].as<std::vector<int>>();
-			std::cout << "Frequencies are: ";
+			// std::cout << "Frequencies are: ";
 			for(std::size_t i = 0; i < args.frequencies.size(); i++){
 				std::cout << args.frequencies[i] << ", ";
 			}
@@ -214,9 +214,6 @@ namespace RTT{
 			gps = new RTT::GPS(RTT::GPS::TEST_NULL, "");
 		}else{
 			gps = new RTT::GPS(RTT::GPS::SERIAL, args.gps_target);
-		}
-
-		if(!args.test_config){
 			buffer.str("");
 			buffer.clear();
 			buffer << args.data_dir << "/";
