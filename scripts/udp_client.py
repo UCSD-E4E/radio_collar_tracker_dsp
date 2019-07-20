@@ -26,7 +26,6 @@ def main():
 	try:
 		while True:
 			line = localization_file.readline()
-			print(line)
 			if line == '':
 				continue
 			if 'stop' in json.loads(line):
