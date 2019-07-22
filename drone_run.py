@@ -16,7 +16,7 @@ def sigint_handler(signal, frame):
 
 
 if __name__ == '__main__':
-	data_directory = '/media/e4e/RCT_DATA1'
+	data_directory = '/media/e4e/RCT_DATA'
 	#data_directory = '/media/ntlhui/RCT_DATA'
 	if not os.path.ismount(data_directory):
 		print("Storage not ready!")
