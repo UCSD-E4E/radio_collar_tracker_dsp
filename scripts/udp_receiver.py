@@ -56,7 +56,6 @@ def findFile( filename, path ):
   return None
 
 def main():
-<<<<<<< HEAD
   # create a point.kml file if one doesn't exist
   if findFile( "point.kml", "." ) is None:
     open('point.kml', 'a').close()
