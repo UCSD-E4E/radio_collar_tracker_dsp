@@ -78,9 +78,7 @@ def main():
   guess = [0,0,0]
 
   while True:
-    print( "1" )
     data, addr = sock.recvfrom(BUFFER_LEN)
-    print( "printing data" )
     print(data)
     packet = json.loads(data)
     if 'ping' in packet:
