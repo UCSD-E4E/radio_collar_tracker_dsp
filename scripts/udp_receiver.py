@@ -9,6 +9,7 @@ import utm
 import heatMap
 import generateKML
 import pos_estimate
+import platform
 
 class Ping(object):
   """Ping object"""
@@ -55,25 +56,30 @@ def findFile( filename, path ):
   return None
 
 def main():
+<<<<<<< HEAD
   # create a point.kml file if one doesn't exist
   if findFile( "point.kml", "." ) is None:
     open('point.kml', 'a').close()
 
-
+  isWindows = ( platform.system() == 'Windows' )
   parser = argparse.ArgumentParser("Radio Telemetry Tracker Payload Receiver")
-
   args = parser.parse_args()
-
   UDP_PORT = 9000
   BUFFER_LEN = 1024
-
   sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  sock.bind(('', UDP_PORT))
+
+  # Checks if we're on a windows machine
+  if isWindows:
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+
+  sock.bind(("", UDP_PORT))
 
   pings = []
   guess = [0,0,0]
 
   while True:
+    print( "1" )
     data, addr = sock.recvfrom(BUFFER_LEN)
     print( "printing data" )
     print(data)
