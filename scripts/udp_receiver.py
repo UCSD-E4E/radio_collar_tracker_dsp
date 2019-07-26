@@ -25,8 +25,9 @@ class Ping(object):
     assert('txf' in packet['ping'])
 
     self._time = int(packet['ping']['time'])
-    self._lat = float(packet['ping']['lat'])
-    self._lon = float(packet['ping']['lon'])
+    self._lat = float(packet['ping']['lat']) / 1e7
+    self._lon = float(packet['ping']['lon']) / 1e7
+
     self._alt = float(packet['ping']['alt'])
     self._amp = float(packet['ping']['amp'])
     self._txf = int(packet['ping']['txf'])
@@ -70,11 +71,9 @@ def main():
   guess = [0,0,0]
 
   while True:
-    print( "1" )
     data, addr = sock.recvfrom(BUFFER_LEN)
-    print( "printing data" )
-    print(data)
-    packet = json.loads(data)
+    print(data.decode('utf-8').strip())
+    packet = json.loads(data.decode('utf-8'))
     if 'ping' in packet:
       pings.append(Ping(packet))
       if len(pings) > 4:
