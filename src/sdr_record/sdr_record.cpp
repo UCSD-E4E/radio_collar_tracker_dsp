@@ -302,6 +302,8 @@ namespace RTT{
 		syslog(LOG_DEBUG, "Printing metadata to file");
 		this->print_meta_data();
 
+		bool wroteTime = false;
+
 
 		syslog(LOG_INFO, "Starting threads");
 		dsp->startProcessing(sdr_queue, sdr_queue_mutex, sdr_var, ping_queue, 
@@ -314,8 +316,9 @@ namespace RTT{
 		}
 		localizer->start(ping_queue, ping_queue_mutex, ping_var, *gps);
 		while(true){
-			if(sdr->getStartTime_ms() != 0){
+			if(sdr->getStartTime_ms() != 0 && !wroteTime){
 				dsp->setStartTime(sdr->getStartTime_ms());
+				wroteTime = true;
 			}
 			std::unique_lock<std::mutex> run_lock(run_mutex);
 			if(program_on){
