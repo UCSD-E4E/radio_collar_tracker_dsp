@@ -31,8 +31,8 @@ def main():
 		while True:
 			now = datetime.datetime.now()
 			if (now - prevTime).total_seconds() > 1:
-				msg = "{heartbeat:{time: %d}}\n" % (time.mktime(now.timetuple()))
-				print msg
+				msg = '{"heartbeat":{"time": %d}}\n' % (time.mktime(now.timetuple()))
+				# print(msg.strip())
 				sock.sendto(msg, (UDP_IP, UDP_PORT))
 				prevTime = now
 			line = localization_file.readline()
@@ -40,7 +40,7 @@ def main():
 				continue
 			if 'stop' in json.loads(line):
 				break
-			print line
+			# print line
 			sock.sendto(line.encode('utf-8'), (UDP_IP, UDP_PORT))
 	except:
 		print("Early Fail!")
