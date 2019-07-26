@@ -50,8 +50,16 @@ class Ping(object):
   def getUTMZone(self):
     return (self._zonenum, self._zone)
 
+def findFile( filename, path ):
+  for root, dirs, files in os.walk( path ):
+    if filename in files:
+      return os.path.join( root, filename )
+  return None
 
 def main():
+  # create a point.kml file if one doesn't exist
+  if findFile( "point.kml", "." ) is None:
+    open('point.kml', 'a').close()
 
   isWindows = ( platform.system() == 'Windows' )
   parser = argparse.ArgumentParser("Radio Telemetry Tracker Payload Receiver")
