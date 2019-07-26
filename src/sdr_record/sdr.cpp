@@ -19,7 +19,7 @@ namespace RTT{
 	SDR::SDR(double gain, long int rate, long int freq) : device_args(""), 
 			subdev("A:A"), ant("RX2"), ref("internal"), cpu_format("fc64"), 
 			wire_format("sc16"), channel{0}, if_gain(gain), rx_rate(rate), 
-			rx_freq(freq){
+			rx_freq(freq), _start_ms(0){
 		double value{0};
 		//create a usrp device
 		syslog(LOG_DEBUG, "Creating USRP with args \"%s\"...\n", 
