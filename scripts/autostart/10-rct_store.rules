@@ -1,2 +1,2 @@
-KERNEL=="mmcblk0p1", ACTION=="add", RUN+="&INSTALL_PREFIX/bin/rct_mount_sd"
-KERNEL=="mmcblk0p1", ACTION=="remove", RUN+="&INSTALL_PREFIX/bin/rct_umount_sd"
+KERNEL=="sda1", ACTION=="add", RUN+="&INSTALL_PREFIX/bin/rct_mount_sd"
+KERNEL=="sda1", ACTION=="remove", RUN+="&INSTALL_PREFIX/bin/rct_umount_sd"

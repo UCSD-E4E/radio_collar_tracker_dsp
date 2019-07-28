@@ -1,3 +1,3 @@
 #!/bin/bash
-umount /dev/mmcblk0p1
+umount /dev/sda1
 rmdir /mnt/RAW_DATA
