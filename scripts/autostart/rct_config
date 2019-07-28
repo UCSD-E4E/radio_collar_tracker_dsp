@@ -1,0 +1,6 @@
+ping_width_ms=36
+ping_min_snr=4
+ping_max_len_mult=1.5
+ping_min_len_mult=0.75
+gps_mode=true
+gps_target=/dev/ttyACM0
