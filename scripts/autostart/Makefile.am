@@ -1,11 +1,5 @@
-bin_SCRIPTS = rct_parser rctstart rctrun rct_mount_sd rct_umount_sd
+bin_SCRIPTS = rctstart rctrun rct_mount_sd rct_umount_sd
 CLEANFILES = $(bin_SCRIPTS)
-
-rct_parser: $(srcdir)/parser.sh
-	rm -f $@
-	echo "#!" $(BASH) > $@
-	$(SED) -e "s|&INSTALL_PREFIX|\'$(prefix)\'|g" $^ >> $@
-	chmod +x $@
 
 rctstart: $(srcdir)/rctstart.sh
 	rm -f $@
