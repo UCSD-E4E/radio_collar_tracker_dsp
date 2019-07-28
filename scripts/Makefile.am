@@ -1,5 +1,5 @@
 EXTRA_DIST = sdr_starter.sh getRunNum.py
-SUBDIRS = autostart gps_logger
+SUBDIRS = autostart
 bin_SCRIPTS = rct_sdr_starter rct_getRunNum.py
 sysconf_DATA=rct_config
 
