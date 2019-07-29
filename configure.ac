@@ -11,7 +11,6 @@ AC_PROG_CXX
 
 # Checks for python.
 AM_PATH_PYTHON(2.7)
-AM_PATH_PYTHON(2.7)
 AC_PATH_PROGS(BASH, bash sh)
 
 # Checks for programs.
@@ -87,7 +86,6 @@ AC_CONFIG_FILES([Makefile
                  doc/Makefile
                  scripts/Makefile
                  scripts/autostart/Makefile
-                 scripts/gps_logger/Makefile
                  src/Makefile
                  src/sdr_record/Makefile
                  tests/Makefile
