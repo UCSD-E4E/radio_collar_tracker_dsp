@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 import socket
 import argparse
@@ -11,6 +11,9 @@ import generateKML
 import pos_estimate
 import platform
 import select
+import threading
+
+import Tkinter
 
 class Ping(object):
 	"""Ping object"""
@@ -67,6 +70,7 @@ def waitForHeartbeat(socket, timeout = 30):
 			if 'heartbeat' in packet:
 				return addr
 		else:
+			print("waiting")
 			counter += 1
 	return None
 
@@ -75,6 +79,24 @@ class CommandGateway():
 	def __init__(self, mav_IP, socket):
 		self.mav_IP = mav_IP
 		self._socket = socket
+		self.thread = threading.Thread(target=self.mainloop)
+		self.thread.start()
+
+	def startCommand(self):
+		pcmdPacket = {}
+		cmdPacket['cmd'] = {}
+		cmdPacket['cmd']['id'] = 'gcs'
+		cmdPacket['cmd']['action'] = 'start'
+		msg = json.dumps(cmdPacket)
+		print("Send: %s" % msg)
+		self._socket.sendto(msg.encode('utf-8'), target_IP)
+
+
+	def mainloop(self):
+		self.m = Tkinter.Tk()
+		self.startButton = Tkinter.Button(self.m, text='Start', command=self.startCommand)
+		self.startButton.pack()
+		self.m.mainloop()
 		
 
 def main():
