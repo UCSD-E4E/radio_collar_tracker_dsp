@@ -1,7 +1,6 @@
 EXTRA_DIST = payload_ui_wiring.sch
-doc_DATA = 3dr_solo.pdf
 if HAVE_PDFLATEX
-doc_DATA += rct_manual.pdf trm.pdf
+doc_DATA = rct_manual.pdf trm.pdf
 endif
 
 clean:
