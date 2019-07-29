@@ -81,6 +81,10 @@ class CommandGateway():
 		self._socket = socket
 		self.thread = threading.Thread(target=self.mainloop)
 		self.thread.start()
+		self.run = True
+
+	def isAlive(self):
+		return self.run
 
 	def startCommand(self):
 		cmdPacket = {}
@@ -100,6 +104,11 @@ class CommandGateway():
 		print("Send: %s" % msg)
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 
+	def windowClose(self):
+		self.m.destroy()
+		self.run = False
+
+
 
 	def mainloop(self):
 		self.m = Tkinter.Tk()
@@ -107,6 +116,7 @@ class CommandGateway():
 		self.stopButton = Tkinter.Button(self.m, text='Stop', command=self.stopCommand)
 		self.startButton.pack()
 		self.stopButton.pack()
+		self.m.protocol("WM_DELETE_WINDOW", self.windowClose)
 		self.m.mainloop()
 		
 
@@ -134,7 +144,7 @@ def main():
 	pings = []
 	guess = [0,0,0]
 
-	while True:
+	while commandGateway.isAlive():
 		data, addr = sock.recvfrom(BUFFER_LEN)
 		print(data.decode('utf-8').strip())
 		packet = json.loads(data.decode('utf-8'))
