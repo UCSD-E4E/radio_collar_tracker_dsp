@@ -309,6 +309,7 @@ def sigint_handler(signal, frame):
 	run = False
 
 def main():
+	global cmdListener
 	# Check for autostart
 	autostart_flag = get_var('autostart')
 	if autostart_flag != 'true':
