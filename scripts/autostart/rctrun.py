@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import subprocess
 import time
 from enum import Enum
@@ -6,19 +6,22 @@ import threading
 import os
 import signal
 import serial
-import pynmea2
+import json
 import mmap
 import sys
-import mraa
+from rct_udp_command import CommandListener
+import sys
+import shlex
 
 WAIT_COUNT = 60
-SW1_PIN = 61
 
-devnull = None
 init_thread_op = True
-master_thread_op = True
+run = True
 mmap_file = None
 shared_states = None
+devnull = None
+cmdListener = None
+output_dir = None
 
 class SDR_INIT_STATES(Enum):
 	find_devices = 0
@@ -54,7 +57,7 @@ class RCT_STATES(Enum):
 def get_var(var):
 	var_file = open('&INSTALL_PREFIX/etc/rct_config')
 	for line in var_file:
-		if line.split('=')[0] == var:
+		if line.split('=')[0].strip() == var:
 			value = line.split('=')[1]
 			return value.strip().strip('"').strip("'")
 	return None
@@ -64,7 +67,7 @@ def init_SDR():
 	global shared_states
 	init_sdr_state = SDR_INIT_STATES.find_devices
 	while init_thread_op:
-		shared_states[0] = str(unichr(init_sdr_state.value))
+		shared_states[0] = init_sdr_state.value
 		if init_sdr_state == SDR_INIT_STATES.find_devices:
 			uhd_find_dev_retval = subprocess.call(['/usr/local/bin/uhd_find_devices', '--args=\"type=b200\"'], stdout=devnull, stderr=devnull)
 			if uhd_find_dev_retval == 0:
@@ -90,23 +93,27 @@ def init_SDR():
 def init_output_dir():
 	global init_thread_op
 	global shared_states
+	global output_dir
 	init_output_dir_state = OUTPUT_DIR_STATES.get_output_dir
 	counter = 0
 	while init_thread_op:
-		shared_states[1] = str(unichr(init_output_dir_state.value))
+		shared_states[1] = init_output_dir_state.value
 		if init_output_dir_state == OUTPUT_DIR_STATES.get_output_dir:
 			output_dir = get_var('output_dir')
-			init_output_dir_state = OUTPUT_DIR_STATES.check_output_dir
+			if output_dir is None:
+				init_output_dir_state = OUTPUT_DIR_STATES.fail
+			else:
+				init_output_dir_state = OUTPUT_DIR_STATES.check_output_dir
 		elif init_output_dir_state == OUTPUT_DIR_STATES.check_output_dir:
-			if os.path.isdir(output_dir) and os.path.isfile(os.path.join(output_dir, 'fileCount')):
+			if os.path.isdir(output_dir) and os.path.isfile(os.path.join(output_dir, 'LAST_RUN.TXT')):
 				init_output_dir_state = OUTPUT_DIR_STATES.check_space
 			else:
 				init_output_dir_state = OUTPUT_DIR_STATES.wait_recycle
 		elif init_output_dir_state == OUTPUT_DIR_STATES.check_space:
-			df = subprocess.Popen(['df', output_dir], stdout=subprocess.PIPE)
-			output = df.communicate()[0]
+			df = subprocess.Popen(['df', '-B1', output_dir], stdout=subprocess.PIPE)
+			output = df.communicate()[0].decode('utf-8')
 			device, size, used, available, percent, mountpoint = output.split('\n')[1].split()
-			if available > 20 * 60 * 2000000 * 4:
+			if int(available) > 20 * 60 * 1500000 * 4:
 				# enough space
 				init_output_dir_state = OUTPUT_DIR_STATES.rdy
 			else:
@@ -138,19 +145,20 @@ def accept_gps(msg):
 
 def init_gps():
 	global init_thread_op
+	global run
 	global shared_states
 	init_gps_state = GPS_STATES.get_tty
 	counter = 0
 	msg_counter = 0
 	tty_stream = None
 	while init_thread_op:
-		shared_states[2] = str(unichr(init_gps_state.value))
+		shared_states[2] = init_gps_state.value
 		if init_gps_state == GPS_STATES.get_tty:
-			tty_device = get_var('gps_port')
+			tty_device = get_var('gps_target')
 			tty_baud = get_var('gps_baud')
 			try:
 				tty_stream = serial.Serial(tty_device, tty_baud, timeout = 1)
-			except serial.SerialException, e:
+			except serial.SerialException as e:
 				init_gps_state = GPS_STATES.fail
 				print("GPS fail: bad serial!")
 				continue
@@ -163,33 +171,21 @@ def init_gps():
 
 		elif init_gps_state == GPS_STATES.get_msg:
 			try:
-				line = tty_stream.readline()
-			except serial.serialutil.SerialException, e:
+				line = tty_stream.readline().decode("utf-8")
+			except serial.serialutil.SerialException as e:
 				init_gps_state = GPS_STATES.fail
 				print("GPS fail: no serial!")
 				continue
-			if line is not None:
+			if line is not None and line != "":
 				msg = None
 				try:
-					msg = pynmea2.parse(line)
-				except pynmea2.ParseError, e:
+					msg = json.loads(line)
+					init_gps_state = GPS_STATES.rdy
+				except json.JSONDecodeError as e:
 					init_gps_state = GPS_STATES.fail
-					print("GPS fail: bad NMEA!")
+					print("GPS fail: bad message!")
+					init_gps_state = GPS_STATES.get_msg
 					continue
-				if msg.sentence_type == 'GGA':
-					if accept_gps(msg):
-						# good GPS
-						init_gps_state = GPS_STATES.rdy
-					else:
-						init_gps_state = GPS_STATES.get_msg
-				else:
-					msg_counter = msg_counter + 1
-					if msg_counter > 60:
-						init_gps_state = GPS_STATES.fail
-						print("GPS fail: no GGA message!")
-						continue
-					else:
-						init_gps_state = GPS_STATES.get_msg
 			else:
 				init_gps_state = GPS_STATES.get_msg
 
@@ -210,22 +206,16 @@ def init_gps():
 
 def init_state_complete():
 	global shared_states
-	return SDR_INIT_STATES(ord(shared_states[0])) == SDR_INIT_STATES.rdy and OUTPUT_DIR_STATES(ord(shared_states[1])) == OUTPUT_DIR_STATES.rdy and GPS_STATES(ord(shared_states[2])) == GPS_STATES.rdy
+	return SDR_INIT_STATES(shared_states[0]) == SDR_INIT_STATES.rdy and \
+		OUTPUT_DIR_STATES(shared_states[1]) == OUTPUT_DIR_STATES.rdy
 
 def init_RCT():
-	global master_thread_op
+	global run
 	global init_thread_op
 	init_RCT_state = RCT_STATES.init
-	if 'mraa' in sys.modules:
-		switch_handle = mraa.Gpio(SW1_PIN)
-		switch_handle.dir(mraa.DIR_IN)
-	else:
-		switch_file = open('switch', 'a+')
-		switch_file.write('0')
-		switch_file.flush()
-		switch_handle = mmap.mmap(switch_file.fileno(), 1)
-	while master_thread_op:
-		shared_states[3] = str(unichr(init_RCT_state.value))
+	
+	while run:
+		shared_states[3] = init_RCT_state.value
 		if init_RCT_state == RCT_STATES.init:
 			init_SDR_thread = threading.Thread(target=init_SDR)
 			init_output_thread = threading.Thread(target=init_output_dir)
@@ -244,11 +234,9 @@ def init_RCT():
 				init_RCT_state = RCT_STATES.wait_init
 		elif init_RCT_state == RCT_STATES.wait_start:
 			time.sleep(1)
-			if 'mraa' in sys.modules:
-				switch_state = not switch_handle.read()
-			else:
-				switch_state = switch_handle[0]
+			switch_state = shared_states[4]
 			if switch_state:
+				print("Got start flag!, running")
 				init_RCT_state = RCT_STATES.start
 				init_thread_op = False
 				init_SDR_thread.join()
@@ -257,42 +245,57 @@ def init_RCT():
 			else:
 				init_RCT_state = RCT_STATES.wait_start
 		elif init_RCT_state == RCT_STATES.start:
-			EN1385# sdr_starter = subprocess.Popen(['sdr_starter'])
-			sdr_starter = subprocess.Popen(['&INSTALL_PREFIX/bin/rct_sdr_starter'])
+			print("Starting drone_run")
+			
+			with open(os.path.join(output_dir, 'LAST_RUN.TXT')) as lastrun:
+				last_run = int(lastrun.readline().strip())
+			with open(os.path.join(output_dir, 'LAST_RUN.TXT'), 'w') as lastrun:
+				lastrun.write(str(last_run + 1))
+
+			run_num = last_run + 1
+			run_dir = os.path.join(output_dir, 'RUN_%06d' % (run_num))
+			os.makedirs(run_dir)
+
+			localize_file = os.path.join(run_dir, 'LOCALIZE_%06d' % (run_num))
+			with open(localize_file, 'w') as file:
+				file.write("")
+
+			sampling_freq = int(get_var('sampling_freq'))
+			center_freq = int(get_var('center_freq'))
+
+			sdr_record_cmd = ('sdr_record -g 22.0 -s %d -c %d'
+				' -r %d -o %s' % (sampling_freq, center_freq, run_num, run_dir))
+
+			cmdListener.setRun(run_dir, run_num)
+
+			sdr_record = subprocess.Popen(shlex.split(sdr_record_cmd))
+			
 			init_RCT_state = RCT_STATES.wait_end
 		elif init_RCT_state == RCT_STATES.wait_end:
 			time.sleep(3)
-			if 'mraa' in sys.modules:
-				switch_state = not switch_handle.read()
-			else:
-				switch_state = switch_handle[0]
+			switch_state = shared_states[4]
 			if switch_state:
 				init_RCT_state = RCT_STATES.wait_end
 			else:
 				init_RCT_state = RCT_STATES.finish
-			if sdr_starter.poll() != None:
+				print('Got stop flag!, stopping')
+			if sdr_record.poll() != None:
 				init_RCT_state = RCT_STATES.fail
+				print('SDR Record failed!')
 		elif init_RCT_state == RCT_STATES.finish:
-			sdr_starter.terminate()
-			rct_retval = sdr_starter.wait()
+			sdr_record.send_signal(2)
+			rct_retval = sdr_record.wait()
 			if not rct_retval:
 				init_RCT_state = RCT_STATES.fail
 			subprocess.call(['sync'])
 			init_RCT_state = RCT_STATES.init
 		elif init_RCT_state == RCT_STATES.fail:
-			if 'mraa' in sys.modules:
-			   switch_state = not switch_handle.read()
-			else:
-				switch_state = switch_handle[0]
+			switch_state = shared_states[4]
 			if switch_state:
 				init_RCT_state = RCT_STATES.fail
 			else:
 				init_RCT_state = RCT_STATES.init
 
-		pass
-	if 'mraa' not in sys.modules:
-		switch_file.close()
-		switch_handle.close()
 	init_SDR_thread.join()
 	init_output_thread.join()
 	init_gps_thread.join()
@@ -300,26 +303,29 @@ def init_RCT():
 def sigint_handler(signal, frame):
 	print("Received sig")
 	global init_thread_op
-	global master_thread_op
+	global run
 	init_thread_op = False
-	master_thread_op = False
+	run = False
 
 def main():
 	# Check for autostart
 	autostart_flag = get_var('autostart')
 	if autostart_flag != 'true':
+		print("Autostart not set!")
 		return
 	# Set up mmap files
 	global shared_states
 	if not os.path.isdir('/var/local/rct'):
 		os.makedirs('/var/local/rct')
-	mmap_file = open('/var/local/rct/status.dat', 'w+b')
-	mmap_file.write('\0' * 4)
-	mmap_file.flush()
-	shared_states = mmap.mmap(mmap_file.fileno(), 4)
-	rct_blink = subprocess.Popen(['&INSTALL_PREFIX/bin/rct_blink'])
 
-	devnull = open(os.devnull, 'w')
+	devnull = open('/dev/null', 'w')
+
+	mmap_file = open('/var/local/rct/status.dat', 'w+b')
+	mmap_file.write(('\0' * 5).encode('utf-8'))
+	mmap_file.flush()
+	shared_states = mmap.mmap(mmap_file.fileno(), 5)
+
+	cmdListener = CommandListener(shared_states, 4)
 
 	signal.signal(signal.SIGINT, sigint_handler)
 	signal.signal(signal.SIGTERM, sigint_handler)
@@ -329,13 +335,12 @@ def main():
 
 	signal.pause()
 
+	cmdListener.stop()
+
 	init_RCT_thread.join()
-	rct_blink.terminate()
-	rct_blink.wait()
 
 	shared_states.close()
 	mmap_file.close()
-	devnull.close()
 
 if __name__ == '__main__':
 	main()
