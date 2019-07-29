@@ -145,22 +145,24 @@ def main():
 	guess = [0,0,0]
 
 	while commandGateway.isAlive():
-		data, addr = sock.recvfrom(BUFFER_LEN)
-		print(data.decode('utf-8').strip())
-		packet = json.loads(data.decode('utf-8'))
-		if 'ping' in packet:
-			pings.append(Ping(packet))
-			if len(pings) > 4:
-				initZoneNum = pings[0].getUTMZone()[0]
-				initZone = pings[0].getUTMZone()[1]
-				D = np.array([ping.toNumpy() for ping in pings])
-				# Save previous estimates
-				guess = pos_estimate.calculateEstimate( D, initZoneNum, initZone, guess )
-				# Convert to lat lon
-				ll = utm.to_latlon( guess[0], guess[1], initZoneNum, zone_letter=initZone )
-				ll = [ ll[1],ll[0] ]
-				newpackage = generateKML.kmlPackage( "RECEIVED PINGS", [ll[0],ll[1]], None )
-				generateKML.generateKML( [ newpackage ] )
+		ready = select.select([sock], [], [], 1)
+		if ready[0]:
+			data, addr = sock.recvfrom(BUFFER_LEN)
+			print(data.decode('utf-8').strip())
+			packet = json.loads(data.decode('utf-8'))
+			if 'ping' in packet:
+				pings.append(Ping(packet))
+				if len(pings) > 4:
+					initZoneNum = pings[0].getUTMZone()[0]
+					initZone = pings[0].getUTMZone()[1]
+					D = np.array([ping.toNumpy() for ping in pings])
+					# Save previous estimates
+					guess = pos_estimate.calculateEstimate( D, initZoneNum, initZone, guess )
+					# Convert to lat lon
+					ll = utm.to_latlon( guess[0], guess[1], initZoneNum, zone_letter=initZone )
+					ll = [ ll[1],ll[0] ]
+					newpackage = generateKML.kmlPackage( "RECEIVED PINGS", [ll[0],ll[1]], None )
+					generateKML.generateKML( [ newpackage ] )
 
 if __name__ == '__main__':
 	main()
