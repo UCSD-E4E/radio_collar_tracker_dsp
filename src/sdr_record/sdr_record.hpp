@@ -34,6 +34,7 @@ namespace RTT{
 			bool test_config = false;
 			std::string test_data = "";
 			std::string gps_target = "";
+			std::size_t gps_baud = 9600;
 			std::size_t ping_width_ms = 36;
 			double ping_min_snr = 4;
 			double ping_max_len_mult = 1.5;

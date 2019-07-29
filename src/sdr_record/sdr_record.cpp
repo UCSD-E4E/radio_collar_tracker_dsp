@@ -78,7 +78,7 @@ namespace RTT{
 			("sampling_freq,s", po::value(&args.rate), "Sampling Frequency")
 			("center_freq,c", po::value(&args.rx_freq), "Center Frequency")
 			("run,r", po::value(&args.run_num), "Run Number")
-			("output,o", po::value(&args.data_dir), "Output Directory")
+			("output_dir,o", po::value(&args.data_dir), "Output Directory")
 			("verbose,v", po::value(&verbosity), "Verbosity")
 			("test_config", "Test Configuration")
 			("test_data", po::value(&args.test_data), "Test Data")
@@ -87,11 +87,16 @@ namespace RTT{
 		po::options_description config{"File"};
 		config.add_options()
 			("gps_target", po::value(&args.gps_target), "GPS Target")
+			("gps_baud", po::value(&args.gps_baud), "GPS Target baud rate")
 			("gps_mode", po::value(&args.gps_mode), "GPS Test Mode")
 			("ping_width_ms", po::value(&args.ping_width_ms), "Ping width in milliseconds")
 			("ping_min_snr", po::value(&args.ping_min_snr), "Ping minimum SNR")
 			("ping_max_len_mult", po::value(&args.ping_max_len_mult), "Ping max len multiplier")
 			("ping_min_len_mult", po::value(&args.ping_min_len_mult), "Ping min len multiplier")
+			("sampling_freq,s", po::value(&args.rate), "Sampling Frequency")
+			("center_freq,c", po::value(&args.rx_freq), "Center Frequency")
+			("output_dir,o", po::value(&args.data_dir), "Output Directory")
+			("autostart", po::value<bool>(), "Autostart flag")
 			("frequencies", po::value<std::vector<int>>()->multitoken(), "Transmitter frequencies");
 
 		std::ifstream config_file{"/usr/local/etc/rct_config"};
