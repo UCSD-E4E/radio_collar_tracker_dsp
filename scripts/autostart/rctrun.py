@@ -212,6 +212,7 @@ def init_state_complete():
 def init_RCT():
 	global run
 	global init_thread_op
+	global cmdListener
 	init_RCT_state = RCT_STATES.init
 	
 	while run:
