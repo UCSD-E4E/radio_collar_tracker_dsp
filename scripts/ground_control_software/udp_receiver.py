@@ -80,7 +80,7 @@ class CommandGateway():
 def main():
 	# create a point.kml file if one doesn't exist
 	if findFile( "point.kml", "." ) is None:
-		open('point.kml', 'a').close()
+		open('point.kml', 'a+').close()
 
 	isWindows = ( platform.system() == 'Windows' )
 	parser = argparse.ArgumentParser("Radio Telemetry Tracker Payload Receiver")
