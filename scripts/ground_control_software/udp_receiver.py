@@ -10,6 +10,7 @@ import heatMap
 import generateKML
 import pos_estimate
 import platform
+import select
 
 class Ping(object):
 	"""Ping object"""
@@ -56,12 +57,25 @@ def findFile( filename, path ):
 			return os.path.join( root, filename )
 	return None
 
-def waitForHeartbeat(socket):
-	while True:
-		data, addr = socket.recvfrom(1024)
-		packet = json.loads(data.decode('utf-8'))
-		if 'heartbeat' in packet:
-			return addr
+def waitForHeartbeat(socket, timeout = 30):
+	counter = 0
+	while counter < 30:
+		ready = select.select([socket], [], [], 1)
+		if ready[0]:
+			data, addr = socket.recvfrom(1024)
+			packet = json.loads(data.decode('utf-8'))
+			if 'heartbeat' in packet:
+				return addr
+		else:
+			counter += 1
+	return None
+
+class CommandGateway():
+	"""docstring for CommandGateway"""
+	def __init__(self, mav_IP, socket):
+		self.mav_IP = mav_IP
+		self._socket = socket
+		
 
 def main():
 	# create a point.kml file if one doesn't exist
@@ -79,6 +93,10 @@ def main():
 
 	sock.bind(("", UDP_PORT))
 	mav_IP = waitForHeartbeat(sock)
+	if mav_IP is None:
+		print("No hearbeat packets received!")
+		return
+	commandGateway = CommandGateway(mav_IP, sock)
 
 	pings = []
 	guess = [0,0,0]
