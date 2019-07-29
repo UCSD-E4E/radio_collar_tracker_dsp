@@ -83,6 +83,8 @@ class CommandListener(object):
 		self.sock.close()
 		if self.ping_file is not None:
 			self.ping_file.close()
+			print('Closing file')
+
 
 	def stop(self):
 		self._run = False
@@ -93,8 +95,14 @@ class CommandListener(object):
 	def setRun(self, runDir, runNum):
 		self.newRun = True
 		if self.ping_file is not None:
-			ping_file.close()
-		self.ping_file = open(os.path.join(runDir, 'LOCALIZE_%06d' % (runNum)))
+			self.ping_file.close()
+			print('Closing file')
+		path = os.path.join(runDir, 'LOCALIZE_%06d' % (runNum))
+		if os.path.isfile(path):
+			self.ping_file = open(path)
+			print("Set and open file to %s" % (os.path.join(runDir, 'LOCALIZE_%06d' % (runNum))))
+		else:
+			raise Exception("File non existent!")
 
 	def getStartFlag(self):
 		return self.startFlag
@@ -116,19 +124,17 @@ class CommandListener(object):
 					prevTime = now
 
 				if self.ping_file is not None:
-					line = ping_file.readline()
+					line = self.ping_file.readline()
 					if line == '':
 						continue
 					if 'stop' in json.loads(line):
-						break
+						print('Got stop')
+					# 	break
 					self.sock.sendto(line.encode('utf-8'), sendTarget)
 			except Exception as e:
 				print("Early Fail!")
 				print(e)
-				break
-
-	
-		return None
+				continue
 
 	def _gotStartCmd(self, commandPacket, addr):
 		self.startFlag = True
@@ -138,6 +144,11 @@ class CommandListener(object):
 	def _gotStopCmd(self, commandPacket, addr):
 		self.startFlag = False
 		self.sharedStates[self.startOffset] = False
+		try:
+			self.ping_file.close()
+		except Exception as e:
+			print(e)
+		self.ping_file = None
 
 	def _gotSetFCmd(self, commandPacket, addr):
 		if 'frequencies' not in commandPacket:
