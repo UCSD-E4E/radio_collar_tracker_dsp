@@ -260,6 +260,9 @@ def init_RCT():
 			localize_file = os.path.join(run_dir, 'LOCALIZE_%06d' % (run_num))
 			with open(localize_file, 'w') as file:
 				file.write("")
+				
+			cmdListener.setRun(run_dir, run_num)
+			time.sleep(1)
 
 			sampling_freq = int(get_var('sampling_freq'))
 			center_freq = int(get_var('center_freq'))
@@ -267,13 +270,12 @@ def init_RCT():
 			sdr_record_cmd = ('sdr_record -g 22.0 -s %d -c %d'
 				' -r %d -o %s' % (sampling_freq, center_freq, run_num, run_dir))
 
-			cmdListener.setRun(run_dir, run_num)
 
 			sdr_record = subprocess.Popen(shlex.split(sdr_record_cmd))
 			
 			init_RCT_state = RCT_STATES.wait_end
 		elif init_RCT_state == RCT_STATES.wait_end:
-			time.sleep(3)
+			time.sleep(1)
 			switch_state = shared_states[4]
 			if switch_state:
 				init_RCT_state = RCT_STATES.wait_end
