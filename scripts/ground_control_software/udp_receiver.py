@@ -56,6 +56,13 @@ def findFile( filename, path ):
 			return os.path.join( root, filename )
 	return None
 
+def waitForHeartbeat(socket):
+	while True:
+		data, addr = socket.recvfrom(1024)
+		packet = json.loads(data.decode('utf-8'))
+		if 'heartbeat' in packet:
+			return addr
+
 def main():
 	# create a point.kml file if one doesn't exist
 	if findFile( "point.kml", "." ) is None:
@@ -71,6 +78,7 @@ def main():
 
 
 	sock.bind(("", UDP_PORT))
+	mav_IP = waitForHeartbeat(sock)
 
 	pings = []
 	guess = [0,0,0]
