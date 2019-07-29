@@ -83,19 +83,30 @@ class CommandGateway():
 		self.thread.start()
 
 	def startCommand(self):
-		pcmdPacket = {}
+		cmdPacket = {}
 		cmdPacket['cmd'] = {}
 		cmdPacket['cmd']['id'] = 'gcs'
 		cmdPacket['cmd']['action'] = 'start'
 		msg = json.dumps(cmdPacket)
 		print("Send: %s" % msg)
-		self._socket.sendto(msg.encode('utf-8'), target_IP)
+		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
+
+	def stopCommand(self):
+		cmdPacket = {}
+		cmdPacket['cmd'] = {}
+		cmdPacket['cmd']['id'] = 'gcs'
+		cmdPacket['cmd']['action'] = 'stop'
+		msg = json.dumps(cmdPacket)
+		print("Send: %s" % msg)
+		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 
 
 	def mainloop(self):
 		self.m = Tkinter.Tk()
 		self.startButton = Tkinter.Button(self.m, text='Start', command=self.startCommand)
+		self.stopButton = Tkinter.Button(self.m, text='Stop', command=self.stopCommand)
 		self.startButton.pack()
+		self.stopButton.pack()
 		self.m.mainloop()
 		
 
