@@ -1,4 +1,4 @@
-bin_SCRIPTS = rctstart rctrun
+bin_SCRIPTS = rctstart rctrun rct_udp_client rct_udp_command.py
 CLEANFILES = $(bin_SCRIPTS)
 sysconf_DATA=rct_config
 
@@ -23,6 +23,18 @@ maintainer-clean-local:
 
 rctrun: $(srcdir)/rctrun.py
 	rm -f $@
-	echo "#!" $(PYTHON) > $@
+	$(PYTHON) -m py_compile $^
+	$(SED) -e "s|&INSTALL_PREFIX|$(prefix)|g" $^ >> $@
+	chmod +x $@
+
+rct_udp_client: $(srcdir)/udp_client.py
+	rm -f $@
+	$(PYTHON) -m py_compile $^
+	$(SED) -e "s|&INSTALL_PREFIX|$(prefix)|g" $^ >> $@
+	chmod +x $@
+
+rct_udp_command.py: $(srcdir)/udp_command.py
+	rm -f $@
+	$(PYTHON) -m py_compile $^
 	$(SED) -e "s|&INSTALL_PREFIX|$(prefix)|g" $^ >> $@
 	chmod +x $@
