@@ -30,3 +30,9 @@
  
  # Output directory.  This should be the root of the removable storage.
  output_dir='/mnt/RAW_DATA'
+
+ # Sampling Frequency in Hz
+ sampling_freq=1500000
+
+ # Center Frequency in Hz
+ center_freq = 173500000
