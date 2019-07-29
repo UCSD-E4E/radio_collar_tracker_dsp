@@ -1,6 +1,29 @@
-ping_width_ms=36
-ping_min_snr=4
-ping_max_len_mult=1.5
-ping_min_len_mult=0.75
-gps_mode=true
-gps_target=/dev/ttyACM0
+ # Length of the ping in milliseconds.                                   
+ ping_width_ms=27                                                        
+                                                                         
+ # Minimum permissible SNR.  Pings with an amplitude less than this will 
+ # be rejected.                                                          
+ ping_min_snr=5                                                          
+                                                                         
+ # Maximum and minimum permissible ping lengths.  Pings will only be     
+ # accepted if their duration is in the range [ping_min_len_mult *       
+ # ping_width_ms, ping_max_len_mult * ping_width_ms].                    
+ ping_max_len_mult=1.5                                                   
+ ping_min_len_mult=0.5                                                   
+                                                                         
+ # GPS Testing mode.  Set this to true to disable use of GPS.  In this   
+ # mode, GPS data will always be 0, 0.                                   
+ gps_mode=false                                                          
+                                                                         
+ # GPS Device handle.  This device must send JSON packets of GPS data.   
+ gps_target=/dev/ttyACM0                                                 
+                                                                         
+ # Transmitter Frequencies.  Enter each transmitter frequency on a new   
+ # line.  For example:                                                   
+ #     frequencies=173500000                                             
+ #     frequencies=173600000                                             
+ frequencies=173965000
+
+ # Autostart flag.  Set to "true" to enable autostart, otherwise, set to "false"
+ autostart=true
+ 
