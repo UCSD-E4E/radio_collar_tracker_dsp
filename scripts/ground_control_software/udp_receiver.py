@@ -124,7 +124,7 @@ class CommandGateway():
 		assert(isinstance(freqs, list))
 		self.freqs = freqs
 		for freq in freqs:
-			freqButton = tk.Entry(self.m)
+			freqButton = tk.Entry(self.freqFrame)
 			freqButton.insert(0, freq)
 			freqButton.pack()
 
@@ -134,6 +134,8 @@ class CommandGateway():
 		self.stopButton = tk.Button(self.m, text='Stop', command=self.stopCommand)
 		self.startButton.pack()
 		self.stopButton.pack()
+		self.freqFrame = tk.LabelFrame(self.m, text='Frequencies', padx=5, pady=5)
+		self.freqFrame.pack()
 		self.m.protocol("WM_DELETE_WINDOW", self.windowClose)
 		self.m.mainloop()
 		
