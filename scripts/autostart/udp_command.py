@@ -119,7 +119,10 @@ class CommandListener(object):
 					heartbeatPacket['heartbeat'] = {}
 					heartbeatPacket['heartbeat']['time'] = time.mktime(now.timetuple())
 					heartbeatPacket['heartbeat']['id'] = 'mav'
-					heartbeatPacket['heartbeat']['status'] = self.sharedStates.read().hex()
+					status_string = "%d%d%d%d%d" % (self.sharedStates[0], 
+						self.sharedStates[1], self.sharedStates[2], 
+						self.sharedStates[3], self.sharedStates[4])
+					heartbeatPacket['heartbeat']['status'] = status_string
 					msg = json.dumps(heartbeatPacket)
 					self.sock.sendto(msg.encode('utf-8'), sendTarget)
 					prevTime = now
