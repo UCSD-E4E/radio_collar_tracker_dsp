@@ -14,6 +14,9 @@ import select
 import threading
 import datetime
 
+import matplotlib
+matplotlib.use('TkAgg')
+
 import tkinter as tk
 
 class Ping(object):
@@ -207,6 +210,8 @@ def main():
 
 	last_heartbeat = datetime.datetime.now()
 
+	pingFrequencies = []
+
 	while commandGateway.isAlive():
 		ready = select.select([sock], [], [], 1)
 		if ready[0]:
@@ -214,11 +219,17 @@ def main():
 			print(data.decode('utf-8').strip())
 			packet = json.loads(data.decode('utf-8'))
 			if 'ping' in packet:
-				pings.append(Ping(packet))
-				if len(pings) > 4:
-					initZoneNum = pings[0].getUTMZone()[0]
-					initZone = pings[0].getUTMZone()[1]
-					D = np.array([ping.toNumpy() for ping in pings])
+				ping = Ping(packet)
+				if ping.getFrequency() not in pingFrequencies:
+					pingFrequencies.append(ping.getFrequency())
+					pings.append([])
+				freqIdx = pingFrequencies.index(ping.getFrequency())
+				pings[freqIdx].append(Ping(packet))
+
+				if len(pings[freqIdx]) > 4:
+					initZoneNum = pings[freqIdx][0].getUTMZone()[0]
+					initZone = pings[freqIdx][0].getUTMZone()[1]
+					D = np.array([ping.toNumpy() for ping in pings[freqIdx]])
 					# Save previous estimates
 					guess = pos_estimate.calculateEstimate( D, initZoneNum, initZone, guess )
 					# Convert to lat lon
