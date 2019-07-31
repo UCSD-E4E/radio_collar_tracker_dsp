@@ -135,9 +135,9 @@ class CommandGateway():
 				element = self._freqElements.pop(-1)
 				element.destroy()
 
-		for freqButton in self._freqElements:
-			freqButton.delete(0, "end")
-			freqButton.insert(0, freq)
+		for i in range(len(freqs)):
+			self._freqElements[i].delete(0, "end")
+			self._freqElements[i].insert(0, freqs[i])
 
 	def addFreq(self):
 		self._freqElements.append(tk.Entry(self.freqFrame))
