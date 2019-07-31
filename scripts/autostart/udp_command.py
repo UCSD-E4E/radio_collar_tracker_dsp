@@ -166,7 +166,7 @@ class CommandListener(object):
 		packet = {}
 		packet['frequencies'] = freqs
 		msg = json.dumps(packet)
-		self.sock.sendto(msg, addr)
+		self.sock.sendto(msg.encode('utf-8'), addr)
 		pass
 
 	def _processCommand(self, commandPacket, addr):
