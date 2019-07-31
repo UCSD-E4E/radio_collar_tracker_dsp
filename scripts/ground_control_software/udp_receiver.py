@@ -120,7 +120,13 @@ class CommandGateway():
 		self.m.destroy()
 		self.run = False
 
-
+	def setFreqs(self, freqs):
+		assert(isinstance(freqs, list))
+		self.freqs = freqs
+		for freq in freqs:
+			freqButton = tk.Entry(self.m)
+			freqButton.insert(0, freq)
+			freqButton.pack()
 
 	def mainloop(self):
 		self.m = tk.Tk()
@@ -179,6 +185,9 @@ def main():
 					generateKML.generateKML( [ newpackage ] )
 			if 'heartbeat' in packet:
 				last_heartbeat = datetime.datetime.now()
+			if 'frequencies' in packet:
+				freqs = packeg['frequencies']
+				commandGateway.setFreqs([int(freq) for freq in freqs])
 
 		if (datetime.datetime.now() - last_heartbeat).total_seconds() > 30:
 			print("No heartbeats!")
