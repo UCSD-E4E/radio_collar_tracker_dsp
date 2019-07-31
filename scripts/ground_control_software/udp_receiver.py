@@ -144,6 +144,8 @@ def main():
 	pings = []
 	guess = [0,0,0]
 
+	last_heartbeat = datetime.datetime.now()
+
 	while commandGateway.isAlive():
 		ready = select.select([sock], [], [], 1)
 		if ready[0]:
@@ -163,6 +165,12 @@ def main():
 					ll = [ ll[1],ll[0] ]
 					newpackage = generateKML.kmlPackage( "RECEIVED PINGS", [ll[0],ll[1]], None )
 					generateKML.generateKML( [ newpackage ] )
+			if 'heartbeat' in packet:
+				last_heartbeat = datetime.datetime.now()
+
+		if (datetime.datetime.now() - last_heartbeat).total_seconds() > 30:
+			print("No heartbeats!")
+			# msgbox?
 
 if __name__ == '__main__':
 	main()
