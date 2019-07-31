@@ -11,6 +11,7 @@ rctstart: $(srcdir)/rctstart.sh
 install-exec-hook: rctstart 10-rct_store.rules
 	cp $(srcdir)/rctstart /etc/init.d/
 	update-rc.d rctstart defaults 98 02
+	sed -i '/LABEL=RCT_DATA \/mnt\/RAW_DATA exfat dmask=000,fmask=0111,user 0 0/d' /etc/fstab
 	echo 'LABEL=RCT_DATA /mnt/RAW_DATA exfat dmask=000,fmask=0111,user 0 0' >> /etc/fstab
 
 uninstall-hook:
