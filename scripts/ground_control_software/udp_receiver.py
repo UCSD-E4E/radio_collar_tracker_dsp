@@ -135,7 +135,7 @@ class CommandGateway():
 				element = self._freqElements.pop(-1)
 				element.destroy()
 
-		for freq in freqs:
+		for freqButton in self._freqElements:
 			freqButton.delete(0, END)
 			freqButton.insert(0, freq)
 
