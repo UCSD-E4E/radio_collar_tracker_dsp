@@ -1,57 +1,75 @@
 #!/usr/bin/env python3
 
 import os
-import glob
 import subprocess
 import shlex
 import signal
 
-def sigint_handler(signal, frame):
-	# print("Received sig")
-	# global init_thread_op
-	# global master_thread_op
-	# init_thread_op = False
-	# master_thread_op = False
-	pass
+class DroneRunner(object):
+	"""docstring for DroneRunner"""
+	def __init__(self):
+		super(DroneRunner, self).__init__()
+		self.data_directory = self.get_var('output_dir')
+		if not os.path.ismount(self.data_directory):
+			print('Storage not ready!')
 
+		if not os.path.isfile(os.path.join(self.data_directory, 'LAST_RUN.TXT')):
+			print("Storage not ready - no run file!")
+			raise Exception('Storage not ready - no run file!')
 
-if __name__ == '__main__':
-	data_directory = '/media/e4e/RCT_DATA'
-	#data_directory = '/media/ntlhui/RCT_DATA'
-	if not os.path.ismount(data_directory):
-		print("Storage not ready!")
-		# exit()
+		with open(os.path.join(self.data_directory, 'LAST_RUN.TXT')) as lastrun:
+			last_run = int(lastrun.readline().strip())
+		with open(os.path.join(self.data_directory, 'LAST_RUN.TXT'), 'w') as lastrun:
+			lastrun.write(str(last_run + 1))
+		
+		run_num = last_run + 1
 
-	if not os.path.isfile(os.path.join(data_directory, 'LAST_RUN.TXT')):
-		print("Storage not ready - no run file!")
-		exit()
+		run_dir = os.path.join(self.data_directory, "RUN_%06d" % (run_num))
+		os.makedirs(run_dir)
 
-	with open(os.path.join(data_directory, 'LAST_RUN.TXT')) as lastrun:
-		last_run = int(lastrun.readline().strip())
-	with open(os.path.join(data_directory, 'LAST_RUN.TXT'), 'w') as lastrun:
-		lastrun.write(str(last_run + 1))
+		localize_file = os.path.join(run_dir, "LOCALIZE_%06d" % (run_num))
+		with open(localize_file, 'w') as file:
+			file.write("")
 
-	run_num = last_run + 1
+		sampling_freq = int(self.get_var('sampling_freq'))
+		center_freq = int(self.get_var('center_freq'))
 
-	run_dir = os.path.join(data_directory, "RUN_%06d" % (run_num))
-	os.makedirs(run_dir)
+		sdr_record_cmd = ('sdr_record -g 22.0 -s %d -c %d'
+			' -r %d -o %s' % (sampling_freq, center_freq, run_num, run_dir))
+		udp_server_cmd = 'udp_client.py %s %d' % (run_dir, run_num)
 
-	localize_file = os.path.join(run_dir, "LOCALIZE_%06d" % (run_num))
-	with open(localize_file, 'w') as file:
-		file.write("")
+		signal.signal(signal.SIGINT, self.sigint_handler)
 
+		self.udp_server = subprocess.Popen(shlex.split(udp_server_cmd))
+		self.sdr_record = subprocess.Popen(shlex.split(sdr_record_cmd))
 
-	sdr_record_cmd = ('src/sdr_record/sdr_record -g 22.0 -s 1500000 -c 173500000'
-		' -r %d -o %s' % (run_num, run_dir))
-	udp_server_cmd = 'scripts/udp_client.py %s %d' % (run_dir, run_num)
+	def sigint_handler(self, signal, frame):
+		# print("Received sig")
+		# global init_thread_op
+		# global master_thread_op
+		# init_thread_op = False
+		# master_thread_op = False
+		self.sdr_record.send_signal(2)
+		self.sdr_record.wait()
 
-	udp_server = subprocess.Popen(shlex.split(udp_server_cmd))
-	sdr_record = subprocess.Popen(shlex.split(sdr_record_cmd))
+	def get_var(self, var):
+		var_file = open('&INSTALL_PREFIX/etc/rct_config')
+		for line in var_file:
+			if line.split('=')[0].strip() == var:
+				value = line.split('=')[1]
+				return value.strip().strip('"').strip("'")
+		return None
 
-	signal.signal(signal.SIGINT, sigint_handler)
+	def wait(self):
+		self.sdr_record.wait()
+		self.udp_server.wait()
+
+def main():
+	droneRun = DroneRunner()
 
 	signal.pause()
 
-	sdr_record.send_signal(2)
-	sdr_record.wait()
+	droneRun.wait()
 
+if __name__ == '__main__':
+	main()
