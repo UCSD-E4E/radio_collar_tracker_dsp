@@ -83,6 +83,7 @@ class CommandGateway():
 		self.thread = threading.Thread(target=self.mainloop)
 		self.thread.start()
 		self.run = True
+		self._freqElements = []
 
 		self.getFreqs()
 
@@ -122,11 +123,43 @@ class CommandGateway():
 
 	def setFreqs(self, freqs):
 		assert(isinstance(freqs, list))
-		self.freqs = freqs
+		
+		if len(self._freqElements) < len(self.freqs):
+			for i in range(len(self.freqs) - len(self._freqElements)):
+				self._freqElements.append(tk.Entry(self.freqFrame))
+				self._freqElements[-1].pack()
+		if len(self.freqs) < len(self._freqElements):
+			for i in range(len(self._freqElements) - len(self.freqs)):
+				element = self._freqElements.pop(-1)
+				element.destroy()
+
 		for freq in freqs:
-			freqButton = tk.Entry(self.freqFrame)
+			freqButton.delete(0, END)
 			freqButton.insert(0, freq)
-			freqButton.pack()
+
+	def addFreq(self):
+		self._freqElements.append(tk.Entry(self.freqFrame))
+		self._freqElements[-1].pack()
+
+	def sendFreq(self):
+		freqs = []
+		for entryObj in self._freqElements:
+			freq = int(entryObj.get())
+			freqs.append(freq)
+		cmdPacket = {}
+		cmdPacket['cmd'] = {}
+		cmdPacket['cmd']['id'] = 'gcs'
+		cmdPacket['cmd']['action'] = 'setF'
+		cmdPacket['cmd']['setF'] = freqs
+		msg = json.dumps(cmdPacket)
+		print("Send: %s" % msg)
+		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
+
+
+	def removeFreq(self):
+		element = self._freqElements.pop(-1)
+		element.destroy()
+		
 
 	def mainloop(self):
 		self.m = tk.Tk()
@@ -136,6 +169,12 @@ class CommandGateway():
 		self.stopButton.pack()
 		self.freqFrame = tk.LabelFrame(self.m, text='Frequencies', padx=5, pady=5)
 		self.freqFrame.pack()
+		self.addFreqButton = tk.Button(self.m, text='Add Frequency', command=self.addFreq)
+		self.addFreqButton.pack()
+		self.removeFreqButton = tk.Button(self.m, text = 'Remove Frequency', command = self.removeFreq)
+		self.removeFreqButton.pack();
+		self.commitFreqButton = tk.Button(self.m, text="Upload Frequencies", command = self.sendFreq)
+		self.commitFreqButton.pack()
 		self.m.protocol("WM_DELETE_WINDOW", self.windowClose)
 		self.m.mainloop()
 		
