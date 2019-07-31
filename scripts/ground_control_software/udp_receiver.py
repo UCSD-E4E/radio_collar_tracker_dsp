@@ -13,7 +13,7 @@ import platform
 import select
 import threading
 
-import Tkinter
+import tkinter as tk
 
 class Ping(object):
 	"""Ping object"""
@@ -111,9 +111,9 @@ class CommandGateway():
 
 
 	def mainloop(self):
-		self.m = Tkinter.Tk()
-		self.startButton = Tkinter.Button(self.m, text='Start', command=self.startCommand)
-		self.stopButton = Tkinter.Button(self.m, text='Stop', command=self.stopCommand)
+		self.m = tk.Tk()
+		self.startButton = tk.Button(self.m, text='Start', command=self.startCommand)
+		self.stopButton = tk.Button(self.m, text='Stop', command=self.stopCommand)
 		self.startButton.pack()
 		self.stopButton.pack()
 		self.m.protocol("WM_DELETE_WINDOW", self.windowClose)
