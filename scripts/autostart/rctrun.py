@@ -12,6 +12,7 @@ import sys
 from rct_udp_command import CommandListener
 import sys
 import shlex
+import argparse
 
 WAIT_COUNT = 60
 
@@ -311,10 +312,16 @@ def sigint_handler(signal, frame):
 	run = False
 
 def main():
+
+	parser = argparse.ArgumentParser(description='RCT Boostrapper')
+	parser.add_argument('autostart', type=bool, action='store_true')
+
+	args = parser.parse_args()
+
 	global cmdListener
 	# Check for autostart
 	autostart_flag = get_var('autostart')
-	if autostart_flag != 'true':
+	if autostart_flag != 'true' and args.autostart:
 		print("Autostart not set!")
 		return
 	# Set up mmap files
