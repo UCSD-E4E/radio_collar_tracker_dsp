@@ -158,6 +158,8 @@ class CommandListener(object):
 		if 'frequencies' not in commandPacket:
 			return
 		freqs = commandPacket['frequencies']
+		print("Got frequencies: ")
+		print(freqs)
 		self._options.setOption('frequencies', freqs)
 		self._options.writeOptions()
 

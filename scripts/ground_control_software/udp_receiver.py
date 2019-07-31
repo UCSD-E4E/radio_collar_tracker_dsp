@@ -152,7 +152,7 @@ class CommandGateway():
 		cmdPacket['cmd'] = {}
 		cmdPacket['cmd']['id'] = 'gcs'
 		cmdPacket['cmd']['action'] = 'setF'
-		cmdPacket['cmd']['setF'] = freqs
+		cmdPacket['cmd']['frequencies'] = freqs
 		msg = json.dumps(cmdPacket)
 		print("Send: %s" % msg)
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
