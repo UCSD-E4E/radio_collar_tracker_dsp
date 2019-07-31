@@ -314,7 +314,7 @@ def sigint_handler(signal, frame):
 def main():
 
 	parser = argparse.ArgumentParser(description='RCT Boostrapper')
-	parser.add_argument('autostart', action='store_true')
+	parser.add_argument('--autostart', action='store_true')
 
 	args = parser.parse_args()
 
