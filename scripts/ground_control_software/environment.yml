@@ -1,0 +1,7 @@
+name: rct_gcs
+dependencies:
+  - numpy
+  - utm
+  - scipy
+  - simplekml
+  - PIL
