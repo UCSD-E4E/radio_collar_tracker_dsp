@@ -84,6 +84,16 @@ class CommandGateway():
 		self.thread.start()
 		self.run = True
 
+		self.getFreqs()
+
+	def getFreqs(self):
+		cmdPacket = {}
+		cmdPacket['cmd']['id'] = 'gcs'
+		cmdPacket['cmd']['action'] = 'getF'
+		msg = json.dumps(cmdPacket)
+		print("Send: %s" % (msg))
+		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
+
 	def isAlive(self):
 		return self.run
 

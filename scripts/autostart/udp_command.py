@@ -162,6 +162,11 @@ class CommandListener(object):
 		self._options.writeOptions()
 
 	def _gotGetFCmd(self, commandPacket, addr):
+		freqs = self._options.getOption('frequencies')
+		packet = {}
+		packet['frequencies'] = freqs
+		msg = json.dumps(packet)
+		self.sock.sendto(msg, addr)
 		pass
 
 	def _processCommand(self, commandPacket, addr):
