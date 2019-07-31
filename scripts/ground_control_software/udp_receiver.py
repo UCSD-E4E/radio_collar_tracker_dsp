@@ -88,6 +88,7 @@ class CommandGateway():
 
 	def getFreqs(self):
 		cmdPacket = {}
+		cmdPacket['cmd'] = {}
 		cmdPacket['cmd']['id'] = 'gcs'
 		cmdPacket['cmd']['action'] = 'getF'
 		msg = json.dumps(cmdPacket)
