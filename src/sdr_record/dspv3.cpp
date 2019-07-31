@@ -67,7 +67,7 @@ namespace RTT{
 				#endif
 			}else{
 				// lower half
-				std::size_t target_bin = FFT_LEN - (double)(center_freq - *it) / (sampling_freq / 2) * FFT_LEN / 2;
+				std::size_t target_bin = FFT_LEN + (double)(*it - center_freq) / (sampling_freq / 2) * FFT_LEN / 2;
 				target_bins.push_back(target_bin);
 				#ifdef DEBUG
 				_ostr1 << *it << ", " << target_bin << std::endl;
