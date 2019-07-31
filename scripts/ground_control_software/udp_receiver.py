@@ -84,6 +84,7 @@ class CommandGateway():
 		self.thread.start()
 		self.run = True
 		self._freqElements = []
+		self.freqs = []
 
 		self.getFreqs()
 
@@ -123,13 +124,14 @@ class CommandGateway():
 
 	def setFreqs(self, freqs):
 		assert(isinstance(freqs, list))
+		self.freqs = freqs
 		
-		if len(self._freqElements) < len(self.freqs):
-			for i in range(len(self.freqs) - len(self._freqElements)):
+		if len(self._freqElements) < len(freqs):
+			for i in range(len(freqs) - len(self._freqElements)):
 				self._freqElements.append(tk.Entry(self.freqFrame))
 				self._freqElements[-1].pack()
-		if len(self.freqs) < len(self._freqElements):
-			for i in range(len(self._freqElements) - len(self.freqs)):
+		if len(freqs) < len(self._freqElements):
+			for i in range(len(self._freqElements) - len(freqs)):
 				element = self._freqElements.pop(-1)
 				element.destroy()
 
