@@ -26,7 +26,7 @@ case "$1" in
 	start)
 		# start
 		if [ ! -f /var/lock/rctstart ]; then
-			$INSTALL_DIR/bin/rctrun &
+			$INSTALL_DIR/bin/rctrun autostart &
 			echo $! > /var/run/rct.pid
 			echo "Service started!"
 			touch /var/lock/rctstart
@@ -39,7 +39,7 @@ case "$1" in
 		echo "Service stopped!"
 		rm -f /var/lock/rctstart
 		echo "Service started!"
-		$INSTALL_DIR/bin/rctrun &
+		$INSTALL_DIR/bin/rctrun autostart&
 		echo $! > /var/run/rct.pid
 		echo "Service started!"
 		touch /var/lock/rctstart
