@@ -91,23 +91,24 @@ def generateKML( packages ):
 
   for package in packages:
     # Note: newpoint coords take in [long,lat]
-    temp = package.getLabel() + " Estimate"
-    kml.newpoint( name=temp, \
-                  coords=[(package.estimate[0],package.estimate[1])] )
-    print( "package.estimate is " )
-    print( package.estimate )
+    if package is not None:
+      temp = package.getLabel() + " Estimate"
+      kml.newpoint( name=temp, \
+                    coords=[(package.estimate[0],package.estimate[1])] )
+      print( "package.estimate is " )
+      print( package.estimate )
 
-    # Generate an overlay if provided
-    if package.overlay is not None:
-      pixels = package.overlay[0]
-      corners = package.overlay[1]
-      # Generate a png image of the pixels given
-      imgPath = convertPixelArrToPNG( pixels )
-      # Create a ground overlay
-      temp = package.getLabel() + " Precision"
-      ground = kml.newgroundoverlay(name=temp)
-      ground.icon.href = imgPath
-      ground.gxlatlonquad.coords = corners
+      # Generate an overlay if provided
+      if package.overlay is not None:
+        pixels = package.overlay[0]
+        corners = package.overlay[1]
+        # Generate a png image of the pixels given
+        imgPath = convertPixelArrToPNG( pixels )
+        # Create a ground overlay
+        temp = package.getLabel() + " Precision"
+        ground = kml.newgroundoverlay(name=temp)
+        ground.icon.href = imgPath
+        ground.gxlatlonquad.coords = corners
 
     # Save the final KML file
   kml.save( "point.kml" )

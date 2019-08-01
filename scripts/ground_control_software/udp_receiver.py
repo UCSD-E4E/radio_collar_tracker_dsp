@@ -211,6 +211,8 @@ def main():
 	last_heartbeat = datetime.datetime.now()
 
 	pingFrequencies = []
+	pingEstimates = []
+	pingPackages = []
 
 	while commandGateway.isAlive():
 		ready = select.select([sock], [], [], 1)
@@ -223,6 +225,8 @@ def main():
 				if ping.getFrequency() not in pingFrequencies:
 					pingFrequencies.append(ping.getFrequency())
 					pings.append([])
+					pingEstimates.append([])
+					pingPackages.append(None)
 				freqIdx = pingFrequencies.index(ping.getFrequency())
 				pings[freqIdx].append(Ping(packet))
 
@@ -235,8 +239,9 @@ def main():
 					# Convert to lat lon
 					ll = utm.to_latlon( guess[0], guess[1], initZoneNum, zone_letter=initZone )
 					ll = [ ll[1],ll[0] ]
-					newpackage = generateKML.kmlPackage( "RECEIVED PINGS", [ll[0],ll[1]], None )
-					generateKML.generateKML( [ newpackage ] )
+					pingEstimates[freqIdx] = ll
+					pingPackages[freqIdx] = generateKML.kmlPackage( "%.3f MHz" % (pingFrequencies[freqIdx] / 1e6), [ll[0],ll[1]], None )
+				generateKML.generateKML( pingPackages )
 			if 'heartbeat' in packet:
 				last_heartbeat = datetime.datetime.now()
 			if 'frequencies' in packet:
