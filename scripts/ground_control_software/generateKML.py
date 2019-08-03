@@ -31,30 +31,21 @@ class kmlPackage:
   """
   label - a label for estimate and overlay
   estimate - a coord in the form [lon, lat] 
-  overlay - Optional photo overlay. Each overlay should be a list
-            of 2 lists:
-              1. list of pixels for image with values of 0-1 with 1 being
-                 most heat
-              2. list of coordinates to represent corners of overlay
+  score - denotes "goodness" of estimate
+  stats - True if good estimate, False if not.
   """
-  def __init__( self, label, estimate, overlay ):
+  def __init__( self, label, estimate, score, status ):
     # Validate arguments
     assert( isinstance( label, str ) )
+    print(estimate)
     assert( len( estimate ) == 2 )
     for coord in estimate:
       assert( isinstance( coord, float ) )
-    assert( isinstance( overlay, list ) or overlay is None )
-    if overlay is not None:
-      assert( len( overlay ) == 2 )
-      assert( overlay[0] is not None )
-      assert( overlay[1] is not None )
-      for corner in overlay[1]:
-        assert( isinstance( corner, list ) )
-        assert( len( corner ) == 2 )
 
     self.label = label
     self.estimate = estimate
-    self.overlay = overlay
+    self.score = score
+    self.status = status
 
   def getLabel( self ):
     return self.label
@@ -71,10 +62,11 @@ class kmlPackage:
   def setEstimate( self, estimate ):
     self.estimate = estimate
 
-  def setOverlay( self, overlay ):
-    self.overlay = overlay
+  def setStatus(self, status):
+    self.status = status
 
-
+  def setScore(self, score):
+    self.score = score
 
 
 
@@ -93,22 +85,19 @@ def generateKML( packages ):
     # Note: newpoint coords take in [long,lat]
     if package is not None:
       temp = package.getLabel() + " Estimate"
-      kml.newpoint( name=temp, \
+      point = kml.newpoint( name=temp, \
                     coords=[(package.estimate[0],package.estimate[1])] )
-      print( "package.estimate is " )
-      print( package.estimate )
+      # print( "package.estimate is " )
+      # print( package.estimate )
 
-      # Generate an overlay if provided
-      if package.overlay is not None:
-        pixels = package.overlay[0]
-        corners = package.overlay[1]
-        # Generate a png image of the pixels given
-        imgPath = convertPixelArrToPNG( pixels )
-        # Create a ground overlay
-        temp = package.getLabel() + " Precision"
-        ground = kml.newgroundoverlay(name=temp)
-        ground.icon.href = imgPath
-        ground.gxlatlonquad.coords = corners
+      point.style.iconstyle.scale = 1 - package.score
+
+      if package.status:
+        print("Good estimate")
+        point.style.iconstyle.color = simplekml.Color.green
+      else:
+        print("bad estimate")
+        point.style.iconstyle.color = simplekml.Color.red
 
     # Save the final KML file
   kml.save( "point.kml" )

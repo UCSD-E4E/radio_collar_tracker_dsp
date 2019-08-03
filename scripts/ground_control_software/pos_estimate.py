@@ -37,7 +37,7 @@ def residuals( p, data ):
 
 # Edit so that data is not a Data, but rather list of pings
 def calculateEstimate( data, zonenum, zone, guess ):
-  if len( data ) <= 5:
+  if len( data ) <= 5 or guess is None:
     xT = average( data[:,0] )
     yT = average( data[:,1] )
     k = np.max( data[:,3] )
@@ -47,8 +47,11 @@ def calculateEstimate( data, zonenum, zone, guess ):
     k = guess[2]
   n = -4
   p = [ xT, yT, k, n ]
-  print( least_squares( residuals, p, kwargs={ "data":data } ) )
-  return [ p[0], p[1], k ]
+  res_x = least_squares( residuals, p, kwargs={ "data":data } )
+  if res_x.success:
+    return [ res_x.x[0], res_x.x[1], res_x.optimality ]
+  else:
+    return None
 
 
 

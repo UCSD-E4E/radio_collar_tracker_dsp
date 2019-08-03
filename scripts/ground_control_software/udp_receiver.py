@@ -165,6 +165,13 @@ class CommandGateway():
 		element = self._freqElements.pop(-1)
 		element.destroy()
 
+	def setOptions(self, options):
+		self.centerFreqEntry.insert(0, int(options['center_freq'][0]))
+		self.samplingFreqEntry.insert(0, int(options['sampling_freq'][0]))
+		self.pingWidthEntry.insert(0, int(options['ping_width_ms'][0]))
+		self.pingMaxEntry.insert(0, float(options['ping_max_len_mult'][0]))
+		self.pingMinEntry.insert(0, float(options['ping_min_len_mult'][0]))
+
 	def configureOpts(self):
 		cmdPacket = {}
 		cmdPacket['cmd'] = {}
@@ -173,7 +180,42 @@ class CommandGateway():
 		msg = json.dumps(cmdPacket)
 		print("Send: %s" % msg)
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
+
 		self.configureWindow = tk.Toplevel(self.m)
+
+		self.centerFreqLabel = tk.Label(self.configureWindow, text="Center Frequency")
+		self.centerFreqLabel.grid(row=1, column=1)
+
+		self.centerFreqEntry = tk.Entry(self.configureWindow)
+		self.centerFreqEntry.grid(row=1, column=2)
+
+		self.samplingFreqLabel = tk.Label(self.configureWindow, text="Sampling Frequency")
+		self.samplingFreqLabel.grid(row=2, column=1)
+
+		self.samplingFreqEntry = tk.Entry(self.configureWindow)
+		self.samplingFreqEntry.grid(row=2, column=2)
+
+		self.pingWidthLabel = tk.Label(self.configureWindow, text="Ping Width")
+		self.pingWidthLabel.grid(row=3, column=1)
+
+		self.pingWidthEntry = tk.Entry(self.configureWindow)
+		self.pingWidthEntry.grid(row=3, column=2)
+
+		self.pingMaxLabel = tk.Label(self.configureWindow, text="Ping Width Max")
+		self.pingMaxLabel.grid(row=4, column=1)
+
+		self.pingMaxEntry = tk.Entry(self.configureWindow)
+		self.pingMaxEntry.grid(row=4, column=2)
+
+		self.pingMinLabel = tk.Label(self.configureWindow, text="Ping Width Min")
+		self.pingMinLabel.grid(row=5, column=1)
+
+		self.pingMinEntry = tk.Entry(self.configureWindow)
+		self.pingMinEntry.grid(row=5, column=2)
+
+		self.sendConfigButton = tk.Button(self.configureWindow, text='')
+
+		# {"options": {"center_freq": ["173500000"], "autostart": ["true"], "ping_width_ms": ["27"], "gps_baud": ["9600"], "frequencies": ["173965000"], "output_dir": ["/mnt/RAW_DATA"], "gps_mode": ["false"], "ping_min_snr": ["5"], "sampling_freq": ["1500000"], "ping_max_len_mult": ["1.5"], "gps_target": ["/dev/ttyACM0"], "ping_min_len_mult": ["0.5"]}}
 
 		
 
@@ -231,7 +273,7 @@ def main():
 		ready = select.select([sock], [], [], 1)
 		if ready[0]:
 			data, addr = sock.recvfrom(BUFFER_LEN)
-			print(data.decode('utf-8').strip())
+			# print(data.decode('utf-8').strip())
 			packet = json.loads(data.decode('utf-8'))
 			if 'ping' in packet:
 				ping = Ping(packet)
@@ -239,27 +281,37 @@ def main():
 					pingFrequencies.append(ping.getFrequency())
 					pings.append([])
 					pingEstimates.append([])
-					pingPackages.append(None)
+					pingPackages.append(generateKML.kmlPackage("%.3f MHz" % (ping.getFrequency() / 1e6), list(ping.getLonLat()), 0, False))
 				freqIdx = pingFrequencies.index(ping.getFrequency())
 				pings[freqIdx].append(Ping(packet))
-
+				print("Got ping at %d" % (pingFrequencies[freqIdx]))
 				if len(pings[freqIdx]) > 4:
 					initZoneNum = pings[freqIdx][0].getUTMZone()[0]
 					initZone = pings[freqIdx][0].getUTMZone()[1]
 					D = np.array([ping.toNumpy() for ping in pings[freqIdx]])
 					# Save previous estimates
-					guess = pos_estimate.calculateEstimate( D, initZoneNum, initZone, guess )
+					guess = pos_estimate.calculateEstimate( D, initZoneNum, initZone, pingEstimates[freqIdx] )
 					# Convert to lat lon
-					ll = utm.to_latlon( guess[0], guess[1], initZoneNum, zone_letter=initZone )
-					ll = [ ll[1],ll[0] ]
-					pingEstimates[freqIdx] = ll
-					pingPackages[freqIdx] = generateKML.kmlPackage( "%.3f MHz" % (pingFrequencies[freqIdx] / 1e6), [ll[0],ll[1]], None )
+					if guess is None:
+						print("Failed to calculate estimate for collar %d" % (pingFrequencies[freqIdx]))
+						pingPackages[freqIdx].setStatus(False)
+						pingEstimates[freqIdx] = None
+					else:
+						print("Found good esimtate for collar %d" % (pingFrequencies[freqIdx]))
+						ll = utm.to_latlon( guess[0], guess[1], initZoneNum, zone_letter=initZone )
+						ll = [ ll[1],ll[0] ]
+						pingEstimates[freqIdx] = guess
+						pingPackages[freqIdx].setEstimate(ll)
+						pingPackages[freqIdx].setScore(guess[2])
+						pingPackages[freqIdx].setStatus(True)
 				generateKML.generateKML( pingPackages )
 			if 'heartbeat' in packet:
 				last_heartbeat = datetime.datetime.now()
 			if 'frequencies' in packet:
 				freqs = packet['frequencies']
 				commandGateway.setFreqs([int(freq) for freq in freqs])
+			if 'options' in packet:
+				commandGateway.setOptions(packet['options'])
 
 		if (datetime.datetime.now() - last_heartbeat).total_seconds() > 30:
 			print("No heartbeats!")
