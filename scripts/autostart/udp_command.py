@@ -188,7 +188,7 @@ class CommandListener(object):
 			'start': self._gotStartCmd,
 			'stop': self._gotStopCmd,
 			'setF': self._gotSetFCmd,
-			'getF': self._gotGetFCmd
+			'getF': self._gotGetFCmd,
 			'getOpts': self._gotGetOptsCmd
 		}
 
