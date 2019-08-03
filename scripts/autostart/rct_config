@@ -3,7 +3,7 @@ ping_width_ms=27
 
 # Minimum permissible SNR.  Pings with an amplitude less than this will
 # be rejected.
-ping_min_snr=5
+ping_min_snr=15
 
 # Maximum and minimum permissible ping lengths.  Pings will only be
 # accepted if their duration is in the range [ping_min_len_mult *
