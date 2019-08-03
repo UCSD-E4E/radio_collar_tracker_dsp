@@ -35,6 +35,8 @@ n = 4
 k = 1
 d = 1000
 
+tx1 = (477854, 3638477, 11, 'S')
+
 
 # In[20]:
 
@@ -51,6 +53,7 @@ prevTime = datetime.datetime.now()
 
 
 tx_loc = np.array([tx[0], tx[1], 0])
+tx1_loc = np.array([tx1[0], tx1[1], 0])
 dx_loc = np.array([tx[0] - 100, tx[1], 30])
 vx = np.array([[5, 1, 0],
                 [-1, 5, 0],
@@ -71,13 +74,22 @@ while True:
             prevTime = now
         c_loc += vx[leg,:]
         dist = np.linalg.norm(tx_loc - c_loc)
+        dist1 = np.linalg.norm(tx1_loc - c_loc)
         R = txp - 10 * n * np.log10(dist) + k
+        R1 = txp - 10 * n * np.log10(dist1) + k
         ll = utm.to_latlon(c_loc[0], c_loc[1], tx[2], tx[3])
+        ll1 = utm.to_latlon(c_loc[0], c_loc[1], tx1[2], tx1[3])
         msg = '{"ping": {"time": %d, "lat": %d, "lon": %d, "alt": %.5f, "amp": %.5f, "txf": %d}}\n' % (time.mktime(now.timetuple()), ll[0] * 1e7, ll[1] * 1e7, dx_loc[2], R, 173965000)
         print(msg.strip())
         sent = sock.sendto(msg.encode("UTF-8"), (UDP_IP, UDP_PORT))
         assert(sent == len(msg))
         print(count)
+        msg = '{"ping": {"time": %d, "lat": %d, "lon": %d, "alt": %.5f, "amp": %.5f, "txf": %d}}\n' % (time.mktime(now.timetuple()), ll1[0] * 1e7, ll1[1] * 1e7, dx_loc[2], R1, 173969000)
+        print(msg.strip())
+        sent = sock.sendto(msg.encode("UTF-8"), (UDP_IP, UDP_PORT))
+        assert(sent == len(msg))
+        print(count)
+        
         count += 1
         time.sleep(1)
     leg = leg + 1
