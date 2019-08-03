@@ -50,6 +50,9 @@ class RCTOpts(object):
 					print(opt)
 					var_file.write(opt)
 
+	def getAllOptions(self):
+		return self._params
+
 
 class CommandListener(object):
 	"""docstring for CommandListener"""
@@ -171,7 +174,13 @@ class CommandListener(object):
 		packet['frequencies'] = freqs
 		msg = json.dumps(packet)
 		self.sock.sendto(msg.encode('utf-8'), addr)
-		pass
+
+	def _gotGetOptsCmd(self, commandPacket, addr):
+		opts = self._options.getAllOptions()
+		packet = {}
+		packet['options'] = opts
+		msg = json.dumps(packet)
+		self.sock.sendto(msg.encode('utf-8'), addr)
 
 	def _processCommand(self, commandPacket, addr):
 		commands = {
@@ -180,6 +189,7 @@ class CommandListener(object):
 			'stop': self._gotStopCmd,
 			'setF': self._gotSetFCmd,
 			'getF': self._gotGetFCmd
+			'getOpts': self._gotGetOptsCmd
 		}
 
 		print('Got action: %s' % (commandPacket['action']))
