@@ -164,6 +164,17 @@ class CommandGateway():
 	def removeFreq(self):
 		element = self._freqElements.pop(-1)
 		element.destroy()
+
+	def configureOpts(self):
+		cmdPacket = {}
+		cmdPacket['cmd'] = {}
+		cmdPacket['cmd']['id'] = 'gcs'
+		cmdPacket['cmd']['action'] = 'getOpts'
+		msg = json.dumps(cmdPacket)
+		print("Send: %s" % msg)
+		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
+		self.configureWindow = tk.Toplevel(self.m)
+
 		
 
 	def mainloop(self):
@@ -180,6 +191,8 @@ class CommandGateway():
 		self.removeFreqButton.pack();
 		self.commitFreqButton = tk.Button(self.m, text="Upload Frequencies", command = self.sendFreq)
 		self.commitFreqButton.pack()
+		self.configureButton = tk.Button(self.m, text="Configure", command = self.configureOpts)
+		self.configureButton.pack()
 		self.m.protocol("WM_DELETE_WINDOW", self.windowClose)
 		self.m.mainloop()
 		
