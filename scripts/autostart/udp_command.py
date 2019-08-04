@@ -231,6 +231,7 @@ class CommandListener(object):
 		subprocess.call('unzip -o -f /home/e4e/upgrade.zip', shell=True)
 		subprocess.call('make -C /home/e4e/radio_collar_tracker_drone', shell=True)
 		subprocess.call('make -C /home/e4e/radio_collar_tracker_drone install', shell=True)
+		subprocess.call('service rctstart restart', shell=True)
 
 
 	def _processCommand(self, commandPacket, addr):
