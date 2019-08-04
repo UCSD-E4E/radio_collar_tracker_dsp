@@ -240,7 +240,7 @@ class CommandGateway():
 					print(e)
 					return
 		byteCounter = 0
-		with open(self._upgradeFname) as archiveFile:
+		with open(self._upgradeFname, 'rb') as archiveFile:
 			frame = archiveFile.read(1024)
 			byteCounter += len(frame)
 			while frame:
