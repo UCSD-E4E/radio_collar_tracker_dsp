@@ -235,6 +235,7 @@ class CommandGateway():
 				break
 			except socket.error as e:
 				tryCounter += 1
+				time.sleep(0.5)
 				if tryCounter > 10:
 					print(e)
 					return
