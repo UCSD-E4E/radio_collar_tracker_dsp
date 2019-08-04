@@ -221,12 +221,12 @@ class CommandGateway():
 
 		self._upgradeFname = fname[0]
 
-	def startUpgrade(self)
+	def startUpgrade(self):
 
-		sock = socket.socket()
-		host = socket.gethostname()
-		port = 9500
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		port = 9501
 		mav_IP = (self.mav_IP[0], port)
+		print("Connecting to %s:%s" % mav_IP)
 		sock.connect(mav_IP)
 		byteCounter = 0
 		with open(_upgradeFname) as archiveFile:

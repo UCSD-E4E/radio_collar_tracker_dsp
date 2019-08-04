@@ -206,9 +206,9 @@ class CommandListener(object):
 		msg = json.dumps(packet)
 		self.sock.sendto(msg.encode('utf-8'), addr)
 
-		sock = socket.socket()
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		host = socket.gethostname()
-		socket.settimeout(10)
+		sock.settimeout(10)
 		port = 9500
 		sock.bind((host, port))
 		byteCounter = 0
