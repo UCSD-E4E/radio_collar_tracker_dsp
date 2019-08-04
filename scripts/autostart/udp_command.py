@@ -182,6 +182,17 @@ class CommandListener(object):
 		msg = json.dumps(packet)
 		self.sock.sendto(msg.encode('utf-8'), addr)
 
+	def _gotSetOptsCmd(self, commandPacket, addr):
+		if 'options' not in commandPacket:
+			return
+		opts = commandPacket['options']
+		self._options.setOptions(opts)
+		self._options.writeOptions()
+		packet = {}
+		packet['options'] = self._options.getAllOptions()
+		msg = json.dumps(packet)
+		self.sock.sendto(msg.encode('utf-8'), addr)
+
 	def _processCommand(self, commandPacket, addr):
 		commands = {
 			'test': lambda: None,
@@ -189,7 +200,8 @@ class CommandListener(object):
 			'stop': self._gotStopCmd,
 			'setF': self._gotSetFCmd,
 			'getF': self._gotGetFCmd,
-			'getOpts': self._gotGetOptsCmd
+			'getOpts': self._gotGetOptsCmd,
+			'setOpts': self._gotSetOptsCmd
 		}
 
 		print('Got action: %s' % (commandPacket['action']))
