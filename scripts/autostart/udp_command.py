@@ -228,10 +228,26 @@ class CommandListener(object):
 			pass
 		conn.close()
 		print("Received %d bytes" % byteCounter)
-		subprocess.call('unzip -o -f /home/e4e/upgrade.zip', shell=True)
-		subprocess.call('make -C /home/e4e/radio_collar_tracker_drone', shell=True)
-		subprocess.call('make -C /home/e4e/radio_collar_tracker_drone install', shell=True)
-		subprocess.call('service rctstart restart', shell=True)
+
+		try:
+			retval = subprocess.call('unzip -o -f /home/e4e/upgrade.zip', shell=True)
+			assert(retval == 0)
+			retval = subprocess.call('make -C /home/e4e/radio_collar_tracker_drone', shell=True)
+			assert(retval == 0)
+			retval = subprocess.call('make -C /home/e4e/radio_collar_tracker_drone install', shell=True)
+			assert(retval == 0)
+			retval = subprocess.call('service rctstart restart', shell=True)
+			assert(retval == 0)
+			packet = {}
+			packet['upgrade_complete'] = 'true'
+		except:
+			packet = {}
+			packet['upgrade_complete'] = 'false'
+		finally:
+			msg = json.dumps(packet)
+			self.sock.sendto(msg.encode('utf-8'), addr)
+
+
 
 
 	def _processCommand(self, commandPacket, addr):
