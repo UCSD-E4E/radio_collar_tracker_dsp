@@ -206,7 +206,7 @@ class CommandGateway():
 		if not ok:
 			return
 
-		fname = askopenfilename(initialdir=".", title='Select Upgrade Package', filetypes=[('Repo Archive', '*.zip')])
+		fname = askopenfilename(initialdir="~", title='Select Upgrade Package', filetypes=[('Repo Archive', '*.zip')])
 		if fname is None or fname == '':
 			return
 		if len(fname) == 0:
@@ -229,7 +229,7 @@ class CommandGateway():
 		print("Connecting to %s:%s" % mav_IP)
 		sock.connect(mav_IP)
 		byteCounter = 0
-		with open(_upgradeFname) as archiveFile:
+		with open(self._upgradeFname) as archiveFile:
 			frame = archiveFile.read(1024)
 			byteCounter += len(frame)
 			while frame:
