@@ -13,6 +13,7 @@ import platform
 import select
 import threading
 import datetime
+import time
 
 import matplotlib
 matplotlib.use('TkAgg')
@@ -88,6 +89,7 @@ class CommandGateway():
 		self.run = True
 		self._freqElements = []
 		self.freqs = []
+		self.freqFrame = None
 
 		self.getFreqs()
 
@@ -128,7 +130,10 @@ class CommandGateway():
 	def setFreqs(self, freqs):
 		assert(isinstance(freqs, list))
 		self.freqs = freqs
-		
+
+		while self.freqFrame is None:
+			time.sleep(0.01)
+
 		if len(self._freqElements) < len(freqs):
 			for i in range(len(freqs) - len(self._freqElements)):
 				self._freqElements.append(tk.Entry(self.freqFrame))
@@ -166,7 +171,7 @@ class CommandGateway():
 		element.destroy()
 
 	def setOptions(self, options):
-		if configureWindow is not None:
+		if self.configureWindow is not None:
 			self.centerFreqEntry.insert(0, int(options['center_freq'][0]))
 			self.samplingFreqEntry.insert(0, int(options['sampling_freq'][0]))
 			self.pingWidthEntry.insert(0, int(options['ping_width_ms'][0]))
@@ -176,18 +181,20 @@ class CommandGateway():
 	def sendOptions(self):
 		# {"options": {"center_freq": ["173500000"], "autostart": ["true"], "ping_width_ms": ["27"], "gps_baud": ["9600"], "frequencies": ["173965000"], "output_dir": ["/mnt/RAW_DATA"], "gps_mode": ["false"], "ping_min_snr": ["5"], "sampling_freq": ["1500000"], "ping_max_len_mult": ["1.5"], "gps_target": ["/dev/ttyACM0"], "ping_min_len_mult": ["0.5"]}}
 		packet = {}
-		packet['options'] = {}
-		packet['options']['center_freq'] = self.centerFreqEntry.get()
-		packet['options']['sampling_freq'] = self.samplingFreqEntry.get()
-		packet['options']['ping_width_ms'] = self.pingWidthEntry.get()
-		packet['options']['ping_min_len_mult'] = self.pingMinEntry.get()
-		packet['options']['ping_max_len_mult'] = self.pingMaxEntry.get()
-		msg = json.dumps(cmdPacket)
+		packet['cmd'] = {}
+		packet['cmd']['id'] = 'gcs'
+		packet['cmd']['action'] = 'setOpts'
+		packet['cmd']['options'] = {}
+		packet['cmd']['options']['center_freq'] = self.centerFreqEntry.get()
+		packet['cmd']['options']['sampling_freq'] = self.samplingFreqEntry.get()
+		packet['cmd']['options']['ping_width_ms'] = self.pingWidthEntry.get()
+		packet['cmd']['options']['ping_min_len_mult'] = self.pingMinEntry.get()
+		packet['cmd']['options']['ping_max_len_mult'] = self.pingMaxEntry.get()
+		msg = json.dumps(packet)
 		print("Send: %s" % msg)
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 		self.configureWindow.destroy()
 		self.configureWindow = None
-		pass
 
 	def configureOpts(self):
 		cmdPacket = {}
