@@ -295,7 +295,11 @@ class CommandGateway():
 		self.sendConfigButton = tk.Button(self.configureWindow, text='Send Parameters', command = self.sendOptions)
 		self.sendConfigButton.grid(row=6, column=1, columnspan=2)
 
-
+	def completeUpgrade(self, packet):
+		if packet['upgrade_complete'] == 'true':
+			messagebox.showinfo(title='Software Upgrade', message='Upgrade Complete!')
+		else:
+			messagebox.showerror(title='Software Upgrade', message='Errors were reported!')
 		
 
 	def mainloop(self):
@@ -398,6 +402,9 @@ def main():
 
 			if 'upgrade_ready' in packet:
 				commandGateway.startUpgrade()
+
+			if 'upgrade_complete' in packet:
+				commandGateway.completeUpgrade(packet)
 
 		if (datetime.datetime.now() - last_heartbeat).total_seconds() > 30:
 			print("No heartbeats!")
