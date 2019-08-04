@@ -200,6 +200,26 @@ class CommandListener(object):
 		msg = json.dumps(packet)
 		self.sock.sendto(msg.encode('utf-8'), addr)
 
+	def _upgradeCmd(self, commandPacket, addr):
+		sock = socket.socket()
+		host = socket.gethostname()
+		port = 9500
+		sock.bind((host, port))
+		byteCounter = 0
+		with open('/home/e4e/upgrade.zip', 'wb') as archiveFile:
+			sock.listen(5)
+			conn, addr = sock.accept()
+			frame = conn.recv(1024)
+			byteCounter += len(frame)
+			while frame:
+				archiveFile.write(frame)
+				frame = conn.recv(1024)
+				byteCounter += len(frame)
+		conn.close()
+		sock.shutdown()
+		print("Received %d bytes" % byteCounter)
+
+
 	def _processCommand(self, commandPacket, addr):
 		commands = {
 			'test': lambda: None,
@@ -208,7 +228,8 @@ class CommandListener(object):
 			'setF': self._gotSetFCmd,
 			'getF': self._gotGetFCmd,
 			'getOpts': self._gotGetOptsCmd,
-			'setOpts': self._gotSetOptsCmd
+			'setOpts': self._gotSetOptsCmd,
+			'upgrade': self._upgradeCmd
 		}
 
 		print('Got action: %s' % (commandPacket['action']))

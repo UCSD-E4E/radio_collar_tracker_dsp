@@ -196,6 +196,43 @@ class CommandGateway():
 		self.configureWindow.destroy()
 		self.configureWindow = None
 
+	def upgradeSoftware(self):
+		ok = tk.tkMessageBox.askokcancel(title='Software Upgrade', 
+			message='You are trying to upgrade the remote software.  This may'
+			' cause software issues!  Are you sure about this?', parent=self.m)
+
+		if not ok:
+			return
+
+		fname = tk.tkFileDialog.askopenfilename(initialdir=".", 
+			title='Select Upgrade Package', filetypes=(('Repo Archive', '*.zip')))
+		if fname is None or fname == '':
+			return
+		cmdPacket = {}
+		cmdPacket['cmd'] = {}
+		cmdPacket['cmd']['id'] = 'gcs'
+		cmdPacket['cmd']['action'] = 'upgrade'
+		msg = json.dumps(packet)
+		print("Send: %s" % (msg))
+		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
+
+		sock = socket.socket()
+		host = socket.gethostname()
+		port = 9500
+		mav_IP = (self.mav_IP[0], port)
+		sock.connect(mav_IP)
+		byteCounter = 0
+		with open(fname) as archiveFile:
+			frame = archiveFile.read(1024)
+			byteCounter += len(frame)
+			while frame:
+				sock.send(frame)
+				frame = archiveFile.read(1024)
+				byteCounter += len(frame)
+		sock.shutdown()
+		print("Sent %d bytes" % (byteCounter))
+
+
 	def configureOpts(self):
 		cmdPacket = {}
 		cmdPacket['cmd'] = {}
@@ -259,6 +296,10 @@ class CommandGateway():
 		self.commitFreqButton.pack()
 		self.configureButton = tk.Button(self.m, text="Configure", command = self.configureOpts)
 		self.configureButton.pack()
+
+		self.upgradeButton = tk.Button(self.m, text = "Upgrade Software", command = self.upgradeSoftware)
+		self.upgradeButton.pack()
+
 		self.m.protocol("WM_DELETE_WINDOW", self.windowClose)
 		self.m.mainloop()
 		
