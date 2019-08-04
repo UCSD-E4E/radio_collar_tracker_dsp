@@ -190,6 +190,7 @@ class CommandListener(object):
 		if 'options' not in commandPacket:
 			return
 		opts = commandPacket['options']
+		print(opts)
 		self._options.setOptions(opts)
 		self._options.writeOptions()
 		packet = {}
