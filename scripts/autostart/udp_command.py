@@ -201,13 +201,19 @@ class CommandListener(object):
 		self.sock.sendto(msg.encode('utf-8'), addr)
 
 	def _upgradeCmd(self, commandPacket, addr):
+		packet = {}
+		packet['upgrade_ready'] = "true"
+		msg = json.dumps(packet)
+		self.sock.sendto(msg.encode('utf-8'), addr)
+
 		sock = socket.socket()
 		host = socket.gethostname()
+		socket.settimeout(10)
 		port = 9500
 		sock.bind((host, port))
 		byteCounter = 0
 		with open('/home/e4e/upgrade.zip', 'wb') as archiveFile:
-			sock.listen(5)
+			sock.listen()
 			conn, addr = sock.accept()
 			frame = conn.recv(1024)
 			byteCounter += len(frame)

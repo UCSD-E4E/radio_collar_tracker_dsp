@@ -19,6 +19,8 @@ import matplotlib
 matplotlib.use('TkAgg')
 
 import tkinter as tk
+import tkinter.messagebox as messagebox
+from tkFileDialog import askopenfilename
 
 class Ping(object):
 	"""Ping object"""
@@ -197,24 +199,29 @@ class CommandGateway():
 		self.configureWindow = None
 
 	def upgradeSoftware(self):
-		ok = tk.tkMessageBox.askokcancel(title='Software Upgrade', 
+		ok = messagebox.askokcancel(title='Software Upgrade', 
 			message='You are trying to upgrade the remote software.  This may'
 			' cause software issues!  Are you sure about this?', parent=self.m)
 
 		if not ok:
 			return
 
-		fname = tk.tkFileDialog.askopenfilename(initialdir=".", 
-			title='Select Upgrade Package', filetypes=(('Repo Archive', '*.zip')))
+		fname = askopenfilename(initialdir=".", title='Select Upgrade Package', filetypes=[('Repo Archive', '*.zip')])
 		if fname is None or fname == '':
+			return
+		if len(fname) == 0:
 			return
 		cmdPacket = {}
 		cmdPacket['cmd'] = {}
 		cmdPacket['cmd']['id'] = 'gcs'
 		cmdPacket['cmd']['action'] = 'upgrade'
-		msg = json.dumps(packet)
+		msg = json.dumps(cmdPacket)
 		print("Send: %s" % (msg))
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
+
+		self._upgradeFname = fname[0]
+
+	def startUpgrade(self)
 
 		sock = socket.socket()
 		host = socket.gethostname()
@@ -222,7 +229,7 @@ class CommandGateway():
 		mav_IP = (self.mav_IP[0], port)
 		sock.connect(mav_IP)
 		byteCounter = 0
-		with open(fname) as archiveFile:
+		with open(_upgradeFname) as archiveFile:
 			frame = archiveFile.read(1024)
 			byteCounter += len(frame)
 			while frame:
@@ -231,7 +238,7 @@ class CommandGateway():
 				byteCounter += len(frame)
 		sock.shutdown()
 		print("Sent %d bytes" % (byteCounter))
-
+		self._upgradeFname = None
 
 	def configureOpts(self):
 		cmdPacket = {}
@@ -377,6 +384,9 @@ def main():
 				commandGateway.setFreqs([int(freq) for freq in freqs])
 			if 'options' in packet:
 				commandGateway.setOptions(packet['options'])
+
+			if 'upgrade_ready' in packet:
+				commandGateway.startUpgrade()
 
 		if (datetime.datetime.now() - last_heartbeat).total_seconds() > 30:
 			print("No heartbeats!")
