@@ -236,8 +236,6 @@ class CommandListener(object):
 			assert(retval == 0)
 			retval = subprocess.call('make -C /home/e4e/radio_collar_tracker_drone install', shell=True)
 			assert(retval == 0)
-			retval = subprocess.call('service rctstart restart', shell=True)
-			assert(retval == 0)
 			packet = {}
 			packet['upgrade_complete'] = 'true'
 		except:
@@ -247,6 +245,7 @@ class CommandListener(object):
 			msg = json.dumps(packet)
 			self.sock.sendto(msg.encode('utf-8'), addr)
 
+		subprocess.call('service rctstart restart', shell=True)
 
 
 
