@@ -42,6 +42,10 @@ class RCTOpts(object):
 	def setOption(self, option, param):
 		self._params[option] = param
 
+	def setOptions(self, options):
+		for key, value in options.items():
+			self._params[key] = value
+
 	def writeOptions(self):
 		with open(self._configFile, 'w') as var_file:
 			for key, value in list(self._params.items()):
