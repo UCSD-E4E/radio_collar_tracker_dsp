@@ -7,6 +7,7 @@ import datetime
 import time
 import threading
 import select
+import subprocess
 
 class RCTOpts(object):
 	def __init__(self):
@@ -213,16 +214,23 @@ class CommandListener(object):
 		sock.bind(('', port))
 		byteCounter = 0
 		sock.listen(1)
-		conn, addr = sock.accept()
-		with open('/home/e4e/upgrade.zip', 'wb') as archiveFile:
-			frame = conn.recv(1024)
-			byteCounter += len(frame)
-			while frame:
-				archiveFile.write(frame)
+		try:
+			conn, addr = sock.accept()
+
+			with open('/home/e4e/upgrade.zip', 'wb') as archiveFile:
 				frame = conn.recv(1024)
 				byteCounter += len(frame)
+				while frame:
+					archiveFile.write(frame)
+					frame = conn.recv(1024)
+					byteCounter += len(frame)
+		except:
+			pass
 		conn.close()
 		print("Received %d bytes" % byteCounter)
+		subprocess.call('unzip -o -f /home/e4e/upgrade.zip', shell=True)
+		subprocess.call('make -C /home/e4e/radio_collar_tracker_drone', shell=True)
+		subprocess.call('make -C /home/e4e/radio_collar_tracker_drone install', shell=True)
 
 
 	def _processCommand(self, commandPacket, addr):

@@ -219,7 +219,8 @@ class CommandGateway():
 		print("Send: %s" % (msg))
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 
-		self._upgradeFname = fname[0]
+		self._upgradeFname = fname
+		print(fname)
 
 	def startUpgrade(self):
 
