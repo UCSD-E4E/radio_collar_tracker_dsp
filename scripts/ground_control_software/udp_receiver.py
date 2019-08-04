@@ -228,7 +228,16 @@ class CommandGateway():
 		port = 9500
 		mav_IP = (self.mav_IP[0], port)
 		print("Connecting to %s:%s" % mav_IP)
-		sock.connect(mav_IP)
+		tryCounter = 0;
+		while True:
+			try:
+				sock.connect(mav_IP)
+				break
+			except socket.error as e:
+				tryCounter += 1
+				if tryCounter > 10:
+					print(e)
+					return
 		byteCounter = 0
 		with open(self._upgradeFname) as archiveFile:
 			frame = archiveFile.read(1024)
