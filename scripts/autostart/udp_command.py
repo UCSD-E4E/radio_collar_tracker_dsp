@@ -228,22 +228,37 @@ class CommandListener(object):
 			pass
 		conn.close()
 		print("Received %d bytes" % byteCounter)
+		statusPacket = {}
+		statusPacket['upgrade_status'] = "Received %d bytes" % (byteCounter)
+		self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
 
 		try:
 			retval = subprocess.call('unzip -o -f /home/e4e/upgrade.zip', shell=True)
 			assert(retval == 0)
+			statusPacket['upgrade_status'] = "Unzipped"
+			print(json.dumps(packet))
+			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+
 			retval = subprocess.call('make -C /home/e4e/radio_collar_tracker_drone', shell=True)
 			assert(retval == 0)
+			statusPacket['upgrade_status'] = "Make complete"
+			print(json.dumps(packet))
+			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+
 			retval = subprocess.call('make -C /home/e4e/radio_collar_tracker_drone install', shell=True)
 			assert(retval == 0)
+			statusPacket['upgrade_status'] = "Make installed"
+			print(json.dumps(packet))
+			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+
 			packet = {}
 			packet['upgrade_complete'] = 'true'
 		except:
 			packet = {}
 			packet['upgrade_complete'] = 'false'
-		finally:
-			msg = json.dumps(packet)
-			self.sock.sendto(msg.encode('utf-8'), addr)
+
+		msg = json.dumps(packet)
+		self.sock.sendto(msg.encode('utf-8'), addr)
 
 		subprocess.call('service rctstart restart', shell=True)
 
