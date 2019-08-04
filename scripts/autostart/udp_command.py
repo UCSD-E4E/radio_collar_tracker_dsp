@@ -210,11 +210,11 @@ class CommandListener(object):
 		host = socket.gethostname()
 		sock.settimeout(10)
 		port = 9500
-		sock.bind((host, port))
+		sock.bind(('', port))
 		byteCounter = 0
+		sock.listen(1)
+		conn, addr = sock.accept()
 		with open('/home/e4e/upgrade.zip', 'wb') as archiveFile:
-			sock.listen()
-			conn, addr = sock.accept()
 			frame = conn.recv(1024)
 			byteCounter += len(frame)
 			while frame:
@@ -222,7 +222,6 @@ class CommandListener(object):
 				frame = conn.recv(1024)
 				byteCounter += len(frame)
 		conn.close()
-		sock.shutdown()
 		print("Received %d bytes" % byteCounter)
 
 

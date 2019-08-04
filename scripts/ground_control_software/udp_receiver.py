@@ -224,7 +224,7 @@ class CommandGateway():
 	def startUpgrade(self):
 
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		port = 9501
+		port = 9500
 		mav_IP = (self.mav_IP[0], port)
 		print("Connecting to %s:%s" % mav_IP)
 		sock.connect(mav_IP)
@@ -236,7 +236,7 @@ class CommandGateway():
 				sock.send(frame)
 				frame = archiveFile.read(1024)
 				byteCounter += len(frame)
-		sock.shutdown()
+		sock.shutdown(socket.SHUT_RDWR)
 		print("Sent %d bytes" % (byteCounter))
 		self._upgradeFname = None
 
