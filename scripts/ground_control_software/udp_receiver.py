@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import socket
 import argparse
@@ -20,7 +20,7 @@ matplotlib.use('TkAgg')
 
 import tkinter as tk
 import tkinter.messagebox as messagebox
-from tkFileDialog import askopenfilename
+from tkinter.filedialog import askopenfilename
 
 class Ping(object):
 	"""Ping object"""
