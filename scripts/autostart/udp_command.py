@@ -44,14 +44,17 @@ class RCTOpts(object):
 
 	def setOptions(self, options):
 		for key, value in options.items():
-			self._params[key] = value
+			if isinstance(value, list):
+				self._params[key] = value
+			else:
+				self._params[key] = [value]
 
 	def writeOptions(self):
 		with open(self._configFile, 'w') as var_file:
 			for key, value in list(self._params.items()):
 				for val in value:
 					opt = '%s=%s\n' % (key, val)
-					print(opt)
+					print(opt.strip())
 					var_file.write(opt)
 
 	def getAllOptions(self):
@@ -190,7 +193,6 @@ class CommandListener(object):
 		if 'options' not in commandPacket:
 			return
 		opts = commandPacket['options']
-		print(opts)
 		self._options.setOptions(opts)
 		self._options.writeOptions()
 		packet = {}
