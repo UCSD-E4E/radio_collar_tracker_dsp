@@ -209,7 +209,8 @@ def init_gps():
 def init_state_complete():
 	global shared_states
 	return SDR_INIT_STATES(shared_states[0]) == SDR_INIT_STATES.rdy and \
-		OUTPUT_DIR_STATES(shared_states[1]) == OUTPUT_DIR_STATES.rdy
+		OUTPUT_DIR_STATES(shared_states[1]) == OUTPUT_DIR_STATES.rdy and \
+		GPS_STATES(shared_states[2]) == GPS_STATES.rdy
 
 def init_RCT():
 	global run
