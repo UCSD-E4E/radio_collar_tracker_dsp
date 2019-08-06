@@ -269,10 +269,10 @@ def init_RCT():
 			center_freq = int(get_var('center_freq'))
 
 			sdr_record_cmd = ('sdr_record -g 22.0 -s %d -c %d'
-				' -r %d -o %s' % (sampling_freq, center_freq, run_num, run_dir))
+				' -r %d -o %s | tee -a /home/e4e/rtt.log' % (sampling_freq, center_freq, run_num, run_dir))
 
 
-			sdr_record = subprocess.Popen(shlex.split(sdr_record_cmd))
+			sdr_record = subprocess.Popen(sdr_record_cmd, shell=True)
 			
 			init_RCT_state = RCT_STATES.wait_end
 		elif init_RCT_state == RCT_STATES.wait_end:
