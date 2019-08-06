@@ -162,6 +162,7 @@ def init_gps():
 			except serial.SerialException as e:
 				init_gps_state = GPS_STATES.fail
 				print("GPS fail: bad serial!")
+				print(e)
 				continue
 			if tty_stream is None:
 				init_gps_state = GPS_STATES.fail
