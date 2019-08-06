@@ -301,6 +301,79 @@ class CommandGateway():
 		else:
 			messagebox.showerror(title='Software Upgrade', message='Errors were reported!')
 		
+	def setStatus(self, statusString):
+		print(statusString)
+		sdrStatus = int(statusString[0])
+		dirStatus = int(statusString[1])
+		gpsStatus = int(statusString[2])
+		sysStatus = int(statusString[3])
+		swStatus = int(statusString[4])
+
+		if sdrStatus == 0:
+			self.sdrStatusLabel.config(text='SDR: Searching for devices', bg='yellow')
+		elif sdrStatus == 1:
+			self.sdrStatusLabel.config(text='SDR: Recycling!', bg='yellow')
+		elif sdrStatus == 2:
+			self.sdrStatusLabel.config(text='SDR: Initializing SDR', bg='yellow')
+		elif sdrStatus == 3:
+			self.sdrStatusLabel.config(text='SDR: Ready', bg='green')
+		elif sdrStatus == 4:
+			self.sdrStatusLabel.config(text='SDR: Failed!', bg='red')
+		else:
+			self.sdrStatusLabel.config(text='SDR: NULL', bg='red')
+		pass
+
+		if dirStatus == 0:
+			self.dirStatusLabel.config(text='DIR: Searching', bg='yellow')
+		elif dirStatus == 1:
+			self.dirStatusLabel.config(text='DIR: Checking for mount', bg='yellow')
+		elif dirStatus == 2:
+			self.dirStatusLabel.config(text='DIR: Checking for space', bg='yellow')
+		elif dirStatus == 3:
+			self.dirStatusLabel.config(text='DIR: Recycling!', bg='yellow')
+		elif dirStatus == 4:
+			self.dirStatusLabel.config(text='DIR: Ready', bg='green')
+		elif dirStatus == 5:
+			self.dirStatusLabel.config(text='DIR: Failed!', bg='red')
+		else:
+			self.dirStatusLabel.config(text='DIR: NULL', bg='red')
+
+		if gpsStatus == 0:
+			self.gpsStatusLabel.config(text='GPS: Getting TTY Device', bg='yellow')		
+		elif gpsStatus == 1:
+			self.gpsStatusLabel.config(text='GPS: Waiting for message', bg='yellow')
+		elif gpsStatus == 2:
+			self.gpsStatusLabel.config(text='GPS: Recycling', bg='yellow')
+		elif gpsStatus == 3:
+			self.gpsStatusLabel.config(text='GPS: Ready', bg='green')
+		elif gpsStatus == 4:
+			self.gpsStatusLabel.config(text='GPS: Failed!', bg='red')
+		else:
+			self.gpsStatusLabel.config(text='GPS: NULL', bg='red')
+
+		if sysStatus == 0:
+			self.sysStatusLabel.config(text='SYS: Initializing', bg='yellow')
+		elif sysStatus == 1:
+			self.sysStatusLabel.config(text='SYS: Initializing', bg='yellow')
+		elif sysStatus == 2:
+			self.sysStatusLabel.config(text='SYS: Ready for start', bg='green')
+		elif sysStatus == 3:
+			self.sysStatusLabel.config(text='SYS: Starting', bg='blue')
+		elif sysStatus == 4:
+			self.sysStatusLabel.config(text='SYS: Running', bg='blue')
+		elif sysStatus == 5:
+			self.sysStatusLabel.config(text='SYS: Stopping', bg='blue')
+		elif sysStatus == 6:
+			self.sysStatusLabel.config(text='SYS: Failed!', bg='red')
+		else:
+			self.sysStatusLabel.config(text='SYS: NULL', bg='red')
+
+		if swStatus == 0:
+			self.swStatusLabel.config(text='SW: OFF', bg='yellow')
+		elif swStatus == 1:
+			self.swStatusLabel.config(text='SW: ON', bg='green')
+		else:
+			self.swStatusLabel.config(text='SW: NULL', bg='red')
 
 	def mainloop(self):
 		self.m = tk.Tk()
@@ -321,6 +394,19 @@ class CommandGateway():
 
 		self.upgradeButton = tk.Button(self.m, text = "Upgrade Software", command = self.upgradeSoftware)
 		self.upgradeButton.pack()
+
+		self.statusFrame = tk.LabelFrame(self.m, text="Payload Status", padx = 5, pady = 5)
+		self.statusFrame.pack()
+		self.sdrStatusLabel = tk.Label(self.statusFrame, text="SDR: NULL")
+		self.sdrStatusLabel.grid(row=1, column=1)
+		self.dirStatusLabel = tk.Label(self.statusFrame, text="DIR: NULL")
+		self.dirStatusLabel.grid(row=2, column=1)
+		self.gpsStatusLabel = tk.Label(self.statusFrame, text="GPS: NULL")
+		self.gpsStatusLabel.grid(row=3, column=1)
+		self.sysStatusLabel = tk.Label(self.statusFrame, text="SYS: NULL")
+		self.sysStatusLabel.grid(row=4, column=1)
+		self.swStatusLabel = tk.Label(self.statusFrame, text="SW: NULL")
+		self.swStatusLabel.grid(row=5, column=1)
 
 		self.m.protocol("WM_DELETE_WINDOW", self.windowClose)
 		self.m.mainloop()
@@ -394,6 +480,7 @@ def main():
 				generateKML.generateKML( pingPackages )
 			if 'heartbeat' in packet:
 				last_heartbeat = datetime.datetime.now()
+				commandGateway.setStatus(packet['heartbeat']['status'])
 			if 'frequencies' in packet:
 				freqs = packet['frequencies']
 				commandGateway.setFreqs([int(freq) for freq in freqs])
