@@ -30,7 +30,11 @@ def residuals( p, data ):
     r1 = p[2]
     n = p[3]
 
-    result[i] = rd - r1 - 10  *  n * math.log10( distance( [xd, yd, zd], [xT, yT, 0] ) )
+    dist = distance([xd, yd, zd], [xT, yT, 0])
+    if dist < 0.01:
+      dist = 0.01
+
+    result[i] = rd - r1 - 10  *  n * math.log10( dist )
 
   return result
 
