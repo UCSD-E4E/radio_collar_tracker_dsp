@@ -1,6 +1,12 @@
 *.pdf
-!trm.pdf
-!3dr_solo.pdf
+*.png
+*.aux
+*.glo
+*.ist
+*.toc
+*.synctex.gz
+*.dvi
+*.jpg
 *.sublime*
 Makefile
 Makefile.in
