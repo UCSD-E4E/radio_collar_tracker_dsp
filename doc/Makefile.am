@@ -6,6 +6,8 @@ endif
 clean:
 	-rm trm.pdf
 	-rm rct_manual.pdf
+	-rm *.aux *.glg *.glo *.gls *.ist *.log *.toc *.lof *.lot
+	
 
 maintainer-clean-local:
 	-rm Makefile.in
