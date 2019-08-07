@@ -67,7 +67,13 @@ while True:
     for i in range(n1):
         now = datetime.datetime.now()
         if (now - prevTime).total_seconds() > 1:
-            msg = '{"heartbeat":{"time": %d}}\n' % (time.mktime(now.timetuple()))
+            packet = {}
+            packet['heartbeat'] = {}
+            packet['heartbeat']['time'] = time.mktime(now.timetuple())
+            packet['heartbeat']['id'] = 'tmav'
+            status_string = '%d%d%d%d%d' % (1, 2, 3, 4, 5)
+            packet['heartbeat']['status'] = status_string
+            msg = json.dumps(packet)
             print(msg.strip())
             sent = sock.sendto(msg.encode("UTF-8"), (UDP_IP, UDP_PORT))
             assert(sent == len(msg))
