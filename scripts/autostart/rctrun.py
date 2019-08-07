@@ -13,6 +13,7 @@ from rct_udp_command import CommandListener
 import sys
 import shlex
 import argparse
+import datetime
 
 WAIT_COUNT = 60
 
@@ -63,27 +64,35 @@ def get_var(var):
 			return value.strip().strip('"').strip("'")
 	return None
 
-def init_SDR():
+def init_SDR(test = False):
 	global init_thread_op
 	global shared_states
 	init_sdr_state = SDR_INIT_STATES.find_devices
 	while init_thread_op:
 		shared_states[0] = init_sdr_state.value
 		if init_sdr_state == SDR_INIT_STATES.find_devices:
-			uhd_find_dev_retval = subprocess.call(['/usr/local/bin/uhd_find_devices', '--args=\"type=b200\"'], stdout=devnull, stderr=devnull)
-			if uhd_find_dev_retval == 0:
-				init_sdr_state = SDR_INIT_STATES.usrp_probe
+			if not test:
+				uhd_find_dev_retval = subprocess.call(['/usr/local/bin/uhd_find_devices', '--args=\"type=b200\"'], stdout=devnull, stderr=devnull)
+				if uhd_find_dev_retval == 0:
+					init_sdr_state = SDR_INIT_STATES.usrp_probe
+				else:
+					init_sdr_state = SDR_INIT_STATES.fail
 			else:
-				init_sdr_state = SDR_INIT_STATES.fail
+				time.sleep(1)
+				init_sdr_state = SDR_INIT_STATES.usrp_probe
 		elif init_sdr_state == SDR_INIT_STATES.wait_recycle:
 			time.sleep(1)
 			init_sdr_state = SDR_INIT_STATES.find_devices
 		elif init_sdr_state == SDR_INIT_STATES.usrp_probe:
-			uhd_usrp_probe_retval = subprocess.call(['/usr/local/bin/uhd_usrp_probe', '--args=\"type=b200\"', '--init-only'], stdout=devnull, stderr=devnull)
-			if uhd_usrp_probe_retval == 0:
-				init_sdr_state = SDR_INIT_STATES.rdy
+			if not test:
+				uhd_usrp_probe_retval = subprocess.call(['/usr/local/bin/uhd_usrp_probe', '--args=\"type=b200\"', '--init-only'], stdout=devnull, stderr=devnull)
+				if uhd_usrp_probe_retval == 0:
+					init_sdr_state = SDR_INIT_STATES.rdy
+				else:
+					init_sdr_state = SDR_INIT_STATES.fail
 			else:
-				init_sdr_state = SDR_INIT_STATES.fail
+				time.sleep(1)
+				init_sdr_state = SDR_INIT_STATES.rdy
 		elif init_sdr_state == SDR_INIT_STATES.fail:
 			time.sleep(10)
 			init_sdr_state = SDR_INIT_STATES.find_devices
@@ -91,7 +100,7 @@ def init_SDR():
 			time.sleep(1)
 	return 0
 
-def init_output_dir():
+def init_output_dir(test = False):
 	global init_thread_op
 	global shared_states
 	global output_dir
@@ -105,20 +114,28 @@ def init_output_dir():
 				init_output_dir_state = OUTPUT_DIR_STATES.fail
 			else:
 				init_output_dir_state = OUTPUT_DIR_STATES.check_output_dir
+			if test:
+				output_dir = '/tmp/'
+				if not os.path.isfile('/tmp/LAST_RUN.TXT'):
+					with open('/tmp/LAST_RUN.TXT', 'w') as lastrun:
+						lastrun.write('1')
 		elif init_output_dir_state == OUTPUT_DIR_STATES.check_output_dir:
 			if os.path.isdir(output_dir) and os.path.isfile(os.path.join(output_dir, 'LAST_RUN.TXT')):
 				init_output_dir_state = OUTPUT_DIR_STATES.check_space
 			else:
 				init_output_dir_state = OUTPUT_DIR_STATES.wait_recycle
 		elif init_output_dir_state == OUTPUT_DIR_STATES.check_space:
-			df = subprocess.Popen(['df', '-B1', output_dir], stdout=subprocess.PIPE)
-			output = df.communicate()[0].decode('utf-8')
-			device, size, used, available, percent, mountpoint = output.split('\n')[1].split()
-			if int(available) > 20 * 60 * 1500000 * 4:
-				# enough space
-				init_output_dir_state = OUTPUT_DIR_STATES.rdy
+			if not test:
+				df = subprocess.Popen(['df', '-B1', output_dir], stdout=subprocess.PIPE)
+				output = df.communicate()[0].decode('utf-8')
+				device, size, used, available, percent, mountpoint = output.split('\n')[1].split()
+				if int(available) > 20 * 60 * 1500000 * 4:
+					# enough space
+					init_output_dir_state = OUTPUT_DIR_STATES.rdy
+				else:
+					init_output_dir_state = OUTPUT_DIR_STATES.wait_recycle
 			else:
-				init_output_dir_state = OUTPUT_DIR_STATES.wait_recycle
+				init_output_dir_state = OUTPUT_DIR_STATES.rdy
 		elif init_output_dir_state == OUTPUT_DIR_STATES.wait_recycle:
 			time.sleep(1)
 			counter = counter + 1
@@ -144,7 +161,7 @@ def accept_gps(msg):
 		return False
 	return True
 
-def init_gps():
+def init_gps(test=False):
 	global init_thread_op
 	global run
 	global shared_states
@@ -152,45 +169,54 @@ def init_gps():
 	counter = 0
 	msg_counter = 0
 	tty_stream = None
+
+	prev_gps = 0
+
 	while init_thread_op:
 		shared_states[2] = init_gps_state.value
 		if init_gps_state == GPS_STATES.get_tty:
 			tty_device = get_var('gps_target')
 			tty_baud = get_var('gps_baud')
-			try:
-				tty_stream = serial.Serial(tty_device, tty_baud, timeout = 1)
-			except serial.SerialException as e:
-				init_gps_state = GPS_STATES.fail
-				print("GPS fail: bad serial!")
-				print(e)
-				continue
-			if tty_stream is None:
-				init_gps_state = GPS_STATES.fail
-				print("GPS fail: no serial!")
-				continue
+			if not test:
+				try:
+					tty_stream = serial.Serial(tty_device, tty_baud, timeout = 1)
+				except serial.SerialException as e:
+					init_gps_state = GPS_STATES.fail
+					print("GPS fail: bad serial!")
+					print(e)
+					continue
+				if tty_stream is None:
+					init_gps_state = GPS_STATES.fail
+					print("GPS fail: no serial!")
+					continue
+				else:
+					init_gps_state = GPS_STATES.get_msg
 			else:
 				init_gps_state = GPS_STATES.get_msg
 
 		elif init_gps_state == GPS_STATES.get_msg:
-			try:
-				line = tty_stream.readline().decode("utf-8")
-			except serial.serialutil.SerialException as e:
-				init_gps_state = GPS_STATES.fail
-				print("GPS fail: no serial!")
-				continue
-			if line is not None and line != "":
-				msg = None
+			if not test:
 				try:
-					msg = json.loads(line)
-					init_gps_state = GPS_STATES.rdy
-				except json.JSONDecodeError as e:
+					line = tty_stream.readline().decode("utf-8")
+				except serial.serialutil.SerialException as e:
 					init_gps_state = GPS_STATES.fail
-					print("GPS fail: bad message!")
-					init_gps_state = GPS_STATES.get_msg
+					print("GPS fail: no serial!")
 					continue
+				if line is not None and line != "":
+					msg = None
+					try:
+						msg = json.loads(line)
+						init_gps_state = GPS_STATES.rdy
+					except json.JSONDecodeError as e:
+						init_gps_state = GPS_STATES.fail
+						print("GPS fail: bad message!")
+						init_gps_state = GPS_STATES.get_msg
+						continue
+				else:
+					init_gps_state = GPS_STATES.get_msg
 			else:
-				init_gps_state = GPS_STATES.get_msg
-
+				time.sleep(1)
+				init_gps_state = GPS_STATES.rdy
 		elif init_gps_state == GPS_STATES.wait_recycle:
 			time.sleep(1)
 			if counter > WAIT_COUNT / 2:
@@ -202,8 +228,33 @@ def init_gps():
 		elif init_gps_state == GPS_STATES.fail:
 			time.sleep(10)
 			init_gps_state = GPS_STATES.get_tty
-		else:
-			time.sleep(1)
+		else: # init_gps_state = GPS_STATES.rdy
+			if not test:
+				try:
+					line = tty_stream.readline().decode("utf-8")
+				except serial.serialutil.SerialException as e:
+					init_gps_state = GPS_STATES.fail
+					print("GPS fail: no serial!")
+					continue
+				if line is not None and line != "":
+					msg = None
+					try:
+						msg = json.loads(line)
+					except json.JSONDecodeError as e:
+						init_gps_state = GPS_STATES.fail
+						print("GPS fail: bad message!")
+						print(e)
+						init_gps_state = GPS_STATES.get_msg
+						continue
+			else:
+				time.sleep(1)
+			current_gps = datetime.datetime.now()
+			if prev_gps == 0:
+				continue
+			else:
+				if (current_gps - prev_gps).total_seconds() > 5:
+					init_gps_state = GPS_STATES.wait_recycle
+			prev_gps = current_gps
 	return 0
 
 def init_state_complete():
@@ -212,7 +263,7 @@ def init_state_complete():
 		OUTPUT_DIR_STATES(shared_states[1]) == OUTPUT_DIR_STATES.rdy and \
 		GPS_STATES(shared_states[2]) == GPS_STATES.rdy
 
-def init_RCT():
+def init_RCT(test = False):
 	global run
 	global init_thread_op
 	global cmdListener
@@ -221,9 +272,9 @@ def init_RCT():
 	while run:
 		shared_states[3] = init_RCT_state.value
 		if init_RCT_state == RCT_STATES.init:
-			init_SDR_thread = threading.Thread(target=init_SDR)
-			init_output_thread = threading.Thread(target=init_output_dir)
-			init_gps_thread = threading.Thread(target=init_gps)
+			init_SDR_thread = threading.Thread(target=init_SDR, kwargs={'test':test})
+			init_output_thread = threading.Thread(target=init_output_dir, kwargs={'test':test})
+			init_gps_thread = threading.Thread(target=init_gps, kwargs={'test':test})
 			init_SDR_thread.start()
 			init_output_thread.start()
 			init_gps_thread.start()
@@ -255,7 +306,6 @@ def init_RCT():
 				last_run = int(lastrun.readline().strip())
 			with open(os.path.join(output_dir, 'LAST_RUN.TXT'), 'w') as lastrun:
 				lastrun.write(str(last_run + 1))
-
 			run_num = last_run + 1
 			run_dir = os.path.join(output_dir, 'RUN_%06d' % (run_num))
 			os.makedirs(run_dir)
@@ -270,9 +320,18 @@ def init_RCT():
 			sampling_freq = int(get_var('sampling_freq'))
 			center_freq = int(get_var('center_freq'))
 
-			sdr_record_cmd = ('sdr_record -g 22.0 -s %d -c %d'
-				' -r %d -o %s | tee -a /home/e4e/rtt.log' % (sampling_freq, center_freq, run_num, run_dir))
-
+			if not test:
+				sdr_record_cmd = ('sdr_record -g 22.0 -s %d -c %d'
+					' -r %d -o %s | tee -a /var/log/rtt.log' % (sampling_freq, center_freq, run_num, run_dir))
+			else:
+				sdr_record_cmd = ('sdr_record -g 22.0 '
+									'-s %d ' % (sampling_freq) +
+									'-c %d ' % (center_freq) +
+									'-r %d ' % (run_num) +
+									'-o %s ' % (run_dir) +
+									'--test_config ' +
+									'--test_data /media/ntlhui/FA56-CFCD/2019.05.05/RUN_000008'
+									'| tee -a /var/log/rtt.log')
 
 			sdr_record = subprocess.Popen(sdr_record_cmd, shell=True)
 			
@@ -317,6 +376,7 @@ def main():
 
 	parser = argparse.ArgumentParser(description='RCT Boostrapper')
 	parser.add_argument('--autostart', action='store_true')
+	parser.add_argument('--test', action='store_true')
 
 	args = parser.parse_args()
 
@@ -343,7 +403,7 @@ def main():
 	signal.signal(signal.SIGINT, sigint_handler)
 	signal.signal(signal.SIGTERM, sigint_handler)
 
-	init_RCT_thread = threading.Thread(target=init_RCT)
+	init_RCT_thread = threading.Thread(target=init_RCT, kwargs={'test':args.test})
 	init_RCT_thread.start()
 
 	signal.pause()
