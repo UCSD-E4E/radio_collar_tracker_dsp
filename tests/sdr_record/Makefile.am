@@ -1,6 +1,6 @@
 check_PROGRAMS = testIQdata testUtility \
 	testSDRTest testGPStest \
-	testDSPV3 testLocalization \
+	testDSPV3 \
 	testSerialGPS
 
 TESTS = $(check_PROGRAMS)
