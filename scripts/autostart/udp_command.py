@@ -8,6 +8,7 @@ import time
 import threading
 import select
 import subprocess
+import sys
 
 class RCTOpts(object):
 	def __init__(self):
@@ -217,7 +218,7 @@ class CommandListener(object):
 		try:
 			conn, addr = sock.accept()
 
-			with open('/home/e4e/upgrade.zip', 'wb') as archiveFile:
+			with open('/tmp/upgrade.zip', 'wb') as archiveFile:
 				frame = conn.recv(1024)
 				byteCounter += len(frame)
 				while frame:
@@ -233,19 +234,31 @@ class CommandListener(object):
 		self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
 
 		try:
-			retval = subprocess.call('unzip -o -f /home/e4e/upgrade.zip', shell=True)
+			retval = subprocess.call('unzip -f -u -o /tmp/upgrade.zip -d /tmp', shell=True)
 			assert(retval == 0)
 			statusPacket['upgrade_status'] = "Unzipped"
 			print(json.dumps(packet))
 			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
 
-			retval = subprocess.call('make -C /home/e4e/radio_collar_tracker_drone', shell=True)
+			retval = subprocess.call('./autogen.sh', shell=True, cwd='/tmp/radio_collar_tracker_drone-online_proc')
+			assert(retval == 0)
+			statusPacket['upgrade_status'] = "autogen complete"
+			print(json.dumps(packet))
+			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+
+			retval = subprocess.call('./configure', shell=True, cwd='/tmp/radio_collar_tracker_drone-online_proc')
+			assert(retval == 0)
+			statusPacket['upgrade_status'] = "configure complete"
+			print(json.dumps(packet))
+			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+
+			retval = subprocess.call('make', shell=True, cwd='/tmp/radio_collar_tracker_drone-online_proc')
 			assert(retval == 0)
 			statusPacket['upgrade_status'] = "Make complete"
 			print(json.dumps(packet))
 			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
 
-			retval = subprocess.call('make -C /home/e4e/radio_collar_tracker_drone install', shell=True)
+			retval = subprocess.call('make install', shell=True, cwd='/tmp/radio_collar_tracker_drone-online_proc')
 			assert(retval == 0)
 			statusPacket['upgrade_status'] = "Make installed"
 			print(json.dumps(packet))
@@ -260,8 +273,11 @@ class CommandListener(object):
 		msg = json.dumps(packet)
 		self.sock.sendto(msg.encode('utf-8'), addr)
 
-		subprocess.call('service rctstart restart', shell=True)
-
+		
+		print("I was run with: ")
+		print(sys.argv)
+		os.execvp(sys.argv[0], sys.argv[1:])
+			
 
 
 	def _processCommand(self, commandPacket, addr):
