@@ -216,7 +216,7 @@ class CommandListener(object):
 		byteCounter = 0
 		sock.listen(1)
 		try:
-			conn, addr = sock.accept()
+			conn, tcp_addr = sock.accept()
 
 			with open('/tmp/upgrade.zip', 'wb') as archiveFile:
 				frame = conn.recv(1024)
@@ -226,58 +226,73 @@ class CommandListener(object):
 					frame = conn.recv(1024)
 					byteCounter += len(frame)
 		except:
-			pass
+			return
 		conn.close()
 		print("Received %d bytes" % byteCounter)
 		statusPacket = {}
 		statusPacket['upgrade_status'] = "Received %d bytes" % (byteCounter)
-		self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+		msg = json.dumps(statusPacket)
+		self.sock.sendto(msg.encode('utf-8'), addr)
 
 		try:
-			retval = subprocess.call('unzip -f -u -o /tmp/upgrade.zip -d /tmp', shell=True)
+			retval = subprocess.call('unzip -u -o /tmp/upgrade.zip -d /tmp', shell=True)
 			assert(retval == 0)
 			statusPacket['upgrade_status'] = "Unzipped"
-			print(json.dumps(packet))
-			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+			msg = json.dumps(statusPacket)
+			print(msg)
+			self.sock.sendto(msg.encode('utf-8'), addr)
+			self.sock.sendto(msg.encode('utf-8'), addr)
 
 			retval = subprocess.call('./autogen.sh', shell=True, cwd='/tmp/radio_collar_tracker_drone-online_proc')
 			assert(retval == 0)
 			statusPacket['upgrade_status'] = "autogen complete"
-			print(json.dumps(packet))
-			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+			msg = json.dumps(statusPacket)
+			print(msg)
+			self.sock.sendto(msg.encode('utf-8'), addr)
 
 			retval = subprocess.call('./configure', shell=True, cwd='/tmp/radio_collar_tracker_drone-online_proc')
 			assert(retval == 0)
 			statusPacket['upgrade_status'] = "configure complete"
-			print(json.dumps(packet))
-			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+			msg = json.dumps(statusPacket)
+			print(msg)
+			self.sock.sendto(msg.encode('utf-8'), addr)
 
 			retval = subprocess.call('make', shell=True, cwd='/tmp/radio_collar_tracker_drone-online_proc')
 			assert(retval == 0)
 			statusPacket['upgrade_status'] = "Make complete"
-			print(json.dumps(packet))
-			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+			msg = json.dumps(statusPacket)
+			print(msg)
+			self.sock.sendto(msg.encode('utf-8'), addr)
 
 			retval = subprocess.call('make install', shell=True, cwd='/tmp/radio_collar_tracker_drone-online_proc')
 			assert(retval == 0)
 			statusPacket['upgrade_status'] = "Make installed"
-			print(json.dumps(packet))
-			self.sock.sendto(json.dumps(packet).encode('utf-8'), addr)
+			msg = json.dumps(statusPacket)
+			print(msg)
+			self.sock.sendto(msg.encode('utf-8'), addr)
 
 			packet = {}
 			packet['upgrade_complete'] = 'true'
-		except:
+			msg = json.dumps(packet)
+			print(msg)
+			self.sock.sendto(msg.encode('utf-8'), addr)
+
+			print("I was run with: ")
+			print(sys.argv)
+			print(sys.argv[1:])
+			os.execv(sys.argv[0], sys.argv)
+
+		except Exception as e:
 			packet = {}
 			packet['upgrade_complete'] = 'false'
+			packet['reason'] = str(e)
 
-		msg = json.dumps(packet)
-		self.sock.sendto(msg.encode('utf-8'), addr)
+			msg = json.dumps(packet)
+			print(msg)
+			self.sock.sendto(msg.encode('utf-8'), addr)
 
 		
-		print("I was run with: ")
-		print(sys.argv)
-		os.execvp(sys.argv[0], sys.argv[1:])
-			
+
 
 
 	def _processCommand(self, commandPacket, addr):
