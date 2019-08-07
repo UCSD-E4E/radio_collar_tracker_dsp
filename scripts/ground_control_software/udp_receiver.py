@@ -317,7 +317,7 @@ class CommandGateway():
 		if packet['upgrade_complete'] == 'true':
 			messagebox.showinfo(title='Software Upgrade', message='Upgrade Complete!')
 		else:
-			messagebox.showerror(title='Software Upgrade', message='Errors were reported!')
+			messagebox.showerror(title='Software Upgrade', message='Errors were reported!\n%s' % packet['reason'])
 	
 	def noHeartbeat(self):
 		pass
@@ -403,6 +403,8 @@ class CommandGateway():
 		self.stopButton.pack()
 		self.freqFrame = tk.LabelFrame(self.m, text='Frequencies', padx=5, pady=5)
 		self.freqFrame.pack()
+		self.getFrequencyButton = tk.Button(self.m, text='Get Frequencies', command=self.getFreqs)
+		self.getFrequencyButton.pack()
 		self.addFreqButton = tk.Button(self.m, text='Add Frequency', command=self.addFreq)
 		self.addFreqButton.pack()
 		self.removeFreqButton = tk.Button(self.m, text = 'Remove Frequency', command = self.removeFreq)
