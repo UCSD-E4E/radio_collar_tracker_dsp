@@ -8,7 +8,7 @@
 FROM ubuntu:16.04
 RUN apt-get update && apt-get install -y git vim htop gdb valgrind cmake \
 	build-essential python3 libboost-all-dev python-mako python3-pip \
-	libusb-1.0-0-dev autoconf pkg-config picocom sudo python-pip
+	libusb-1.0-0-dev autoconf pkg-config picocom sudo python-pip zip
 RUN pip3 install --upgrade pip
 RUN pip2 install --upgrade pip
 RUN pip2 install requests
