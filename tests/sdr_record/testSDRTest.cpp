@@ -22,12 +22,14 @@
 #include <chrono>
 
 void testConstructor(){
-	RTT::SDR_TEST testObj("/home/ntlhui/workspace/tmp/testData/");
+	volatile bool run = false;
+	RTT::SDR_TEST testObj("/home/ntlhui/workspace/tmp/testData/", run);
 	assert(testObj._files.size() == 1);
 }
 
 void testThroughput(){
-	RTT::SDR_TEST testObj("/home/ntlhui/workspace/tmp/testData/");
+	volatile bool run = false;
+	RTT::SDR_TEST testObj("/home/ntlhui/workspace/tmp/testData/", run);
 	assert(testObj._files.size() == 1);
 	double maxTime = 67108864 / 4 / 2000000.0 * testObj._files.size();
 	
@@ -48,7 +50,8 @@ void testThroughput(){
 
 
 void testTime(){
-	RTT::SDR_TEST testObj("/home/ntlhui/workspace/tmp/testData/");
+	volatile bool run = false;
+	RTT::SDR_TEST testObj("/home/ntlhui/workspace/tmp/testData/", run);
 	std::cout << testObj.getStartTime_ms() << std::endl;
 	assert(testObj.getStartTime_ms() == 1502770079180);
 }
