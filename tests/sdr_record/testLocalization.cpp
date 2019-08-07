@@ -5,7 +5,7 @@
 #include <thread>
 #include <condition_variable>
 #include "ping.hpp"
-#include <dlib/optimization.h>
+
 #define private public
 #define protected public
 #include "gps.hpp"
