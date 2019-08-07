@@ -60,14 +60,14 @@ namespace RTT{
 			}
 			if(*it >= center_freq){
 				// upper half
-				std::size_t target_bin = (double)(*it - center_freq) / (sampling_freq / 2) * FFT_LEN / 2;
+				std::size_t target_bin = ((double)(*it - center_freq) / (sampling_freq / 2)) * FFT_LEN / 2;
 				target_bins.push_back(target_bin);
 				#ifdef DEBUG
 				_ostr1 << *it << ", " << target_bin << std::endl;
 				#endif
 			}else{
 				// lower half
-				std::size_t target_bin = FFT_LEN + (double)(*it - center_freq) / (sampling_freq / 2) * FFT_LEN / 2;
+				std::size_t target_bin = FFT_LEN + ((double)(*it - (double)center_freq) / (sampling_freq / 2)) * FFT_LEN / 2;
 				target_bins.push_back(target_bin);
 				#ifdef DEBUG
 				_ostr1 << *it << ", " << target_bin << std::endl;
@@ -92,7 +92,7 @@ namespace RTT{
 			std::cout << "Failed to initialize FFTW threads!" << std::endl;
 			return;
 		}
-		fftw_plan_with_nthreads(4);
+		fftw_plan_with_nthreads(1);
 		_unpack_fft_plan = fftw_plan_dft_1d(FFT_LEN, _unpack_fft_in, _unpack_fft_out,
 			FFTW_FORWARD, FFTW_MEASURE);
 
@@ -289,6 +289,7 @@ namespace RTT{
 		std::size_t signal_idx = 0;
 		std::size_t out_count = 0;
 		std::size_t sample_counter = 0;
+		std::cout << "DSP is alive" << std::endl;
 
 		#ifdef DEBUG
 		std::ofstream _ostr1{"classifier_in.log"};
@@ -456,12 +457,13 @@ namespace RTT{
 		std::size_t integrate_counter = 0;
 		std::size_t fft_counter = 0;
 		std::size_t write_counter = 0;
+		std::size_t buffer_counter = 0;
 		char fname[1024];
-		sprintf(fname, _output_fmt, file_counter);
 		std::ofstream data_str;
 
 
 		if(!_output_dir.empty()){
+			sprintf(fname, _output_fmt, file_counter);
 			data_str.open(fname, std::ofstream::binary);
 			#ifdef DEBUG
 			std::cout << "Opening initial " << fname << std::endl;
@@ -487,8 +489,9 @@ namespace RTT{
 				i_v.wait(inputLock);
 			}
 			if(!i_q.empty()){
-				std::complex<double>* dataObj = i_q.front();
+				const std::complex<double>* dataObj = i_q.front();
 				i_q.pop();
+				buffer_counter++;
 				inputLock.unlock();
 
 				if(integrate_counter >= int_factor && nFreqs > 0){
