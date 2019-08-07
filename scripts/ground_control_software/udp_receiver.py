@@ -318,9 +318,11 @@ class CommandGateway():
 			messagebox.showinfo(title='Software Upgrade', message='Upgrade Complete!')
 		else:
 			messagebox.showerror(title='Software Upgrade', message='Errors were reported!')
-		
+	
+	def noHeartbeat(self):
+		pass
+
 	def setStatus(self, statusString):
-		print(statusString)
 		sdrStatus = int(statusString[0])
 		dirStatus = int(statusString[1])
 		gpsStatus = int(statusString[2])
@@ -525,7 +527,7 @@ def main():
 		if (datetime.datetime.now() - last_heartbeat).total_seconds() > 30:
 			print("No heartbeats!")
 			logfile.write("No heartbeats! at %s\n" % (datetime.datetime.now().ctime()))
-			# msgbox?
+			commandGateway.noHeartbeat()
 
 if __name__ == '__main__':
 	main()
