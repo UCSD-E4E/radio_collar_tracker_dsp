@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y git vim htop gdb valgrind cmake \
 RUN pip3 install --upgrade pip
 RUN pip2 install --upgrade pip
 RUN pip2 install requests
-RUN pip2 install six requests pynmea2 serial
+RUN pip2 install six requests pynmea2 pyserial
+RUN pip3 install pyserial
 #  exfat-fuse exfat-utils autoconf
 
 RUN git clone git://github.com/EttusResearch/uhd.git /root/uhd
