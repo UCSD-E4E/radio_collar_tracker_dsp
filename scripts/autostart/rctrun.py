@@ -302,14 +302,22 @@ def init_RCT(test = False):
 				init_RCT_state = RCT_STATES.wait_start
 		elif init_RCT_state == RCT_STATES.start:
 			print("Starting drone_run")
-			
-			with open(os.path.join(output_dir, 'LAST_RUN.TXT')) as lastrun:
-				last_run = int(lastrun.readline().strip())
-			with open(os.path.join(output_dir, 'LAST_RUN.TXT'), 'w') as lastrun:
-				lastrun.write(str(last_run + 1))
-			run_num = last_run + 1
+			if not test:
+				with open(os.path.join(output_dir, 'LAST_RUN.TXT')) as lastrun:
+					last_run = int(lastrun.readline().strip())
+				with open(os.path.join(output_dir, 'LAST_RUN.TXT'), 'w') as lastrun:
+					lastrun.write(str(last_run + 1))
+				run_num = last_run + 1
+			else:
+				run_num = 8
 			run_dir = os.path.join(output_dir, 'RUN_%06d' % (run_num))
-			os.makedirs(run_dir)
+			if not test:
+				os.makedirs(run_dir)
+			else:
+				try:
+					os.makedirs(run_dir)
+				except:
+					pass
 
 			localize_file = os.path.join(run_dir, 'LOCALIZE_%06d' % (run_num))
 			with open(localize_file, 'w') as file:
