@@ -14,6 +14,7 @@ import sys
 import shlex
 import argparse
 import datetime
+import sys
 
 WAIT_COUNT = 60
 
@@ -416,4 +417,5 @@ def main():
 	mmap_file.close()
 
 if __name__ == '__main__':
+	print(sys.argv)
 	main()
