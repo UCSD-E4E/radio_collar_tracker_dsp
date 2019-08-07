@@ -49,7 +49,7 @@ namespace RTT{
 		_input_dir(input_dir),
 		_stream(),
 		_files(),
-		_buffer_size(16384),
+		_buffer_size(rx_buffer_size),
 		_sampling_freq(4000000),
 		_p_run(program_run){
 		glob_t glob_output;
@@ -62,7 +62,7 @@ namespace RTT{
 			_files.push_back(std::string(glob_output.gl_pathv[i]));
 		}
 		globfree(&glob_output);
-		std::cout << "Using test module" << std::endl;
+		std::cout << "Using test SDR module" << std::endl;
 	}
 
 	SDR_TEST::~SDR_TEST(){
@@ -127,9 +127,7 @@ namespace RTT{
 			for(std::size_t j = 0; j < num_samples / _buffer_size  && _run; j++){
 				// std::cout << "Reading frame " << j << " of " << num_samples / 
 				// 	_buffer_size << std::endl;
-				IQdataPtr databuf (new IQdata(_buffer_size));
-				databuf->time_ms = (std::size_t)((double)sample_count / 
-					_sampling_freq * 1000);
+				std::complex<double>* raw_buffer = new std::complex<double>[_buffer_size * 2];
 				if(!_stream){
 					std::cout << "Stream not ready!" << std::endl;
 					std::cout << _stream.good() << std::endl;
@@ -141,8 +139,8 @@ namespace RTT{
 				_stream.read((char*) buffer, sizeof(std::int16_t) * 2 * 
 					_buffer_size);
 				for(std::size_t k = 0; k < _buffer_size  && _run; k++){
-					databuf->data->at(k) = std::complex<short>(buffer[2 * k], 
-						buffer[2 * k + 1]);
+					raw_buffer[k] = std::complex<double>(buffer[2 * k] / 4096.0, 
+						buffer[2 * k + 1] / 4096.0);
 					// std::cout << buffer[2 * k] << ", " << buffer[2 * k + 1] << std::endl;
 					sample_count++;
 					#ifdef DEBUG
@@ -153,9 +151,11 @@ namespace RTT{
 					_ostr << buffer[2*k+1] << "i" << std::endl;
 					#endif
 				}
+
+
 				std::unique_lock<std::mutex> olock(data_mutex);
-				// data_queue.push(databuf);
-				#warning NOT IMPLEMENTED
+				data_queue.push(raw_buffer);
+				
 				buffer_count++;
 				olock.unlock();
 				data_cv.notify_all();
