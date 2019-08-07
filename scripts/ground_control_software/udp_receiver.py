@@ -472,7 +472,7 @@ def main():
 		if ready[0]:
 			data, addr = sock.recvfrom(BUFFER_LEN)
 			# print(data.decode('utf-8').strip())
-			logfile.write("Received: %s\n" % (data.encode('utf-8')))
+			logfile.write("Received: %s\n" % (data.decode('utf-8')))
 			packet = json.loads(data.decode('utf-8'))
 			if 'ping' in packet:
 				ping = Ping(packet)
