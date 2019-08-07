@@ -83,7 +83,7 @@ def waitForHeartbeat(socket, timeout = 30):
 
 class CommandGateway():
 	"""docstring for CommandGateway"""
-	def __init__(self, mav_IP, socket):
+	def __init__(self, mav_IP, socket, logfile):
 		self.mav_IP = mav_IP
 		self._socket = socket
 		self.thread = threading.Thread(target=self.mainloop)
@@ -92,6 +92,7 @@ class CommandGateway():
 		self._freqElements = []
 		self.freqs = []
 		self.freqFrame = None
+		self._log = logfile
 
 		self.getFreqs()
 
@@ -102,6 +103,7 @@ class CommandGateway():
 		cmdPacket['cmd']['action'] = 'getF'
 		msg = json.dumps(cmdPacket)
 		print("Send: %s" % (msg))
+		self._log.write("Send: %s\n" % (msg))
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 
 	def isAlive(self):
@@ -114,6 +116,7 @@ class CommandGateway():
 		cmdPacket['cmd']['action'] = 'start'
 		msg = json.dumps(cmdPacket)
 		print("Send: %s" % msg)
+		self._log.write("Send: %s\n" % (msg))
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 
 	def stopCommand(self):
@@ -123,6 +126,7 @@ class CommandGateway():
 		cmdPacket['cmd']['action'] = 'stop'
 		msg = json.dumps(cmdPacket)
 		print("Send: %s" % msg)
+		self._log.write("Send: %s\n" % (msg))
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 
 	def windowClose(self):
@@ -165,6 +169,7 @@ class CommandGateway():
 		cmdPacket['cmd']['frequencies'] = freqs
 		msg = json.dumps(cmdPacket)
 		print("Send: %s" % msg)
+		self._log.write("Send: %s\n" % (msg))
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 
 
@@ -196,6 +201,7 @@ class CommandGateway():
 		packet['cmd']['options']['ping_min_snr'] = self.minSNREntry.get()
 		msg = json.dumps(packet)
 		print("Send: %s" % msg)
+		self._log.write("Send: %s\n" % (msg))
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 		self.configureWindow.destroy()
 		self.configureWindow = None
@@ -219,10 +225,12 @@ class CommandGateway():
 		cmdPacket['cmd']['action'] = 'upgrade'
 		msg = json.dumps(cmdPacket)
 		print("Send: %s" % (msg))
+		self._log.write("Send: %s\n" % (msg))
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 
 		self._upgradeFname = fname
 		print(fname)
+		self._log.write('Using %s as upgrade package\n' % (fname))
 
 	def startUpgrade(self):
 
@@ -251,6 +259,7 @@ class CommandGateway():
 				byteCounter += len(frame)
 		sock.shutdown(socket.SHUT_RDWR)
 		print("Sent %d bytes" % (byteCounter))
+		self._log.write("Sent %d bytes\n" % (byteCounter))
 		self._upgradeFname = None
 
 	def configureOpts(self):
@@ -260,6 +269,7 @@ class CommandGateway():
 		cmdPacket['cmd']['action'] = 'getOpts'
 		msg = json.dumps(cmdPacket)
 		print("Send: %s" % msg)
+		self._log.write("Send: %s\n" % msg)
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
 
 		self.configureWindow = tk.Toplevel(self.m)
@@ -425,6 +435,11 @@ def main():
 	if findFile( "point.kml", "." ) is None:
 		open('point.kml', 'a+').close()
 
+	logfilename = 'udp_receiver.log'
+
+	logfile = open(logfilename, 'a')
+	logfile.write('UDP Receiver started at %s\n' % (datetime.datetime.now().ctime()))
+
 	isWindows = ( platform.system() == 'Windows' )
 	parser = argparse.ArgumentParser("Radio Telemetry Tracker Payload Receiver")
 	args = parser.parse_args()
@@ -439,7 +454,9 @@ def main():
 	if mav_IP is None:
 		print("No hearbeat packets received!")
 		return
-	commandGateway = CommandGateway(mav_IP, sock)
+
+	logfile.write("Connected at %s\n" % (datetime.datetime.now().ctime()))
+	commandGateway = CommandGateway(mav_IP, sock, logfile)
 
 	pings = []
 	guess = [0,0,0]
@@ -455,6 +472,7 @@ def main():
 		if ready[0]:
 			data, addr = sock.recvfrom(BUFFER_LEN)
 			# print(data.decode('utf-8').strip())
+			logfile.write("Received: %s\n" % (data.encode('utf-8')))
 			packet = json.loads(data.decode('utf-8'))
 			if 'ping' in packet:
 				ping = Ping(packet)
@@ -466,6 +484,7 @@ def main():
 				freqIdx = pingFrequencies.index(ping.getFrequency())
 				pings[freqIdx].append(Ping(packet))
 				print("Got ping at %d" % (pingFrequencies[freqIdx]))
+				logfile.write("Got ping at %d\n" % (pingFrequencies[freqIdx]))
 				if len(pings[freqIdx]) > 4:
 					initZoneNum = pings[freqIdx][0].getUTMZone()[0]
 					initZone = pings[freqIdx][0].getUTMZone()[1]
@@ -475,10 +494,12 @@ def main():
 					# Convert to lat lon
 					if guess is None:
 						print("Failed to calculate estimate for collar %d" % (pingFrequencies[freqIdx]))
+						logfile.write("Failed to calculate estimate for collar %d\n" % (pingFrequencies[freqIdx]))
 						pingPackages[freqIdx].setStatus(False)
 						pingEstimates[freqIdx] = None
 					else:
-						print("Found good esimtate for collar %d" % (pingFrequencies[freqIdx]))
+						print("Found good estimate for collar %d" % (pingFrequencies[freqIdx]))
+						logfile.write("Found good estimate for collar %d\n" % (pingFrequencies[freqIdx]))
 						ll = utm.to_latlon( guess[0], guess[1], initZoneNum, zone_letter=initZone )
 						ll = [ ll[1],ll[0] ]
 						pingEstimates[freqIdx] = guess
@@ -503,6 +524,7 @@ def main():
 
 		if (datetime.datetime.now() - last_heartbeat).total_seconds() > 30:
 			print("No heartbeats!")
+			logfile.write("No heartbeats! at %s\n" % (datetime.datetime.now().ctime()))
 			# msgbox?
 
 if __name__ == '__main__':
