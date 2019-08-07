@@ -179,6 +179,7 @@ class CommandGateway():
 			self.pingWidthEntry.insert(0, int(options['ping_width_ms'][0]))
 			self.pingMaxEntry.insert(0, float(options['ping_max_len_mult'][0]))
 			self.pingMinEntry.insert(0, float(options['ping_min_len_mult'][0]))
+			self.minSNREntry.insert(0, float(options['ping_min_snr'][0]))
 
 	def sendOptions(self):
 		# {"options": {"center_freq": ["173500000"], "autostart": ["true"], "ping_width_ms": ["27"], "gps_baud": ["9600"], "frequencies": ["173965000"], "output_dir": ["/mnt/RAW_DATA"], "gps_mode": ["false"], "ping_min_snr": ["5"], "sampling_freq": ["1500000"], "ping_max_len_mult": ["1.5"], "gps_target": ["/dev/ttyACM0"], "ping_min_len_mult": ["0.5"]}}
@@ -192,6 +193,7 @@ class CommandGateway():
 		packet['cmd']['options']['ping_width_ms'] = self.pingWidthEntry.get()
 		packet['cmd']['options']['ping_min_len_mult'] = self.pingMinEntry.get()
 		packet['cmd']['options']['ping_max_len_mult'] = self.pingMaxEntry.get()
+		packet['cmd']['options']['ping_min_snr'] = self.minSNREntry.get()
 		msg = json.dumps(packet)
 		print("Send: %s" % msg)
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
@@ -292,8 +294,14 @@ class CommandGateway():
 		self.pingMinEntry = tk.Entry(self.configureWindow)
 		self.pingMinEntry.grid(row=5, column=2)
 
+		self.minSNRLabel = tk.Label(self.configureWindow, text="Minimum SNR")
+		self.minSNRLabel.grid(row = 6, column = 1)
+
+		self.minSNREntry = tk.Entry(self.configureWindow)
+		self.minSNREntry.grid(row=6, column = 2)
+
 		self.sendConfigButton = tk.Button(self.configureWindow, text='Send Parameters', command = self.sendOptions)
-		self.sendConfigButton.grid(row=6, column=1, columnspan=2)
+		self.sendConfigButton.grid(row=7, column=1, columnspan=2)
 
 	def completeUpgrade(self, packet):
 		if packet['upgrade_complete'] == 'true':
