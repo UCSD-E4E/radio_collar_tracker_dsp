@@ -9,6 +9,8 @@ import threading
 import select
 import subprocess
 import sys
+import glob
+import traceback
 
 class RCTOpts(object):
 	def __init__(self):
@@ -42,9 +44,100 @@ class RCTOpts(object):
 		return self._params[option]
 
 	def setOption(self, option, param):
+		if option == 'ping_width_ms':
+			assert(isinstance(param, str))
+			test = float(param)
+			assert(test > 0)
+		elif option == 'ping_min_snr':
+			assert(isinstance(param, str))
+			test = float(param)
+			assert(test > 0)
+		elif option == 'ping_max_len_mult':
+			assert(isinstance(param, str))
+			test = float(param)
+			assert(test > 1)
+		elif option == 'ping_min_len_mult':
+			assert(isinstance(param, str))
+			test = float(param)
+			assert(test < 1)
+			assert(test > 0)
+		elif option == 'gps_mode':
+			assert(isinstance(param, str))
+			assert(param == 'true' or param == 'false')
+		elif option == 'gps_target':
+			assert(isinstance(param, str))
+		elif option == 'gps_baud':
+			assert(isinstance(param, str))
+			test = int(param)
+			assert(param > 0)
+		elif option == 'frequencies':
+			assert(isinstance(param, list))
+			assert(all(isinstance(freq, int) and freq > 0 for freq in param))
+		elif option == 'autostart':
+			assert(isinstance(param, str))
+			assert(param == 'true' or param == 'false')
+		elif option == 'output_dir':
+			assert(isinstance(param, str))
+		elif option == 'sampling_freq':
+			assert(isinstance(param, str))
+			test = int(param)
+			assert(test > 0)
+		elif option == 'center_freq':
+			assert(isinstance(param, str))
+			test = int(param)
+			assert(test > 0)
 		self._params[option] = param
 
 	def setOptions(self, options):
+		# Error check first before committing
+		for key, value in options.items():
+			print("Option: ")
+			print(key)
+			print(value)
+			if key == 'ping_width_ms':
+				assert(isinstance(value, str))
+				test = float(value)
+				assert(test > 0)
+			elif key == 'ping_min_snr':
+				assert(isinstance(value, str))
+				test = float(value)
+				assert(test > 0)
+			elif key == 'ping_max_len_mult':
+				assert(isinstance(value, str))
+				test = float(value)
+				assert(test > 1)
+			elif key == 'ping_min_len_mult':
+				assert(isinstance(value, str))
+				test = float(value)
+				assert(test < 1)
+				assert(test > 0)
+			elif key == 'gps_mode':
+				assert(isinstance(value, str))
+				assert(value == 'true' or value == 'false')
+			elif key == 'gps_target':
+				assert(isinstance(value, str))
+			elif key == 'gps_baud':
+				assert(isinstance(value, str))
+				test = int(value)
+				assert(value > 0)
+			elif key == 'frequencies':
+				assert(isinstance(param, list))
+				assert(all(isinstance(freq, int) and freq > 0 for freq in param))
+			elif key == 'autostart':
+				assert(isinstance(value, str))
+				assert(value == 'true' or value == 'false')
+			elif key == 'output_dir':
+				assert(isinstance(value, str))
+			elif key == 'sampling_freq':
+				assert(isinstance(value, str))
+				test = int(value)
+				assert(test > 0)
+			elif key == 'center_freq':
+				assert(isinstance(value, str))
+				test = int(value)
+				assert(test > 0)
+		
+
 		for key, value in options.items():
 			if isinstance(value, list):
 				self._params[key] = value
@@ -52,6 +145,16 @@ class RCTOpts(object):
 				self._params[key] = [value]
 
 	def writeOptions(self):
+		backups = glob.glob("&INSTALL_PREFIX/etc/*.bak")
+		if len(backups) > 0:
+			backup_numbers = [os.path.basename(path).split('.')[0].lstrip('rct_config') for path in backups]
+			backup_numbers = [int(number) for number in backup_numbers if number != '']
+			nextNumber = max(backup_numbers) + 1
+		else:
+			nextNumber = 1
+
+		os.rename('&INSTALL_PREFIX/etc/rct_config', '&INSTALL_PREFIX/etc/rct_config%d.bak' % nextNumber)
+
 		with open(self._configFile, 'w') as var_file:
 			for key, value in list(self._params.items()):
 				for val in value:
@@ -191,15 +294,27 @@ class CommandListener(object):
 		msg = json.dumps(packet)
 		self.sock.sendto(msg.encode('utf-8'), addr)
 
+	def _gotWriteOptsCmd(self, commandPacket, addr):
+		if 'confirm' not in commandPacket:
+			return
+		if commandPacket['confirm'] == 'true':
+			self._options.writeOptions()
+			print("Writing params")
+		else:
+			# load from backup
+			self._options.loadParams()
+			print('Reloading params')
+
+
 	def _gotSetOptsCmd(self, commandPacket, addr):
 		if 'options' not in commandPacket:
 			return
 		opts = commandPacket['options']
 		self._options.setOptions(opts)
-		self._options.writeOptions()
 		packet = {}
-		packet['options'] = self._options.getAllOptions()
+		packet['options_readback'] = self._options.getAllOptions()
 		msg = json.dumps(packet)
+		print(msg)
 		self.sock.sendto(msg.encode('utf-8'), addr)
 
 	def _upgradeCmd(self, commandPacket, addr):
@@ -291,10 +406,6 @@ class CommandListener(object):
 			print(msg)
 			self.sock.sendto(msg.encode('utf-8'), addr)
 
-		
-
-
-
 	def _processCommand(self, commandPacket, addr):
 		commands = {
 			'test': lambda: None,
@@ -304,6 +415,7 @@ class CommandListener(object):
 			'getF': self._gotGetFCmd,
 			'getOpts': self._gotGetOptsCmd,
 			'setOpts': self._gotSetOptsCmd,
+			'writeOpts': self._gotWriteOptsCmd,
 			'upgrade': self._upgradeCmd
 		}
 
@@ -313,6 +425,12 @@ class CommandListener(object):
 			commands[commandPacket['action']](commandPacket, addr)
 		except Exception as e:
 			print(e)
+			packet = {}
+			packet['exception'] = str(e)
+			packet['traceback'] = traceback.format_exc()
+			msg = json.dumps(packet)
+			print(msg)
+			self.sock.sendto(msg.encode('utf-8'), addr)
 
 	def _listener(self):
 
