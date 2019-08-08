@@ -381,6 +381,10 @@ class CommandGateway():
 	def noHeartbeat(self):
 		pass
 
+	def exception(self, packet):
+		messagebox.showerror(title='Exception', message='An exception has occured!\n%s\n%s' % (packet['exception'], packet['traceback']))
+
+
 	def setStatus(self, statusString):
 		sdrStatus = int(statusString[0])
 		dirStatus = int(statusString[1])
@@ -587,6 +591,9 @@ def main():
 
 			if 'options_readback' in packet:
 				commandGateway.confirmOptions(packet['options_readback'])
+
+			if 'exception' in packet:
+				commandGateway.exception(packet)
 
 		if (datetime.datetime.now() - last_heartbeat).total_seconds() > 30:
 			print("No heartbeats!")
