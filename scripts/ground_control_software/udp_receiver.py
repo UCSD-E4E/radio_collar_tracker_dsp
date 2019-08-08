@@ -179,32 +179,91 @@ class CommandGateway():
 
 	def setOptions(self, options):
 		if self.configureWindow is not None:
+			self.centerFreqEntry.delete(0, tk.END)
 			self.centerFreqEntry.insert(0, int(options['center_freq'][0]))
+			self.samplingFreqEntry.delete(0, tk.END)
 			self.samplingFreqEntry.insert(0, int(options['sampling_freq'][0]))
+			self.pingWidthEntry.delete(0, tk.END)
 			self.pingWidthEntry.insert(0, int(options['ping_width_ms'][0]))
+			self.pingMaxEntry.delete(0, tk.END)
 			self.pingMaxEntry.insert(0, float(options['ping_max_len_mult'][0]))
+			self.pingMinEntry.delete(0, tk.END)
 			self.pingMinEntry.insert(0, float(options['ping_min_len_mult'][0]))
+			self.minSNREntry.delete(0, tk.END)
 			self.minSNREntry.insert(0, float(options['ping_min_snr'][0]))
+
+	def confirmOptions(self, options):
+		if self.configureWindow is not None:
+			self.centerFreqEntry.delete(0, tk.END)
+			self.centerFreqEntry.insert(0, int(options['center_freq'][0]))
+			self.samplingFreqEntry.delete(0, tk.END)
+			self.samplingFreqEntry.insert(0, int(options['sampling_freq'][0]))
+			self.pingWidthEntry.delete(0, tk.END)
+			self.pingWidthEntry.insert(0, int(options['ping_width_ms'][0]))
+			self.pingMaxEntry.delete(0, tk.END)
+			self.pingMaxEntry.insert(0, float(options['ping_max_len_mult'][0]))
+			self.pingMinEntry.delete(0, tk.END)
+			self.pingMinEntry.insert(0, float(options['ping_min_len_mult'][0]))
+			self.minSNREntry.delete(0, tk.END)
+			self.minSNREntry.insert(0, float(options['ping_min_snr'][0]))
+		ok = messagebox.askokcancel(title='Configuration', message='Are the '
+			'parameters what you expect?', parent=self.configureWindow)
+		cmdPacket = {}
+		cmdPacket['cmd'] = {}
+		cmdPacket['cmd']['id'] = 'gcs'
+		cmdPacket['cmd']['action'] = 'writeOpts'
+		if not ok:
+			cmdPacket['cmd']['confirm'] = 'false'
+		else:
+			cmdPacket['cmd']['confirm'] = 'true'
+		msg = json.dumps(cmdPacket)
+		print('Send: %s' % msg)
+		self._log.write("Send: %s\n" % (msg))
+		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
+		self.configureWindow.destroy()
+		self.configureWindow = None
+
 
 	def sendOptions(self):
 		# {"options": {"center_freq": ["173500000"], "autostart": ["true"], "ping_width_ms": ["27"], "gps_baud": ["9600"], "frequencies": ["173965000"], "output_dir": ["/mnt/RAW_DATA"], "gps_mode": ["false"], "ping_min_snr": ["5"], "sampling_freq": ["1500000"], "ping_max_len_mult": ["1.5"], "gps_target": ["/dev/ttyACM0"], "ping_min_len_mult": ["0.5"]}}
+		
+		center_freq = self.centerFreqEntry.get()
+		sampling_freq = self.samplingFreqEntry.get()
+		ping_width_ms = self.pingWidthEntry.get()
+		ping_min_len_mult = self.pingMinEntry.get()
+		ping_max_len_mult = self.pingMaxEntry.get()
+		ping_min_snr = self.minSNREntry.get()
+
+		try:
+			assert(center_freq.isdigit())
+			assert(sampling_freq.isdigit())
+			assert(ping_width_ms.isdigit())
+			test = float(ping_min_len_mult)
+			assert(test > 0)
+			assert(test < 1)
+			test = float(ping_max_len_mult)
+			assert(test > 1)
+			test = float(ping_min_snr)
+			assert(test > 0)
+		except Exception as e:
+			print(e)
+			return
+
 		packet = {}
 		packet['cmd'] = {}
 		packet['cmd']['id'] = 'gcs'
 		packet['cmd']['action'] = 'setOpts'
 		packet['cmd']['options'] = {}
-		packet['cmd']['options']['center_freq'] = self.centerFreqEntry.get()
-		packet['cmd']['options']['sampling_freq'] = self.samplingFreqEntry.get()
-		packet['cmd']['options']['ping_width_ms'] = self.pingWidthEntry.get()
-		packet['cmd']['options']['ping_min_len_mult'] = self.pingMinEntry.get()
-		packet['cmd']['options']['ping_max_len_mult'] = self.pingMaxEntry.get()
-		packet['cmd']['options']['ping_min_snr'] = self.minSNREntry.get()
+		packet['cmd']['options']['center_freq'] = center_freq
+		packet['cmd']['options']['sampling_freq'] = sampling_freq
+		packet['cmd']['options']['ping_width_ms'] = ping_width_ms
+		packet['cmd']['options']['ping_min_len_mult'] = ping_min_len_mult
+		packet['cmd']['options']['ping_max_len_mult'] = ping_max_len_mult
+		packet['cmd']['options']['ping_min_snr'] = ping_min_snr
 		msg = json.dumps(packet)
 		print("Send: %s" % msg)
 		self._log.write("Send: %s\n" % (msg))
 		self._socket.sendto(msg.encode('utf-8'), self.mav_IP)
-		self.configureWindow.destroy()
-		self.configureWindow = None
 
 	def upgradeSoftware(self):
 		ok = messagebox.askokcancel(title='Software Upgrade', 
@@ -525,6 +584,9 @@ def main():
 
 			if 'upgrade_complete' in packet:
 				commandGateway.completeUpgrade(packet)
+
+			if 'options_readback' in packet:
+				commandGateway.confirmOptions(packet['options_readback'])
 
 		if (datetime.datetime.now() - last_heartbeat).total_seconds() > 30:
 			print("No heartbeats!")
