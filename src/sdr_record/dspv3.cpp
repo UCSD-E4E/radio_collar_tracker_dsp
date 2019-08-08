@@ -401,7 +401,7 @@ namespace RTT{
 
 						// std::cout << "Fail after pulse magnitude" << std::endl;
 
-						PingPtr ping = std::make_shared<Ping>(ping_start_ms + time_start_ms, amplitude, idxToFreq(target_bins[*it]));
+						PingPtr ping = std::make_shared<Ping>(ping_start_ms + time_start_ms, amplitude, target_freqs[*it]);
 
 						{
 							std::unique_lock<std::mutex> out_lock(o_m);
