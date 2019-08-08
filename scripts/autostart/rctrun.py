@@ -15,6 +15,7 @@ import shlex
 import argparse
 import datetime
 import sys
+import glob
 
 WAIT_COUNT = 60
 
@@ -264,12 +265,16 @@ def init_state_complete():
 		OUTPUT_DIR_STATES(shared_states[1]) == OUTPUT_DIR_STATES.rdy and \
 		GPS_STATES(shared_states[2]) == GPS_STATES.rdy
 
-def init_RCT(test = False):
+def init_RCT(test = False, test_data = ''):
 	global run
 	global init_thread_op
 	global cmdListener
 	init_RCT_state = RCT_STATES.init
 	
+	if test:
+		assert(len(test_data) != 0)
+		assert(os.path.isdir(test_data))
+
 	while run:
 		shared_states[3] = init_RCT_state.value
 		if init_RCT_state == RCT_STATES.init:
@@ -309,7 +314,9 @@ def init_RCT(test = False):
 					lastrun.write(str(last_run + 1))
 				run_num = last_run + 1
 			else:
-				run_num = 8
+				meta_file = glob.glob(os.path.join(test_data, 'META_*'))
+				assert(len(meta_file) == 1)
+				run_num = int(os.path.basename(meta_file[0]).split('_')[1])
 			run_dir = os.path.join(output_dir, 'RUN_%06d' % (run_num))
 			if not test:
 				os.makedirs(run_dir)
@@ -339,7 +346,7 @@ def init_RCT(test = False):
 									'-r %d ' % (run_num) +
 									'-o %s ' % (run_dir) +
 									'--test_config ' +
-									'--test_data /media/ntlhui/FA56-CFCD/2019.05.05/RUN_000008'
+									'--test_data %s' % (test_data) +
 									'| tee -a /var/log/rtt.log')
 
 			sdr_record = subprocess.Popen(sdr_record_cmd, shell=True)
@@ -386,8 +393,12 @@ def main():
 	parser = argparse.ArgumentParser(description='RCT Boostrapper')
 	parser.add_argument('--autostart', action='store_true')
 	parser.add_argument('--test', action='store_true')
+	parser.add_argument('--test_data', action='store')
 
 	args = parser.parse_args()
+
+	if args.test:
+		assert(len(args.test_data) > 1)
 
 	global cmdListener
 	# Check for autostart
@@ -412,7 +423,7 @@ def main():
 	signal.signal(signal.SIGINT, sigint_handler)
 	signal.signal(signal.SIGTERM, sigint_handler)
 
-	init_RCT_thread = threading.Thread(target=init_RCT, kwargs={'test':args.test})
+	init_RCT_thread = threading.Thread(target=init_RCT, kwargs={'test':args.test, 'test_data':args.test_data})
 	init_RCT_thread.start()
 
 	signal.pause()
