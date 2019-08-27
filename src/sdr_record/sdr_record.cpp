@@ -22,6 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 #include "sdr_record.hpp"
 #include "sdr_test.hpp"
 #define SDR_TEST_DATA "/home/ntlhui/workspace/tmp/testData"
@@ -200,7 +201,7 @@ namespace RTT{
 			if(args.test_config){
 				sdr = new RTT::SDR_TEST(args.test_data, program_on);
 			}else{
-				sdr = new RTT::SDR(args.gain, args.rate, args.rx_freq);
+				sdr = new RTT::radio(args.gain, args.rate, args.rx_freq);
 			}
 		}catch(std::runtime_error e){
 			syslog(LOG_CRIT, "No devices found!");

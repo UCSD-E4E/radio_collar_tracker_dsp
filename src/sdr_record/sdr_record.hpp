@@ -15,7 +15,8 @@
 #include <condition_variable>
 #include "localization.hpp"
 #include <boost/program_options.hpp>
-
+#include "soapy_rtt.hpp"
+#include <SoapySDR/Device.hpp>
 namespace RTT{
 	class SDR_RECORD{
 

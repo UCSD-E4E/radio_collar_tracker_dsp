@@ -33,6 +33,7 @@ AC_CHECK_PROG(MAKEGLOSSARIES, makeglossaries, makeglossaries)
 
 # Checks for libraries.
 PKG_CHECK_MODULES([uhd], [uhd])
+PKG_CHECK_MODULES([SoapySDR], [SoapySDR])
 AX_BOOST_BASE([1.50])
 AX_BOOST_SYSTEM
 AX_BOOST_THREAD
@@ -53,7 +54,7 @@ AC_PYTHON3_MODULE([calendar], [fatal])
 AC_PYTHON3_MODULE([math], [fatal])
 
 # Checks for header files.
-AC_CHECK_HEADERS([sys/time.h syslog.h signal.h error.h uhd.h getopt.h])
+AC_CHECK_HEADERS([sys/time.h syslog.h signal.h error.h uhd.h getopt.h SoapySDR/Device.hpp])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
