@@ -304,16 +304,7 @@ namespace RTT{
 
 		while(_run || !i_q.empty()){
 
-			/*************************************************************************************/
-			std::time_t tt = time(NULL);
-			std::tm* tPtr1 = localtime(&tt);
-			if((tPtr1->tm_sec)%10 == 0){
-				for(int i = 0; i < 2; i++)
-					_ostr1 << .01 << "," << std::endl;
-			}
-			//_ostr1 << (tPtr1->tm_hour) << ":" << (tPtr1->tm_min) << ":" << (tPtr1->tm_sec) << std::endl;
-			/*************************************************************************************/	
-
+			
 			std::unique_lock<std::mutex> in_lock(i_m);
 			if(i_q.empty()){
 				i_v.wait(in_lock);
