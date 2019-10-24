@@ -290,10 +290,36 @@ namespace RTT{
 		timing_stream.open(buffer.str());		
 
 		timing_stream << "start_time: " << std::fixed << std::setprecision(3) << start_time.tv_sec + (float)start_time.tv_nsec / 1.e9 << std::endl;
+		
 		timing_stream << "center_freq: " << args.rx_freq << std::endl;
 		timing_stream << "sampling_freq: " << args.rate << std::endl;
 		timing_stream << "gain: " << args.gain << std::endl;
 		timing_stream << "width: " << sizeof(int16_t) << std::endl;
+		
+		for(std::size_t i = 0; i < args.frequencies.size(); i++){
+			timing_stream << "frequency: " << args.frequencies[i] << std::endl;
+		}
+		
+		timing_stream << "ping_width_ms: " << args.ping_width_ms << std::endl;
+		timing_stream << "ping_max_len_mult: " << args.ping_max_len_mult << std::endl;
+		timing_stream << "ping_min_len_mult: " << args.ping_min_len_mult << std::endl;
+		timing_stream << "ping_min_snr: " << args.ping_min_snr << std::endl;
+
+		timing_stream << "gps_target: " << args.gps_target << std::endl;
+		timing_stream << "gps_baud: " << args.gps_baud << std::endl;
+		if(args.gps_mode){
+			timing_stream << "gps_mode: true" << std::endl;
+		}else{
+			timing_stream << "gps_mode: false" << std::endl;
+		}
+
+		timing_stream << "data_dir: " << args.data_dir << std::endl;
+		if(args.test_config){
+			timing_stream << "test_config: true" << std::endl;
+		}else{
+			timing_stream << "test_config: false" << std::endl;
+		}
+		timing_stream << "test_data: " << args.test_data << std::endl;
 
 		timing_stream.close();		
 	}
