@@ -8,7 +8,7 @@
 FROM ubuntu:16.04
 RUN apt-get update && apt-get install -y git vim htop gdb valgrind cmake \
 	build-essential python3 libboost-all-dev python-mako python3-pip \
-	libusb-1.0-0-dev autoconf pkg-config picocom sudo python-pip zip
+	libusb-1.0-0-dev autoconf pkg-config picocom sudo python-pip zip wget tmux
 RUN pip3 install --upgrade pip
 RUN pip2 install --upgrade pip
 RUN pip2 install requests
@@ -42,7 +42,6 @@ RUN ldconfig
 RUN /usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*
 
 WORKDIR /root/
-RUN apt-get update && apt-get install -y wget
 RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz
 RUN tar -xzf fftw-3.3.8.tar.gz
 WORKDIR /root/fftw-3.3.8
@@ -61,5 +60,3 @@ RUN mkdir /host-dev/
 RUN mkdir /root/code
 
 WORKDIR /root/code/
-
-RUN apt-get install -y tmux
