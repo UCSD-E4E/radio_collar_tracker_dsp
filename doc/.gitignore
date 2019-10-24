@@ -11,3 +11,5 @@
 Makefile
 Makefile.in
 .ipynb_checkpoints
+html
+latex
