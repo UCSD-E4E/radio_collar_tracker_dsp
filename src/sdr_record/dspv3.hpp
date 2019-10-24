@@ -4,7 +4,6 @@
 #include <complex>
 #include "fir.hpp"
 #include "integrator.hpp"
-#include "classifier.hpp"
 #include <condition_variable>
 #include <thread>
 #include "tagged_signal.hpp"

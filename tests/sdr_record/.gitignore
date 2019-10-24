@@ -8,7 +8,6 @@ testGPStest
 testiQdata
 testLocalization
 testMixer
-testPingClassifier
 testPingFIR
 testProcessor
 testResampler
@@ -17,7 +16,6 @@ testUtility
 testIQdata
 testRemixer
 .deps/
-testClassifier
 testDSPV3
 testFIR
 testIntegrator
