@@ -38,11 +38,7 @@ testLocalization_SOURCES = testLocalization.cpp $(test_src)/localization.cpp \
 	$(test_src)/sdr_test.cpp $(test_src)/iq_data.cpp \
 	$(test_src)/dspv3.cpp $(test_src)/utility.cpp \
 	$(test_src)/gps_test.cpp $(test_src)/gps.cpp $(test_src)/timeblock.cpp \
-	$(test_src)/integrator.cpp \
 	$(test_src)/serial_gps.cpp
-
-testIntegrator_SOURCES = testIntegrator.cpp $(test_src)/integrator.cpp \
-	$(test_src)/utility.cpp
 
 testDSPV3_SOURCES = testDSPV3.cpp $(test_src)/dspv3.cpp \
 	$(test_src)/integrator.cpp $(test_src)/utility.cpp \

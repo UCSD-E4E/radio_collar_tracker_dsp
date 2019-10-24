@@ -2,7 +2,6 @@
 #define __DSPV3_H__
 #include "dsp.hpp"
 #include <complex>
-#include "integrator.hpp"
 #include <condition_variable>
 #include <thread>
 #include "tagged_signal.hpp"
