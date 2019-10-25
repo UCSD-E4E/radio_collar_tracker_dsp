@@ -7,3 +7,8 @@ maintainer-clean-local:
 	-find . -name '*.log' -delete
 	-rm -rf oprofile_data
 	-rm -rf src/sdr_record/run
+	-rm -rf doxygen-doc
+
+if HAVE_DOXYGEN
+@DX_RULES@
+endif
