@@ -24,21 +24,88 @@ def prob_d(d, n, k, R, mu, sigma):
 	return P.pdf(10 * n * np.log10(d) + k - R) * 10 * n / np.log(10) / d
 
 class SignalModel:
+	'''
+	This class models the signal propagation model that we will use to model the
+	ping amplitude decay.
+
+	This takes the following form: \f$R = P - L &= P - 10n\log_{10}\left(d\right) - k\f$.
+
+	\f$R\f$ is the received signal power of this ping.
+
+	\f$P\f$ is the transmit power of the transmitter.
+
+	\f$L\f$ is the total loss in transmit power (path loss and system losses).
+
+	\f$n\f$ is the path loss exponent.
+
+	\f$d\f$ is the distance from the drone at this particular ping to the estimated location of the transmitter.
+
+	\f$k\f$ represents system losses.
+	'''
 	def __init__(self, mu, sigma, n, k, R):
+		'''
+		Constructor for a new SignalModel class.
+
+		@param mu		mean (unbiased) distance from measurement to transmitter.
+		@param sigma	standard deviation (40% of mean)
+		@param n		estimated path loss exponent
+		@param k		estimated system loss
+		@param R		received signal power
+		'''
+		## Unbiased estimated distance
 		self.mu = mu
+		## Unbiased estimated distance
 		self.sigma = sigma
+		## Unbiased estimated distance
 		self.P = scipy.stats.norm(mu, sigma)
+		## Unbiased estimated distance
 		self.n = n
+		## Unbiased estimated distance
 		self.k = k
+		## Unbiased estimated distance
 		self.R = R
 
 	def p_d(self, d):
+		'''
+		Returns the probability of the transmitter being a particular 
+		distance d from the measurement location given the estimated signal
+		model parameters.
+
+		@param d	distance from target to measurement location
+		@returns	Probability of target being distance d from measurement
+					location.
+		'''
 		return self.P.pdf(10 * self.n * np.log10(d) + self.k - self.R) * 10 * self.n / np.log(10) / d
 
 	def p_x(self, dx, tx):
+		'''
+		Returns the probability of the transmitter at being at location tx given
+		the drone is at location dx and the estimated signal model parameters.
+
+		@param dx	Location of the drone in at most 3D in meters.
+		@param tx	Location of the transmitter in at most 3D in meters.
+		@returns	Probability of transmitter at tx given drone at dx.
+		'''
 		return self.p_d(np.linalg.norm(dx - tx))
 
 def residuals(x, data):
+	'''
+	Calculates the error for the signal propagation model parameterized by x 
+	over the data.
+
+	@param x	Vector of signal model parameters: x[0] is the transmitter power,
+				x[1] is the path loss exponent, x[2] is the x coordinate of the
+				transmitter location in meters, x[3] is the y coordinate of the
+				transmitter location in meters, x[4] is the system loss constant.
+	@param data	Matrix of signal data.  This matrix must have shape (m, 3), 
+				where m is the number of data samples.  data[:,0] is the vector
+				of received signal power.  data[:,1] is the vector of x 
+				coordinates of each measurement in meters.  data[:,2] is the
+				vector of y coordinates of each measurement in meters.
+	@returns	A vector of shape (m,) containing the difference between the 
+				data and estimated data using the provided signal model 
+				parameters.
+	'''
 	P = x[0]
 	n = x[1]
 	tx = x[2]
@@ -55,6 +122,20 @@ def residuals(x, data):
 
 
 def mse(R, x, P, n, t, k):
+	'''
+	Calculates the mean squared error for the signal propagation model 
+	parameterized by P, n, t, and k and the data given by R and x.
+
+	@param R	The received signal power.
+	@param x	A vector of shape (2,) containing the measurement location
+				for the received signal in meters.
+	@param P	The transmitter power.
+	@param n	The path loss exponent.
+	@param t	A vector of shape (2,) containing the transmitter location in
+				meters.
+	@param k	The system loss constant
+	@returns	The mean squared error of this measurement.
+	'''
 	d = np.linalg.norm(x - t)
 	return (R - P + 10 * n * np.log10(d) + k) ** 2
 
