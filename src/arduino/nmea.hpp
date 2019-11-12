@@ -40,21 +40,36 @@
 class NMEA
 {
 	public:
-		NMEA(int connect);						/// constructor for NMEA parser object; parse sentences of GPRMC or all datatypes.
-		int		decode(char c);				/// parse one character received from GPS; returns 1 when full sentence found w/ checksum OK, 0 otherwise
-		float	gprmc_utc();					/// returns decimal value of UTC term in last full GPRMC sentence
-		char	gprmc_status();				/// returns status character in last full GPRMC sentence ('A' or 'V')
-		float	gprmc_latitude();			/// signed degree-decimal value of latitude terms in last full GPRMC sentence
-		float	gprmc_longitude();		/// signed degree-decimal value of longitude terms in last full GPRMC sentence
-		float	gprmc_speed(float unit);	/// speed-on-ground term in last full GPRMC sentence
-		float	gprmc_course();				/// track-angle-made-good term in last full GPRMC sentence
-		float	gprmc_distance_to(float latitude, float longitude, float unit);	/// returns distance from last-known GPRMC position to given position
-		float	gprmc_course_to(float latitude, float longitude);			/// returns initial course in degrees from last-known GPRMC position to given position		
-		char*	sentence();						/// returns last received full sentence as zero terminated string
-		int		terms();							/// returns number of terms (including data type and checksum) in last received full sentence
-		char*	term(int t);					/// returns term t of last received full sentence as zero terminated string
-		float	term_decimal(int t);	/// returns the base-10 converted value of term[t] in last full sentence received
-		int		libversion();					/// returns software version number of NMEA library
+		/// constructor for NMEA parser object; parse sentences of GPRMC or all datatypes.
+		NMEA(int connect);
+		/// parse one character received from GPS; returns 1 when full sentence found w/ checksum OK, 0 otherwise
+		int		decode(char c);
+		/// returns decimal value of UTC term in last full GPRMC sentence
+		float	gprmc_utc();
+		/// returns status character in last full GPRMC sentence ('A' or 'V')
+		char	gprmc_status();
+		/// signed degree-decimal value of latitude terms in last full GPRMC sentence
+		float	gprmc_latitude();
+		/// signed degree-decimal value of longitude terms in last full GPRMC sentence
+		float	gprmc_longitude();
+		/// speed-on-ground term in last full GPRMC sentence
+		float	gprmc_speed(float unit);
+		/// track-angle-made-good term in last full GPRMC sentence
+		float	gprmc_course();
+		/// returns distance from last-known GPRMC position to given position
+		float	gprmc_distance_to(float latitude, float longitude, float unit);
+		/// returns initial course in degrees from last-known GPRMC position to given position
+		float	gprmc_course_to(float latitude, float longitude);
+		/// returns last received full sentence as zero terminated string
+		char*	sentence();
+		/// returns number of terms (including data type and checksum) in last received full sentence
+		int		terms();
+		/// returns term t of last received full sentence as zero terminated string
+		char*	term(int t);
+		/// returns the base-10 converted value of term[t] in last full sentence received
+		float	term_decimal(int t);
+		/// returns software version number of NMEA library
+		int		libversion();
   private:
   	// properties
 		int		_gprmc_only;
