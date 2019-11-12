@@ -1,5 +1,6 @@
 #ifndef __STATUS_PACKET__
 #define __STATUS_PACKET__
+/*! \file */
 /**
  * GPS Subsystem state.
  */
