@@ -13,9 +13,14 @@
 #include <thread>
 
 namespace RTT{
-
+	/**
+	 * Test GPS core module.  This loads data from a local file.
+	 */
 	class GPSTest: public GPSCore{
 	private:
+		/**
+		 * Pointer to the input stream to the data source.
+		 */
 		std::ifstream* data_source;
 
 		/**
@@ -25,11 +30,11 @@ namespace RTT{
 
 		/**
 		 * Parses the location from the given string.
-		 * @param  std::string String containing the location information
+		 * @param  input       String containing the location information
 		 * @return             A reference to a fully initialized Location 
 		 *                     object.
 		 */
-		Location& parseLocation(const std::string);
+		Location& parseLocation(const std::string input);
 
 		void _process(std::queue<Location*>&, std::mutex&, std::condition_variable&);
 
@@ -57,10 +62,20 @@ namespace RTT{
 
 		/**
 		 * Initializes this GPS Core to take data from the specified path.
+		 * @param path Path to data source
 		 */
 		GPSTest(const std::string path);
+		
+		/**
+		 * Initializes this GPS Core to take data from the specified path.
+		 * @param path Path to data source
+		 */
 		GPSTest(const char* path);
 
+		/**
+		 * Sets the output data location
+		 * @param path Path to write data to
+		 */
 		void setOutputFile(const std::string);
 
 	};
