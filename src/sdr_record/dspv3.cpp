@@ -159,7 +159,7 @@ namespace RTT{
 		delete _thread;
 	}
 
-	std::shared_ptr<std::vector<double>> DSP_V3::max(boost::circular_buffer<std::shared_ptr<std::vector<double>>>& sig){
+	std::shared_ptr<std::vector<double>> DSP_V3::max(boost::circular_buffer<std::shared_ptr<std::vector<double>>>& sig) const{
 		std::shared_ptr<std::vector<double>> retVal = std::make_shared<std::vector<double>>();
 		std::vector<double>& maxVal = *retVal;
 		maxVal.resize(sig[0]->size());
@@ -174,7 +174,7 @@ namespace RTT{
 		return retVal;
 	}
 
-	std::vector<double>* DSP_V3::sig_median(boost::circular_buffer<std::shared_ptr<std::vector<double>>>& sig){
+	std::vector<double>* DSP_V3::sig_median(boost::circular_buffer<std::shared_ptr<std::vector<double>>>& sig) const{
 		
 		boost::accumulators::accumulator_set<double, boost::accumulators::features<boost::accumulators::tag::median> > acc[nFreqs];
 		for(auto it = sig.begin(); it != sig.end(); it++){
@@ -207,7 +207,7 @@ namespace RTT{
 	}
 
 	std::shared_ptr<std::set<std::size_t>> DSP_V3::has_falling_edge(
-		boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator it){
+		boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator it) const{
 		std::vector<bool>& s1 = **(it - 1);
 		std::vector<bool>& s2 = **it;
 
