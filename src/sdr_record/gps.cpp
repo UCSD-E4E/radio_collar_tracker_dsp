@@ -54,7 +54,9 @@ namespace RTT{
 
 	void GPS::stop(){
 		_run = false;
-		_core->stop();
+		if(_core){
+			_core->stop();
+		}
 		std::unique_lock<std::mutex> lock(pointMutex);
 		pointVar.notify_all();
 		lock.unlock();

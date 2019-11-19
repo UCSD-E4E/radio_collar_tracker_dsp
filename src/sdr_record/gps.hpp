@@ -12,6 +12,10 @@
 #include <thread>
 
 namespace RTT{
+	/**
+	 * GPS module.  This is responsible for aggregating data from the underlying
+	 * GPS datastream, and referencing timestamps to particular positions.
+	 */
 	class GPS{
 
 	private:
@@ -30,22 +34,40 @@ namespace RTT{
 		 * Queue of Location pointers.
 		 */
 		std::queue<Location*> pointQueue;
+
 		/**
 		 * Mutex for the point queue.
 		 */
 		std::mutex pointMutex;
+
 		/**
 		 * Condition variable for items in the queue.
 		 */
 		std::condition_variable pointVar;
 
+		/**
+		 * Pointer to the aggregator thread
+		 */
 		std::thread* _map_thread;
 
+		/**
+		 * Internal run flag.
+		 */
 		volatile bool _run = false;
 
+		/**
+		 * Timestamp of first GPS position in ms since Unix epoch
+		 */
 		std::size_t first_time = 0;
+
+		/**
+		 * Timestamp of latest GPS position in ms since Unix epoch
+		 */
 		std::size_t last_time = 0;
 
+		/**
+		 * Pointer to the last received GPS location for quick reference.
+		 */
 		Location* lastLocation;
 
 	protected:
@@ -79,21 +101,80 @@ namespace RTT{
 			 * hdg - heading in degrees from True North as an int
 			 */
 			TEST_FILE,
+
+			/**
+			 * For data coming over a serial line as JSON packets.  Each JSON
+			 * packet must have the following:
+			 * lat - latitude in degrees * 1e7 with regards to the WGS84 datum 
+			 * 		as an int
+			 * lon - longitude in degrees * 1e7 with regards to the WGS84 datum 
+			 * 		as an int
+			 * hdg - heading in degrees from True North as an int
+			 * tme - GPS week time
+			 * run - "true" or "false" as the run switch status
+			 * fix - Fix type, as defined in Sensor_Module::GPSFix
+			 * sat - Number of satellites used in the GPS fix
+			 * dat - GPS Date
+			 */
 			SERIAL,
+
+			/**
+			 * No GPS datastream.  Default values
+			 */
 			TEST_NULL,
 		};
-		GPS(GPS::Protocol, std::string);	
-		const Location* getPositionAtMs(uint64_t);
 
+		/**
+		 * Constructor for the GPS module.  Specify appropriate protocol and
+		 * device handle.  For GPS::Protocol::TEST_FILE, specify the source
+		 * file.  For GPS::Protocol::SERIAL, specify the serial device. For
+		 * GPS::Protocol::TEST_NULL, path is ignored.
+		 *
+		 * @param	protocol	GPS data source type
+		 * @param	path		GPS data source location
+		 */
+		GPS(GPS::Protocol protocol, std::string path);	
+
+		/**
+		 * Gets the estimated location at the given timestamp.  Time is 
+		 * specified in ms since Unix epoch
+		 * @param  t_ms Timestamp at which to get position
+		 * @return      Estimated location at given timestamp.
+		 */
+		const Location* getPositionAtMs(uint64_t t_ms);
+
+		/**
+		 * Initializes the GPS module
+		 */
 		void start();
+
+		/**
+		 * Stops the GPS module from parsing more data
+		 */
 		void stop();
 
-		void setOutputFile(const std::string);
+		/**
+		 * Sets the output data location.
+		 * @param path Path to write data to
+		 */
+		void setOutputFile(const std::string path);
 
+		/**
+		 * Only valid for GPS::Protocol::TEST_FILE.  Waits for the system to
+		 * load all data from file.  Behavior for GPS::Protocol::SERIAL is 
+		 * undefined!
+		 */
 		void waitForLoad();
 
+		/**
+		 * Returns the timestamp of the first location in ms since the Unix epoch
+		 * @return Timestamp of first location
+		 */
 		const std::size_t getFirst_ms() const;
 
+		/**
+		 * Waits for first location fix from underlying datastream.
+		 */
 		void waitForPos();
 	};
 }
