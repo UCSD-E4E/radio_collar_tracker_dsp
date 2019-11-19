@@ -27,7 +27,11 @@ namespace RTT{
 		 */
 		virtual void stop() = 0;
 
-		virtual void setOutputFile(const std::string) = 0;
+		/**
+		 * Sets the output data location
+		 * @param path Path to write data to
+		 */
+		virtual void setOutputFile(const std::string path) = 0;
 
 	};
 }
