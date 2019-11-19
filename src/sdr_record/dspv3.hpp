@@ -9,6 +9,7 @@
 #include <memory>
 #include <set>
 #include "AbstractSDR.hpp"
+#include <boost/circular_buffer.hpp>
 
 namespace RTT{
 	/**

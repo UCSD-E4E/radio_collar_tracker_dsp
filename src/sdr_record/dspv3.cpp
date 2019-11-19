@@ -246,7 +246,7 @@ namespace RTT{
 	const std::size_t DSP_V3::get_pulse_width(
 		boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator end,
 		boost::circular_buffer<std::shared_ptr<std::vector<bool>>>::iterator begin,
-		std::size_t i){
+		std::size_t i) const{
 
 		std::size_t width = 0;
 		if(end == begin){
