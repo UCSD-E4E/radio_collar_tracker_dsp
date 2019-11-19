@@ -38,6 +38,10 @@ namespace RTT{
 		 */
 		~IQdata();
 
+		/**
+		 * Returns the number of samples this struct contains.
+		 * @return Number of samples contained.
+		 */
 		std::size_t size();
 
 		/**
