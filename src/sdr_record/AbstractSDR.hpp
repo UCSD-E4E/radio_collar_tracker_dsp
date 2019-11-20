@@ -33,7 +33,7 @@ namespace RTT{
 		 *               	shall push elements to this queue.
 		 * @param mutex		std::mutex object for the queue.  This object should
 		 *               	be owned by the owner of the AbstractSDR object.
-		 * @param conf_var	std::condition_variable for the queue.  This object
+		 * @param cond_var	std::condition_variable for the queue.  This object
 		 *                 	should be owned by the owner of the AbstractSDR
 		 *                 	object.
 		 */
