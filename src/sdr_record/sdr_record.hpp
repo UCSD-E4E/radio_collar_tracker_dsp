@@ -24,7 +24,7 @@ namespace RTT{
 	 * This program will record and analyze RF signals from a software defined
 	 * radio for pings.  These pings will be written out to a specified location.
 	 */
-	class SDR_RECORD{
+	class SDR_RECORD final{
 		/**
 		 * Constructor.  This configures the signal handler and system logger.
 		 */
@@ -83,7 +83,8 @@ namespace RTT{
 			std::string data_dir = "";
 			/**
 			 * Test configuration flag.  If set, this will configure the system
-			 * to run as a SIL testbench.  FIXME.DOC!!!
+			 * to run as a SIL testbench.
+			 * \todo documentation
 			 */
 			bool test_config = false;
 			/**
