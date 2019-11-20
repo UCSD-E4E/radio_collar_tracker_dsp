@@ -24,8 +24,18 @@ namespace RTT{
 		 */
 		TimeBlock(uint64_t start, uint64_t stop);
 
+		/**
+		 * Constructs a new TimeBlock at the specified time.  This will have a
+		 * default stop time of time + 1.
+		 * @param time Time in ms since Unix epoch
+		 */
 		TimeBlock(uint64_t time);
 
+		/**
+		 * Checks whether this object stops before the TimeBlock t starts.
+		 * @param t TimeBlock to compare against
+		 * @returns true if this object stops before t starts, false otherwise.
+		 */
 		const bool operator<(const TimeBlock t) const;
 	};
 }
