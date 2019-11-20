@@ -243,6 +243,7 @@ namespace RTT{
 		 */
 		std::size_t data_len;
 		
+		// WARNING: these values are overridden in the command line arguments!
 		// 2017 data
 		// const static std::size_t ping_width_ms = 15;
 		// const double MIN_SNR = 0.07;
