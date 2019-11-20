@@ -1,6 +1,15 @@
 #ifndef __UTILITY_H__
 #define __UTILITY_H__
-// #include <complex.h>
+
+/**
+ * @file
+ *
+ * Utility functions for signal processing
+ *
+ * @author Nathan Hui - nthui@eng.ucsd.edu
+ * 
+ */
+
 #include <queue>
 #include <complex>
 #include <list>
