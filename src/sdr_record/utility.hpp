@@ -19,6 +19,15 @@ namespace RTT{
 	std::complex<double>* generateSinusoid(std::int64_t frequency,
 		std::size_t sampling_frequency, std::size_t length, 
 		double amplitude = 1.0);
+	/**
+	 * Generates a discrete complex sinusoid at the specified sampling frequency
+	 * at the given frequency with the given amplitude with the given length.
+	 * @param frequency				Frequency of complex sinusoid to generate
+	 * @param sampling_frequency	Sampling frequency of output signal
+	 * @param length				Length of signal in samples
+	 * @param amplitude				Amplitude of signal
+	 * @return						Complex double vector containing sinusoid.
+	 */
 	std::vector<std::complex<double>>* generateVectorSinusoid(std::int64_t frequency,
 		std::size_t sampling_frequency, std::size_t length,
 		double amplitude = 1.0);
