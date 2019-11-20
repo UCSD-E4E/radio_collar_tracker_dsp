@@ -324,11 +324,6 @@ namespace RTT{
 		timing_stream.close();		
 	}
 
-	void SDR_RECORD::receiver(){
-		syslog(LOG_INFO, "rx: Starting USRP stream");
-
-	}
-
 	void SDR_RECORD::run(){
 		syslog(LOG_DEBUG, "Printing metadata to file");
 		this->print_meta_data();
