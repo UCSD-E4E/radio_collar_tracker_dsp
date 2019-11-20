@@ -16,7 +16,7 @@ namespace RTT{
 	/**
 	 * Test GPS core module.  This loads data from a local file.
 	 */
-	class GPSTest: public GPSCore{
+	class GPSTest final : public GPSCore{
 	private:
 		/**
 		 * Pointer to the input stream to the data source.

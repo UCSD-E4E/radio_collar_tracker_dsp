@@ -18,7 +18,7 @@ namespace RTT{
 	 * ping candidacy.  Dynamic thresholding is accomplished by taking the
 	 * median of the most recent set of maximums of multiple windows.
 	 */
-	class DSP_V3 : public DSP{
+	class DSP_V3 final : public DSP{
 
 	public:
 		/**
