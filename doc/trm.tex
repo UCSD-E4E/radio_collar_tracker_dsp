@@ -296,7 +296,7 @@ sudo uhd_images_downloader
 				\subsubsection{Control Switch}
 					The Control Switch controls the recording state of the payload.  The switch must be in the OFF position during boot.  Flipping the switch to the ON position sets the payload to the recording state.  The payload will begin recording immediately if the initialization is complete, or as soon as the initialization completes if not complete already.  Flipping the switch to the OFF position stops the payload recording, at which point the payload finishes writing all recorded data to disk.  When the data is recorded, the payload reinitializes the system, then goes into standby mode waiting for the ON position.
 				\subsubsection{Payload Autostart Software}
-					The payload autostart is controlled by the rctstart Linux service, and the autostart flag in \lstinline{/usr/local/etc/rct\_config}.  If the line in \lstinline{/usr/local/etc/rct\_config} is autostart=false, then the payload service will not start.  The service can also be stopped once started by calling sudo service rctstart stop.
+					The payload autostart is controlled by the rctstart Linux service, and the autostart flag in \lstinline{/usr/local/etc/rct_config}.  If the line in \lstinline{/usr/local/etc/rct_config} is autostart=false, then the payload service will not start.  The service can also be stopped once started by calling sudo service rctstart stop.
 	\appendix
 	\printglossaries
 \end{document}
