@@ -7,22 +7,22 @@ Engineers for Exploration, UCSD Project
 Installing the payload software
 ===============================
 1.	Install the required dependencies
-	1.	python
-		1.	`apt-get install python`
+	1.	python3
+		1.	`apt-get install python3`
 	2.  boost
 		1.	`apt-get install libboost-all-dev`
 	3.  pythom-mako
-		1.	`apt-get instlal python-mako`
+		1.	`apt-get install python-mako`
 	4.  six
 		1.	`pip install six`
 	5.  requests
 		1.	`pip install requests`
-	6.  pynmea2
-		1.	`pip install pynmea2`
 	7.  enum
 		1.	`pip install enum`
 	8.  pyserial
 		1.  `apt-get install python-serial`
+	5.	libusb-dev
+		1.	`apt-get install libusb-1.0-0-dev`
 	9.	libuhd 3.11.01
 		1.	`apt-get install libboost-all-dev libusb-1.0-0-dev python-mako`
 		2.	`apt-get install cmake build-essential`
@@ -36,12 +36,17 @@ Installing the payload software
 		8.	`make install`
 		9.	`ldconfig`
 		10.	`/usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*`
-	10.	dlib v19.16
-		1.	`git clone git://github.com/davisking/dlib.git`
-		2.	`cd <dlib_repo>/`
-		3.	`git checkout v19.16`
+	10.	fftw
+		1.	`wget http://www.fftw.org/fftw-3.3.8.tar.gz`
+		2.	`tar -xzf fftw-3.3.8.targ.gz`
+		3.	`cd <fftw>`
+		4.	`./bootstrap.sh && ./configure --enable-threads 
+		--enable-generic-simd128 --enable-generic-simd256`
+		5.	`make`
+		6.	`make install`
 2.	Install the software
 	1.	`cd <radio_collar_tracker_drone>`
+	2.	`git checkout online_proc`
 	2.  `./autogen.sh`
 	3.  `./configure`
 	4.	`make`
@@ -51,30 +56,46 @@ Installing the payload software
 
 tl;dr
 -----
-1.	`sudo add-apt-repository -y ppa:mraa/mraa`
-2.	`sudo apt-get update`
-3.	`sudo apt-get install -y python-serial libmraa1 libmraa-dev mraa-tools python-mraa python3-mraa libboost-all-dev libusb-1.0-0-dev python-mako doxygen python-docutils cmake build-essential exfat-fuse exfat-utils python-pip git autoconf`
-4.	`sudo pip install pynmea2 enum34`
-5.	`cd $HOME`
-6.	`git clone git://github.com/EttusResearch/uhd.git`
-7.	`cd uhd/host`
+1.	`sudo apt-get update`
+2.	`sudo apt-get install -y git vim htop gdb valgrind cmake build-essential
+	python3 libboost-all-dev python-mako python3-pip libusb-1.0-0-dev autoconf
+	pkg-config picocom python-pip zip wget tmux`
+3.	`sudo pip2 install six requests`
+4.	`sudo pip3 install pyserial`
+5.	`git clone git://github.com/EttusResearch/uhd.git`
+6.	`cd uhd`
+7.	`git checkout v3.11.0.1`
 8.	`mkdir build`
 9.	`cd build`
-10.	`cmake ../`
-11.	`make -j5`
+10.	`cmake -DENABLE_B100=OFF -DENABLE_X300=OFF -DENABLE_N230=OFF
+	-DENABLE_USRP1=OFF -DENABLE_USRP2=OFF -DENABLE_OCTOCLOCK=OFF
+	-DENABLE_RFNOC=OFF -DENABLE_MPMD=OFF -DENABLE_EXAMPLES=OFF
+	-DENABLE_MANUAL=OFF -DENABLE_TESTS=OFF ../`
+11.	`make -j8`
 12.	`sudo make install`
 13.	`sudo ldconfig`
-14.	`cd $HOME`
-15.	`git clone git://github.com/UCSD-E4E/radio_collar_tracker_drone.git`
-16.	`cd radio_collar_tracker_drone`
-17.  `./autogen.sh`
-18.  `./configure`
-19.	`make -j5`
-20.	`sudo make install`
+14.	`sudo /usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*`
+15.	`cd ../..`
+16.	`wget http://www.fftw.org/fftw-3.3.8.tar.gz`
+17.	`tar -xzf fftw-3.3.8.tar.gz`
+18.	`cd fftw-3.3.8`
+19.	`./boostrap.sh`
+20.	`./configure --enable-threads --enable-generic-simd128
+	--enable-generic-simd256`
+21.	`make -j8`
+22.	`sudo make install`
+23.	`cd ../`
+24.	`git clone git://github.com/UCSD-E4E/radio_collar_tracker_drone.git`
+25.	`cd radio_collar_tracker_drone`
+26.	`git checkout online_proc`
+27.	`./autogen.sh`
+28.	`./configure`
+29.	`make -j8`
+30.	`sudo make install`
 
 Running the payload software (standalone)
 =========================================
-`rct_sdr_starter [-h] [-r run_num] [-f center_freq] [-s sample_rate] [-g gain] [-o output_dir]`
+`sudo service rctrun start`
 
 # Running the payload software (hardware-based initialization)
 
