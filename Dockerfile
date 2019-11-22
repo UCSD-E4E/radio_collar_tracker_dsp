@@ -11,8 +11,7 @@ RUN apt-get update && apt-get install -y git vim htop gdb valgrind cmake \
 	libusb-1.0-0-dev autoconf pkg-config picocom sudo python-pip zip wget tmux
 RUN pip3 install --upgrade pip
 RUN pip2 install --upgrade pip
-RUN pip2 install requests
-RUN pip2 install six requests pynmea2 pyserial
+RUN pip2 install six requests
 RUN pip3 install pyserial
 #  exfat-fuse exfat-utils autoconf
 
