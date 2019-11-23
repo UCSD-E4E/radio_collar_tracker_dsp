@@ -4,7 +4,6 @@
 #include <complex>
 #include <condition_variable>
 #include <thread>
-#include "tagged_signal.hpp"
 #include <fftw3.h>
 #include <memory>
 #include <set>

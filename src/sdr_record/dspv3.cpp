@@ -1,5 +1,4 @@
 #include "dspv3.hpp"
-#include "tagged_signal.hpp"
 #include <fstream>
 #include <iostream>
 #include <cstdio>
