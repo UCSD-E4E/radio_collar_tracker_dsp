@@ -6,12 +6,13 @@ endif
 if HAVE_LUALATEX
 doc_DATA += system-diagram.pdf operations_flow.pdf processing_pipeline.pdf v2_signal_detector.pdf
 if HAVE_PDF2SVG
-doc_DATA += system-diagram.svg operations_flow.svg processing_pipeline.svg v2_signal_detector.svg
+SVGS= system-diagram.svg operations_flow.svg processing_pipeline.svg v2_signal_detector.svg
+doc_DATA += $(SVGS)
 endif
 endif
 
 clean:
-	-rm doc_DATA
+	-rm $(doc_DATA)
 	-rm *.aux *.glg *.glo *.gls *.ist *.log *.toc *.lof *.lot
 	
 
@@ -39,7 +40,7 @@ system-diagram.pdf: system-diagram.tex
 	$(LUALATEX) $<
 	-rm system-diagram.aux system-diagram.log
 	
-%.svg: %.pdf
+$(SVGS): %.svg: %.pdf
 	$(PDF2SVG) $< $@
 
 operations_flow.pdf: operations_flow.tex
