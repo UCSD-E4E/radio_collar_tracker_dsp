@@ -23,8 +23,13 @@ AC_CHECK_PROG(LUALATEX, lualatex, lualatex)
 if test -z "$LUALATEX"; then
 	AC_MSG_WARN([Unable to create diagrams!])
 fi
+AC_CHECK_PROG(PDF2SVG, pdf2svg, pdf2svg)
+if test -z "$PDF2SVG"; then
+	AC_MSG_WARN([Unable to create SVGs!])
+fi
 AM_CONDITIONAL([HAVE_PDFLATEX], test -n "$PDFLATEX")
 AM_CONDITIONAL([HAVE_LUALATEX], test -n "$LUALATEX")
+AM_CONDITIONAL([HAVE_PDF2SVG], test -n "$PDF2SVG")
 AC_CHECK_PROG(MAKEGLOSSARIES, makeglossaries, makeglossaries)
 
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
