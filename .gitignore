@@ -26,3 +26,4 @@ callgrind.out.*
 **.log
 oprofile_data
 doxygen-doc
+**.svg
