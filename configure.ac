@@ -19,7 +19,12 @@ AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
 if test -z "$PDFLATEX"; then
 	AC_MSG_WARN([Unable to create user manuals!])
 fi
+AC_CHECK_PROG(LUALATEX, lualatex, lualatex)
+if test -z "$LUALATEX"; then
+	AC_MSG_WARN([Unable to create diagrams!])
+fi
 AM_CONDITIONAL([HAVE_PDFLATEX], test -n "$PDFLATEX")
+AM_CONDITIONAL([HAVE_LUALATEX], test -n "$LUALATEX")
 AC_CHECK_PROG(MAKEGLOSSARIES, makeglossaries, makeglossaries)
 
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
