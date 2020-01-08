@@ -5,22 +5,32 @@
 	\tikz [	node distance=1 cm, 
 			env/.style={}, 
 			block/.style={draw,rectangle},
-			every edge quotes/.append style={font=\tiny}]{
-		\node (rf) [env] {Transmitter Signal};
-		\node (ant) [block, below=of rf] {Antenna};
-		\node (lna) [block, below=of ant] {Low Noise Amplifier};
-		\node (sdr) [block, below=of lna] {Software Defined Radio};
-		\node (ping_detect) [block, below=of sdr] {Ping Detector};
-		\node (sensor_fusion) [block, below=of ping_detect] {Sensor Fusion};
-		\node (sys_mgr) [block, left=of sensor_fusion] {System Manager};
-		\node (ui_board) [block, below=of sys_mgr] {UI Board};
-		\node (gps) [block, left=of ui_board] {GPS};
-		\node (compass) [block, below=of ui_board] {Compass};
-		\node (disk) [block, right=2 cm of sensor_fusion] {Disk};
-		\node (obc) [draw, label={[anchor=south west]north west:On-Board Computer}, fit=(ping_detect) (sys_mgr) (sensor_fusion) (disk)] {};
-		\node (drone)[draw, label={[anchor=south west]north west:Drone}, fit=(obc) (sdr) (lna) (ant) (ui_board) (gps) (compass)] {};
-		\node (ping_est) [block, below right=of drone] {Ping Estimator};
-		\node (ping_vis) [block, below=of ping_est] {Estimate Visualization};
+			every edge quotes/.append style={font=\tiny, rectangle}]{
+		\node (rf) [env] {Transmitter Signal (1)};
+		
+		\node (ant) [block, below=of rf] {Antenna (2)};
+		\node (lna) [block, below=of ant] {Low Noise Amplifier (3)};
+		\node (sdr) [block, below=of lna] {Software Defined Radio (4)};
+		\node (ping_detect) [block, below=of sdr] {Ping Detector (5)};
+		\node (sensor_fusion) [block, below=of ping_detect] {Sensor Fusion (6)};
+		\node (sys_mgr) [block, left=of sensor_fusion] {System Manager (12)};
+		\node (ui_board) [block, below=of sensor_fusion] {UI Board (11)};
+		\node (pgps) [block, left=of ui_board] {Payload GPS (9)};
+		\node (pcompass) [block, below=of ui_board] {Payload Compass (10)};
+		\node (disk) [block, right=of sensor_fusion] {Disk (13)};
+		\node (obc) [draw, label={[anchor=south west]north west:On-Board Computer (14)}, fit=(ping_detect) (sys_mgr) (sensor_fusion) (disk)] {};
+		
+		\node (dmag) [block, left=of ant] {Drone Compass (17)};
+		\node (dgps) [block, left=of dmag] {Drone GPS (18)};
+		\node (px4) [block, below=of dgps] {Flight Controller (19)};
+		\node (esc) [block, below=of px4] {ESCs (22)};
+
+		\node (drone)[draw, label={[anchor=south west]north west:Drone (15)}, fit=(obc) (sdr) (lna) (ant) (ui_board) (pgps) (pcompass) (dgps) (dmag) (px4)] {};
+		
+		\node (ping_est) [block, left=of drone] {Ping Estimator (7)};
+		\node (ping_vis) [block, below=of ping_est] {Estimate Visualization (8)};
+		\node (ctrl) [block, below=of ping_vis] {Payload Control (20)};
+		\node (mp) [block, left=of px4] {Vehicle Control (21)};
 
 		\draw (rf) edge[-stealth', "RF Signal"] (ant)
 			  (ant) edge[-stealth', "RF Signal over Coax"] (lna)
@@ -29,12 +39,18 @@
 			  (ping_detect) edge[-stealth', "Detected Pings"] (sensor_fusion)
 			  (ui_board) edge[-stealth', "Sensor Data"'] (sensor_fusion)
 			  (sys_mgr) edge[-stealth', "System Status"'] (ui_board)
-			  (gps) edge[-stealth', "NMEA"] (ui_board)
-		      (compass) edge[-stealth', "Pose"] (ui_board)
+			  (pgps) edge[-stealth', "NMEA"] (ui_board)
+		      (pcompass) edge[-stealth', "Pose"] (ui_board)
 			  (sensor_fusion) edge[-stealth', "Pings"] (disk)
-			  				  edge[-stealth', out=300, in=180, "Pings"] (ping_est)
-			  (ping_est) edge[-stealth', "Estimates"] (ping_vis);
-		\node (gcs) [block, label={[anchor=south west]north west:Ground Control Station}, fit=(ping_est) (ping_vis)] {};
+			  				  edge[-stealth', out=150, in=0, "Pings"] (ping_est)
+			  (ping_est) edge[-stealth', "Estimates"] (ping_vis)
+			  (px4) edge[stealth'-, "NMEA"] (dgps)
+			  		edge[stealth'-, "Heading"] (dmag)
+			  		edge[stealth'-stealth', "MAVLink"] (mp)
+			  		edge[-stealth', "PWM"] (esc)
+			  (ctrl) edge[-stealth', out=5, in=180, "Commands"] (sys_mgr)
+			  		 edge[stealth'-, out=0, in=185, "System Status"'] (sys_mgr);
+		\node (gcs) [block, label={[anchor=south west]north west:Ground Control Station (16)}, fit=(ping_est) (ping_vis) (mp) (ctrl)] {};
 	}
 
 \end{document}
