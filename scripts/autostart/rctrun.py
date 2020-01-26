@@ -389,7 +389,10 @@ def sigint_handler(signal, frame):
 	run = False
 
 def main():
-
+	'''Main RCT Bootstrap function
+	
+	Main function
+	'''
 	parser = argparse.ArgumentParser(description='RCT Boostrapper')
 	parser.add_argument('--autostart', action='store_true')
 	parser.add_argument('--test', action='store_true')
