@@ -20,22 +20,21 @@ Installing the payload software
 	7.  enum
 		1.	`pip install enum`
 	8.  pyserial
-		1.  `apt-get install python-serial`
+		1.  `pip3 install pyserial`
 	5.	libusb-dev
 		1.	`apt-get install libusb-1.0-0-dev`
 	9.	libuhd 3.11.01
-		1.	`apt-get install libboost-all-dev libusb-1.0-0-dev python-mako`
-		2.	`apt-get install cmake build-essential`
+		1.	`apt-get install cmake build-essential`
 		2.	`git clone git://github.com/EttusResearch/uhd.git`
 		3.	`cd <uhd_repo>/host`
 		4.	`git checkout v3.11.0.1`
-		4.	`mkdir build`
-		5.	`cd build`
-		6.	`cmake -DENABLE_B100=OFF -DENABLE_X300=OFF -DENABLE_N230=OFF -DENABLE_USRP1=OFF -DENABLE_USRP2=OFF -DENABLE_OCTOCLOCK=OFF -DENABLE_RFNOC=OFF -DENABLE_MPMD=OFF -DENABLE_EXAMPLES=OFF -DENABLE_MANUAL=OFF -DENABLE_TESTS=OFF ../`
-		7.	`make`
-		8.	`make install`
-		9.	`ldconfig`
-		10.	`/usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*`
+		5.	`mkdir build`
+		6.	`cd build`
+		7.	`cmake -DENABLE_B100=OFF -DENABLE_X300=OFF -DENABLE_N230=OFF -DENABLE_USRP1=OFF -DENABLE_USRP2=OFF -DENABLE_OCTOCLOCK=OFF -DENABLE_RFNOC=OFF -DENABLE_MPMD=OFF -DENABLE_EXAMPLES=OFF -DENABLE_MANUAL=OFF -DENABLE_TESTS=OFF ../`
+		8.	`make`
+		9.	`make install`
+		10.	`ldconfig`
+		11.	`/usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*`
 	10.	fftw
 		1.	`wget http://www.fftw.org/fftw-3.3.8.tar.gz`
 		2.	`tar -xzf fftw-3.3.8.targ.gz`
@@ -51,8 +50,6 @@ Installing the payload software
 	3.  `./configure`
 	4.	`make`
 	5.	`sudo make install`
-3.	Configure the USRP for the first time
-	1.	`/usr/local/lib/uhd/utils/uhd_images_downloader.py`
 
 tl;dr
 -----
