@@ -21,6 +21,7 @@ uninstall-hook:
 
 maintainer-clean-local:
 	rm Makefile.in
+	-rm *.pyc
 
 rctrun: $(srcdir)/rctrun.py
 	rm -f $@

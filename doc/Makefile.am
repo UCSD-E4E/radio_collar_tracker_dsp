@@ -19,6 +19,8 @@ clean:
 maintainer-clean-local:
 	-rm Makefile.in
 	-rm rct_manual.pdf
+	-rm *.svg
+	-rm *.png
 
 rct_manual.pdf: rct_manual.tex mp_flight_plan_screen.jpg mp_hud_full.jpg MisionPlanner_ConnectButton.png
 	$(PDFLATEX) -halt-on-error $< -output-directory .
