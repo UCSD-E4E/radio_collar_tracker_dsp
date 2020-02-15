@@ -147,3 +147,9 @@ The whitespace between the colon and field value is optional, and preferred for
 readability, but cannot be a newline.  The metadata file contains the following
 fields: local IQ data start time (UTC in seconds), SDR center frequency (Hz),
 SDR sampling frequency (Hz), SDR gain (dB).
+
+# Information for Developers
+## Connecting to the payload
+1.	Connect to the `ubnt` GROUND WIFI LINK.
+2.	Look for the sticker with the device hostname on the payload.
+3.	SSH in using `e4e@hostname.local`
