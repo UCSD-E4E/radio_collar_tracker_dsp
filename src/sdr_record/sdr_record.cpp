@@ -82,6 +82,7 @@ namespace RTT{
 			("verbose,v", po::value(&verbosity), "Verbosity")
 			("test_config", "Test Configuration")
 			("test_data", po::value(&args.test_data), "Test Data")
+			("config_file", po::value(&args.config_file), "Config File Override")
 		;
 
 		po::options_description config{"File"};
@@ -99,9 +100,10 @@ namespace RTT{
 			("autostart", po::value<bool>(), "Autostart flag")
 			("frequencies", po::value<std::vector<int>>()->multitoken(), "Transmitter frequencies");
 
-		std::ifstream config_file{"/usr/local/etc/rct_config"};
 
 		po::store(po::parse_command_line(argc, argv, desc), vm);
+		notify(vm);
+		std::ifstream config_file{args.config_file};
 		if(config_file){
 			po::store(po::parse_config_file(config_file, config), vm);
 		}

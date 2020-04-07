@@ -12,7 +12,7 @@
 #endif
 
 namespace RTT{
-	GPS::GPS(GPS::Protocol protocol, std::string path){
+	GPS::GPS(GPS::Protocol protocol, const std::string &path){
 		switch(protocol){
 			case GPS::Protocol::TEST_FILE:
 				_core = new GPSTest(path);

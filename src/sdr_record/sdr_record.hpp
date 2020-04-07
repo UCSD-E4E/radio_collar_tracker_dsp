@@ -128,6 +128,8 @@ namespace RTT{
 			 * Target frequencies in Hz
 			 */
 			std::vector<int> frequencies;
+
+			std::string config_file = "/usr/local/etc/rct_config";
 		} args;
 
 		/**

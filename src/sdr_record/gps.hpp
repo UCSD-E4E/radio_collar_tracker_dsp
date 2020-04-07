@@ -133,7 +133,7 @@ namespace RTT{
 		 * @param	protocol	GPS data source type
 		 * @param	path		GPS data source location
 		 */
-		GPS(GPS::Protocol protocol, std::string path);	
+		GPS(GPS::Protocol protocol, const std::string &path);
 
 		/**
 		 * Gets the estimated location at the given timestamp.  Time is 
