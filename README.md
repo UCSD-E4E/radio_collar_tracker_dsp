@@ -80,7 +80,7 @@ Engineers for Exploration, UCSD Project
 	4.	`make`
 
 # Installing `sdr_record`
-	1.	`sudo make install`
+1.	`sudo make install`
 
 ## tl;dr
 1.	`sudo apt-get update`
