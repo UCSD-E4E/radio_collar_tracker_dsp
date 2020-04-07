@@ -1,11 +1,9 @@
-radio_collar_tracker_drone
-====================
+# radio_collar_tracker_drone
 Airborne Wildlife Radio Collar Tracker - UAS Component
 
 Engineers for Exploration, UCSD Project
 
-Installing the payload software
-===============================
+# Installing the payload software
 1.	Install the required dependencies
 	1.	python3
 		1.	`apt-get install python3`
@@ -51,8 +49,40 @@ Installing the payload software
 	4.	`make`
 	5.	`sudo make install`
 
-tl;dr
------
+# Compiling `sdr_record`
+1. Dependencies
+	1. `apt-get install libboost-all-dev libusb-1.0-0-dev cmake build-essential python-mako python2-pip`
+	2. `pip2 install six requests enum`
+	3. libuhd
+		2.	`git clone git://github.com/EttusResearch/uhd.git`
+		3.	`cd <uhd_repo>/host`
+		4.	`git checkout v3.11.0.1`
+		5.	`mkdir build`
+		6.	`cd build`
+		7.	`cmake -DENABLE_B100=OFF -DENABLE_X300=OFF -DENABLE_N230=OFF -DENABLE_USRP1=OFF -DENABLE_USRP2=OFF -DENABLE_OCTOCLOCK=OFF -DENABLE_RFNOC=OFF -DENABLE_MPMD=OFF -DENABLE_EXAMPLES=OFF -DENABLE_MANUAL=OFF -DENABLE_TESTS=OFF ../`
+		8.	`make`
+		9.	`make install`
+		10.	`ldconfig`
+		11.	`/usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*`
+	4.	fftw
+		1.	`wget http://www.fftw.org/fftw-3.3.8.tar.gz`
+		2.	`tar -xzf fftw-3.3.8.targ.gz`
+		3.	`cd <fftw>`
+		4.	`./bootstrap.sh && ./configure --enable-threads 
+		--enable-generic-simd128 --enable-generic-simd256`
+		5.	`make`
+		6.	`make install`
+2. Compile
+	1.	`cd <radio_collar_tracker_drone>`
+	2.	`git v5.0a`
+	2.  `./autogen.sh`
+	3.  `./configure`
+	4.	`make`
+
+# Installing `sdr_record`
+	1.	`sudo make install`
+
+## tl;dr
 1.	`sudo apt-get update`
 2.	`sudo apt-get install -y git vim htop gdb valgrind cmake build-essential python3 libboost-all-dev python-mako python3-pip libusb-1.0-0-dev autoconf pkg-config picocom python-pip zip wget tmux`
 3.	`sudo pip2 install six requests`
@@ -84,8 +114,7 @@ tl;dr
 29.	`make -j8`
 30.	`sudo make install`
 
-Running the payload software (standalone)
-=========================================
+# Running the payload software (standalone)
 `sudo service rctrun start`
 
 # Running the payload software (hardware-based initialization)
