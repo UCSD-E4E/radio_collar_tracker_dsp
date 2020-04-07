@@ -8,7 +8,7 @@ sdr_record_SOURCES = sdr_record.cpp sdr.cpp iq_data.cpp utility.cpp \
 	dspv3.cpp serial_gps.cpp localization.cpp
 
 sdr_record_LDADD=$(uhd_LIBS) $(DLIB_LDFLAGS) $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_PROGRAM_OPTIONS_LIB)
-sdr_record_CXXFLAGS= -std=gnu++11 -Wall $(BOOST_CPPFLAGS) $(uhd_CFLAGS) $(DLIB_CPPFLAGS)
+sdr_record_CXXFLAGS= -std=gnu++11 -Wall $(BOOST_CPPFLAGS) $(uhd_CFLAGS) -g
 
 
 
