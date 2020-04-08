@@ -82,6 +82,20 @@ Engineers for Exploration, UCSD Project
 # Installing `sdr_record`
 1.	`sudo make install`
 
+
+# Using the Docker image
+The docker image exists to provide a containerized development environment for
+those that might be doing additional work with GnuRadio and/or UHD.  It also
+provides a testing container to evaluate architectural changes to the payload
+environment.
+
+To build the docker image, use `docker build -t rct .`.
+
+To run the docker image with hardware support, use `docker run -it --rm --name rct --device=/dev/bus/usb/ rct`.
+
+For debugging and running unit tests, use `docker run -it --rm --name rct -v radio_collar_tracker_dsp/:/root/code -v testData/:/tmp/testData --privileged rct`.  Replace `radio_collar_tracker_dsp` with the absolute path to the local code
+repository and `testData` with the absolute path to the test data repository.
+
 ## tl;dr
 1.	`sudo apt-get update`
 2.	`sudo apt-get install -y git vim htop gdb valgrind cmake build-essential python3 libboost-all-dev python-mako python3-pip libusb-1.0-0-dev autoconf pkg-config picocom python-pip zip wget tmux`
