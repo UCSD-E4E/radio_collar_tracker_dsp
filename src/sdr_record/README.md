@@ -128,3 +128,23 @@ sdr_record --test_config --test_data /tmp/RUN_000014 -c 172500000 -s 2000000
 Note that the center frequency and sampling frequencies are provided here - this
 is required if the sampling frequency and/or center frequency is not correct in
 the configuration file.
+
+#### Dataset
+
+The path passed to `sdr_record` as `sdr_record --test_config --test_data .../data_dir` should have the following files at a minimum:
+
+```
+.../data_dir/
+		|
+		ALT
+		GPS_000001
+		META_000001
+		RAW_DATA_000001_000001
+		RAW_DATA_000001_000002
+		.
+		.
+		.
+		RAW_DATA_000001_XXXXXX
+		RUN
+
+```
