@@ -7,6 +7,8 @@
 #include <poll.h>
 #include <termios.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <fcntl.h>
+#include <string>
 
 namespace pt = boost::property_tree;
 namespace ptme = boost::posix_time;
