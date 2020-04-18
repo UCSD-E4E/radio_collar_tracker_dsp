@@ -33,9 +33,9 @@ class sdrRecord:
         self.__samplingFreq = -1
         self.__centerFreq = -1
         self.__runNum = -1
-        self.__runDir = None
+        self.__runDir = "./"
         self.__testData = None
-
+        self.__rttLoc = "/var/log/rtt.log"
         self.__errorCallbacks = []
 
         if paramFile is None:
@@ -56,19 +56,20 @@ class sdrRecord:
                               '-o %s ' % (self.__runDir) +
                               '--test_config ' +
                               '--test_data %s' % (self.__testData) +
-                              '| tee -a rtt.log') #tee -a /var/log/rtt.log'
+                              '| tee -a ' % (self.__rttLoc))  # tee -a /var/log/rtt.log'
 
         else:
-            sdr_record_cmd = ('sdr_record -g 22.0 ' +
+            sdr_record_cmd = ('./sdr_record -g 22.0 ' +
                               '-s %d ' % (self.__samplingFreq) +
                               '-c %d ' % (self.__centerFreq) +
                               '-r %d ' % (self.__runNum) +
                               '-o %s ' % (self.__runDir) +
-                              '| tee -a rtt.log')  # tee -a /var/log/rtt.log'
+                              '--config_file rct_config ' +
+                              '| tee -a rtt.log' ) #% (self.__rttLoc) + '\n')  # tee -a /var/log/rtt.log'
 
             #sdr_record_cmd = ('sdr_record -g 22.0 -s %d -c %d -r %d -o %s | tee -a rtt.log' % (self.__samplingFreq, self.__centerFreq, self.__runNum, self.__runDir))
-        #self.__process = subprocess.Popen(sdr_record_cmd, shell=True)
-        self.__process = subprocess.Popen('echo hello | tee -a rtt.log', shell=True)
+        self.__process = subprocess.Popen(sdr_record_cmd, shell=True)
+        #self.__process = subprocess.Popen('echo hello | tee -a rtt.log', shell=True)
 
         # start output monitoring thread
 
@@ -78,6 +79,38 @@ class sdrRecord:
 # sdrRecord.configure(frequencies=[172350000, 173000000])
 # sdrRecord.configure(gain=20.0)
     def configure(self, **kwargs):
+        if "gain" in kwargs:
+            # type checking the argument
+            arg = kwargs['gain']
+            if type(arg) is float:
+                #self.insert_config('gain', arg)
+                self.__gain = arg
+            else:
+                print("Wrong argument type for gain\n")
+        if "run_num" in kwargs:
+            # type checking the argument
+            arg = kwargs['run_num']
+            if type(arg) is int:
+                #self.insert_config('run_num', arg)
+                self.__runNum = arg
+            else:
+                print("Wrong argument type for run_num\n")
+        if "run_dir" in kwargs:
+            # type checking the argument
+            arg = kwargs['run_dir']
+            if type(arg) is str:
+                #self.insert_config('run_dir', arg)
+                self.__runDir = arg
+            else:
+                print("Wrong argument type for run_dir\n")
+        if "rtt_loc" in kwargs:
+            # type checking the argument
+            arg = kwargs['rtt_loc']
+            if type(arg) is str:
+                #self.insert_config('rtt_loc', arg)
+                self.__rttLoc = arg
+            else:
+                print("Wrong argument type for rtt_loc\n")
         if "gps_target" in kwargs:
             # type checking the argument
             arg = kwargs['gps_target']
@@ -125,12 +158,14 @@ class sdrRecord:
             arg = kwargs['sampling_freq']
             if type(arg) is int:
                 self.insert_config('sampling_freq', arg)
+                self.__samplingFreq = arg
             else:
                 print("Wrong argument type for sampling_freq\n")
         if "center_freq" in kwargs:
             arg = kwargs['center_freq']
             if type(arg) is int:
                 self.insert_config('center_freq', arg)
+                self.__centerFreq = arg
             else:
                 print("Wrong argument type for center_freq\n")
         if "output_dir" in kwargs:
