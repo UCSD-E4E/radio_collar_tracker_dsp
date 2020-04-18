@@ -1,4 +1,4 @@
-/*
+/**
  * @file sdr_test.cpp
  *
  * @author Nathan Hui, nthui@eng.ucsd.edu
@@ -20,8 +20,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * DATE		 WHO DESCRIPTION
+ * ----------------------------------------------------------------------------
+ * 04/17/20  NH  Fixed program options
  */
-
 #include "sdr_record.hpp"
 #include "sdr_test.hpp"
 #define SDR_TEST_DATA "/home/ntlhui/workspace/tmp/testData"
@@ -72,33 +76,44 @@ namespace RTT{
 
 		po::options_description desc("sdr_record - Radio "
 			"Collar Tracker drone application\n\nOptions");
-		desc.add_options()
-			("help,h", "Prints help message")
-			("gain,g", po::value(&args.gain), "Gain")
-			("sampling_freq,s", po::value(&args.rate), "Sampling Frequency")
-			("center_freq,c", po::value(&args.rx_freq), "Center Frequency")
-			("run,r", po::value(&args.run_num), "Run Number")
-			("output_dir,o", po::value(&args.data_dir), "Output Directory")
-			("verbose,v", po::value(&verbosity), "Verbosity")
-			("test_config", "Test Configuration")
-			("test_data", po::value(&args.test_data), "Test Data")
-			("config_file", po::value(&args.config_file), "Config File Override")
-		;
+		/* @formatter:off */
+		desc.add_options()("help,h", "Prints help message")
+				("gain,g", po::value(&args.gain), "Gain")
+				("sampling_freq,s", po::value(&args.rate), "Sampling Frequency")
+				("center_freq,c", po::value(&args.rx_freq), "Center Frequency")
+				("run,r", po::value(&args.run_num), "Run Number")
+				("output_dir,o", po::value(&args.data_dir), "Output Directory")
+				("verbose,v", po::value(&verbosity), "Verbosity")
+				("test_config", "Test Configuration")
+				("test_data", po::value(&args.test_data), "Test Data")
+				("config_file", po::value(&args.config_file)
+					->default_value("&INSTALL_PREFIX/etc/rct_config")
+					->implicit_value("&INSTALL_PREFIX/etc/rct_config"),
+					"Config File Override")
+				;
+		/* @formatter:on */
 
 		po::options_description config{"File"};
+		/* @formatter:off */
 		config.add_options()
 			("gps_target", po::value(&args.gps_target), "GPS Target")
 			("gps_baud", po::value(&args.gps_baud), "GPS Target baud rate")
 			("gps_mode", po::value(&args.gps_mode), "GPS Test Mode")
-			("ping_width_ms", po::value(&args.ping_width_ms), "Ping width in milliseconds")
-			("ping_min_snr", po::value(&args.ping_min_snr), "Ping minimum SNR")
-			("ping_max_len_mult", po::value(&args.ping_max_len_mult), "Ping max len multiplier")
-			("ping_min_len_mult", po::value(&args.ping_min_len_mult), "Ping min len multiplier")
+			("ping_width_ms", po::value(&args.ping_width_ms),
+					"Ping width in milliseconds")
+			("ping_min_snr", po::value(&args.ping_min_snr),
+					"Ping minimum SNR")
+			("ping_max_len_mult", po::value(&args.ping_max_len_mult),
+					"Ping max len multiplier")
+			("ping_min_len_mult", po::value(&args.ping_min_len_mult),
+					"Ping min len multiplier")
 			("sampling_freq,s", po::value(&args.rate), "Sampling Frequency")
 			("center_freq,c", po::value(&args.rx_freq), "Center Frequency")
 			("output_dir,o", po::value(&args.data_dir), "Output Directory")
 			("autostart", po::value<bool>(), "Autostart flag")
-			("frequencies", po::value<std::vector<int>>()->multitoken(), "Transmitter frequencies");
+			("frequencies", po::value<std::vector<int>>()->multitoken(),
+					"Transmitter frequencies");
+		/* @formatter:on */
 
 
 		po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -239,7 +254,8 @@ namespace RTT{
 			args.ping_min_snr,
 			args.ping_max_len_mult,
 			args.ping_min_len_mult};
-		std::cout << "Initialized DSP with ping width of " << args.ping_width_ms << " ms" << std::endl;
+		std::cout << "Initialized DSP with ping width of " <<
+				args.ping_width_ms << " ms" << std::endl;
 		if(!args.test_config){
 			buffer.str("");
 			buffer.clear();
