@@ -50,7 +50,7 @@ Engineers for Exploration, UCSD Project
 
 # Compiling `sdr_record`
 1. Dependencies
-	1. `apt-get install libboost-all-dev libusb-1.0-0-dev cmake build-essential python-mako python-pip automake`
+	1. `apt-get install libboost-all-dev libusb-1.0-0-dev cmake build-essential python-mako python-pip automake python3-pip git`
 	2. `pip2 install six requests enum`
 	3. `pip3 install mako numpy`
 	3. libuhd
@@ -66,10 +66,9 @@ Engineers for Exploration, UCSD Project
 		11.	`/usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*`
 	4.	fftw
 		1.	`wget http://www.fftw.org/fftw-3.3.8.tar.gz`
-		2.	`tar -xzf fftw-3.3.8.targ.gz`
+		2.	`tar -xzf fftw-3.3.8.tar.gz`
 		3.	`cd <fftw>`
-		4.	`./bootstrap.sh && ./configure --enable-threads 
-		--enable-generic-simd128 --enable-generic-simd256`
+		4.	`./bootstrap.sh && ./configure --enable-threads -enable-generic-simd128 --enable-generic-simd256`
 		5.	`make`
 		6.	`make install`
 2. Compile
