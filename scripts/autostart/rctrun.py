@@ -27,6 +27,37 @@ devnull = None
 cmdListener = None
 output_dir = None
 
+class CONFIG():
+	"""
+	This class is to abstract the config variables
+	"""
+    ping_width_ms = None
+    ping_min_snr = None
+    ping_max_len_mult = None
+    ping_min_len_mult = None
+    gps_mode = None
+    gps_target = None
+    gps_baud = None
+    frequencies = None
+    autostart = None
+    output_dir = None
+    sampling_freq = None
+    center_freq = None
+    
+    def __init__(self):
+        self.ping_width_ms = get_var('ping_width_ms')
+        self.ping_min_snr = get_var('ping_min_snr')
+        self.ping_max_len_mult = get_var('ping_max_len_mult')
+        self.ping_min_len_mult = get_var('ping_min_len_mult')
+        self.gps_mode = get_var('gps_mode')
+        self.gps_target = get_var('gps_target')
+        self.gps_baud = get_var('gps_baud')
+        self.frequencies = get_var('frequencies')
+        self.autostart = get_var('autostart')
+        self.output_dir = get_var('output_dir')
+        self.sampling_freq = get_var('sampling_freq')
+        self.center_freq = get_var('center_freq')
+
 class SDR_INIT_STATES(Enum):
 	find_devices = 0
 	wait_recycle = 1
