@@ -28,19 +28,19 @@ cmdListener = None
 output_dir = None
 
 class Config():
-    """	This class is to abstract the config variables
-    """
-    # Using dictionary as underlying Data Structure
-    arr = {}
-    # Just overload the [] operator
-    def __getitem__(self, key):
-        return self.arr.get(key)
+    	"""	This class is to abstract the config variables
+   	"""
+    	# Using dictionary as underlying Data Structure
+    	arr = {}
+    	# Just overload the [] operator
+    	def __getitem__(self, key):
+        	return self.arr.get(key)
 
-    def __setitem__(self, key, value):
-        return self.arr.update({key: value})
+    	def __setitem__(self, key, value):
+        	return self.arr.update({key: value})
     
-    # def __missing__(self, key):
-    #     return self.arr[]
+    	# def __missing__(self, key):
+    	#     return self.arr[]
 
 class SDR_INIT_STATES(Enum):
 	find_devices = 0
