@@ -3,6 +3,35 @@ Airborne Wildlife Radio Collar Tracker - UAS Component
 
 Engineers for Exploration, UCSD Project
 
+# Setting up the Up Core
+## Required Materials
+1. Integrated Payload
+2. Wall Power Adapter
+3. HDMI Monitor
+4. USB Hub
+5. USB Keyboard
+7. Linux Computer
+8. Ubuntu 18.04 ISO
+9. AVR Dragon ISP
+10. USB Drive
+## Procedure
+1. Load Ubuntu ISO onto USB drive from the Linux computer
+2. Plug the USB Hub into the USB port on the UIB.
+3. Plug the USB Keyboard and USB Drive into the USB Hub.
+4. Plug the HDMI Monitor into the UP Core.
+5. Power on the system using the Wall Power Adapter
+6. When prompted, enter the UP Core BIOS using the `ESC` key.
+7. Ensure the boot priority is set to the USB drive.
+8. Continue to boot from the USB drive.
+9. Select the option to ...
+10. Reboot into Ubuntu
+11. Open a terminal using `Ctrl-Alt-t`
+12. Run the following commands:
+	1. `sudo apt-get update`
+	2. `sudo apt-get upgrade -y`
+	3. `sudo apt-get install python3 python3-pip libboost-all-dev python-mako libusb-1.0-0-dev cmake build-essential git`
+	4. 
+
 # Installing the payload software
 1.	Install the required dependencies
 	1.	python3
