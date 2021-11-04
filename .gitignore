@@ -31,3 +31,6 @@ doxygen-doc
 .cproject
 .project
 .settings
+.pydevproject
+
+scripts/autostart/Pipfile.lock
