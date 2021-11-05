@@ -58,7 +58,7 @@ tl;dr
 3.	`sudo pip2 install six requests`
 4.	`sudo pip3 install pyserial`
 5.	`git clone git://github.com/EttusResearch/uhd.git`
-6.	`cd uhd`
+6.	`cd uhd/host`
 7.	`git checkout v3.11.0.1`
 8.	`mkdir build`
 9.	`cd build`
@@ -67,18 +67,18 @@ tl;dr
 12.	`sudo make install`
 13.	`sudo ldconfig`
 14.	`sudo /usr/local/lib/uhd/utils/uhd_images_downloader.py -t b2xx*`
-15.	`cd ../..`
+15.	`cd ../../..`
 16.	`wget http://www.fftw.org/fftw-3.3.8.tar.gz`
 17.	`tar -xzf fftw-3.3.8.tar.gz`
 18.	`cd fftw-3.3.8`
-19.	`./boostrap.sh`
+19.	`./bootstrap.sh`
 20.	`./configure --enable-threads --enable-generic-simd128 --enable-generic-simd256`
 21.	`make -j8`
 22.	`sudo make install`
 23.	`cd ../`
-24.	`git clone git://github.com/UCSD-E4E/radio_collar_tracker_drone.git`
-25.	`cd radio_collar_tracker_drone`
-26.	`git checkout online_proc`
+24.	`git clone git://github.com/UCSD-E4E/radio_collar_tracker_sp.git`
+25.	`cd radio_collar_tracker_dsp`
+26.	`git checkout master`
 27.	`./autogen.sh`
 28.	`./configure`
 29.	`make -j8`
