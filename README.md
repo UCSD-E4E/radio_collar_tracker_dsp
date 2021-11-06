@@ -76,7 +76,7 @@ tl;dr
 21.	`make -j8`
 22.	`sudo make install`
 23.	`cd ../`
-24.	`git clone git://github.com/UCSD-E4E/radio_collar_tracker_sp.git`
+24.	`git clone git://github.com/UCSD-E4E/radio_collar_tracker_dsp.git`
 25.	`cd radio_collar_tracker_dsp`
 26.	`git checkout master`
 27.	`./autogen.sh`
