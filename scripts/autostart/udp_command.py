@@ -435,6 +435,7 @@ class CommandListener(object):
 	def _listener(self):
 
 		self.sock.bind(("", self.port))
+		self.sock.listen()
 
 		while self._run:
 			ready = select.select([self.sock], [], [], 1)
